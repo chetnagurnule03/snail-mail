@@ -5,16 +5,13 @@ const DEFAULT_CHARACTER = {
   name: 'Little Wanderer',
   skin_tone: '#f2c9a0',
   hair_color: '#7a4a2b',
+  hair_style: 'wanderer_cap',
   outfit_color: '#c9a7e0',
+  outfit_style: 'wanderer_coat',
+  accessory: 'backpack',
   position: { x: 0, y: 0, z: 0 },
 };
 
-/**
- * Loads the signed-in user's character on mount, and exposes a
- * save() that upserts it back to Supabase. This is the minimal
- * "save/load" round trip the scaffold needs; the real app will
- * extend this row with pet/garden references.
- */
 export function useCharacter(userId) {
   const [character, setCharacter] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +38,7 @@ export function useCharacter(userId) {
         if (fetchError || !data) {
           setCharacter({ user_id: userId, ...DEFAULT_CHARACTER });
         } else {
-          setCharacter(data);
+          setCharacter({ ...DEFAULT_CHARACTER, ...data });
         }
         setLoading(false);
       })
@@ -73,8 +70,8 @@ export function useCharacter(userId) {
       setSaving(false);
       if (saveError) {
         setError(saveError);
-      } else {
-        setCharacter(data);
+      } else if (data) {
+        setCharacter({ ...DEFAULT_CHARACTER, ...data });
       }
     },
     [character, userId]

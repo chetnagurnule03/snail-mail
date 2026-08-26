@@ -1,18 +1,23 @@
 -- Snail Mail — starter schema
 -- Run this in the Supabase SQL editor for your project.
--- This covers just the character save/load slice of the PRD's data
--- model (section 23). Pets, gardens, letters and notifications follow
--- the same pattern: one table per entity, user_id FK, RLS "own rows only".
 
 create table if not exists public.characters (
   user_id uuid primary key references auth.users (id) on delete cascade,
   name text not null default 'Little Wanderer',
   skin_tone text not null default '#f2c9a0',
   hair_color text not null default '#7a4a2b',
+  hair_style text not null default 'wanderer_cap', -- 'wanderer_cap', 'cute_bob', 'braids', 'wavy_locks'
   outfit_color text not null default '#c9a7e0',
+  outfit_style text not null default 'wanderer_coat', -- 'wanderer_coat', 'cozy_sweater', 'gardener_overalls', 'fairy_dress'
+  accessory text not null default 'backpack', -- 'none', 'backpack', 'cozy_scarf', 'flower_crown', 'round_glasses'
   position jsonb not null default '{"x":0,"y":0,"z":0}'::jsonb,
   updated_at timestamptz not null default now()
 );
+
+-- Add columns if table already exists
+ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS hair_style text DEFAULT 'wanderer_cap';
+ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS outfit_style text DEFAULT 'wanderer_coat';
+ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS accessory text DEFAULT 'backpack';
 
 -- Keep updated_at fresh on every save.
 create or replace function public.set_updated_at()
@@ -28,8 +33,7 @@ create trigger characters_set_updated_at
   before update on public.characters
   for each row execute procedure public.set_updated_at();
 
--- Row Level Security: a user (including anonymous/guest sessions)
--- can only read and write their own character row.
+-- Row Level Security
 alter table public.characters enable row level security;
 
 drop policy if exists "characters_select_own" on public.characters;
