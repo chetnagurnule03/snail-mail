@@ -38,13 +38,16 @@ export function useCharacter(userId) {
       .maybeSingle()
       .then(({ data, error: fetchError }) => {
         if (cancelled) return;
-        if (fetchError) {
-          setError(fetchError);
-        } else if (data) {
-          setCharacter(data);
-        } else {
+        if (fetchError || !data) {
           setCharacter({ user_id: userId, ...DEFAULT_CHARACTER });
+        } else {
+          setCharacter(data);
         }
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCharacter({ user_id: userId, ...DEFAULT_CHARACTER });
         setLoading(false);
       });
 
