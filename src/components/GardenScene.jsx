@@ -48,83 +48,109 @@ function sanitizePlayableTarget(x, z) {
 function ExtendedMeadowTerrain() {
   return (
     <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[100, 100]} />
+      <planeGeometry args={[120, 120]} />
       <meshStandardMaterial color="#94c77d" roughness={0.8} />
     </mesh>
   );
 }
 
 /** -------------------------------------------------------------
- *  2. NATURAL OPEN 360° ROLLING HILLS
+ *  2. NATURAL 360° OPEN COUNTRYSIDE HILLS (FAR NORTH)
  * ------------------------------------------------------------- */
-function StorybookPanoramaHills() {
+function DistantCountrysideHills() {
   return (
-    <group position={[0, -1.2, 0]}>
-      <mesh position={[-16, 1.2, -26]} scale={[18, 6.5, 18]}>
+    <group position={[0, -1.8, 0]}>
+      {/* Low Rolling Far Countryside Swells */}
+      <mesh position={[-28, 1.2, -35]} scale={[24, 4.5, 24]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#8ab874" roughness={0.8} />
+        <meshStandardMaterial color="#8ab874" roughness={0.85} />
       </mesh>
-      <mesh position={[16, 1.0, -28]} scale={[20, 7.5, 20]}>
+      <mesh position={[28, 1.0, -38]} scale={[26, 4.8, 26]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#9ec891" roughness={0.8} />
+        <meshStandardMaterial color="#9ec891" roughness={0.85} />
       </mesh>
-      <mesh position={[0, 0.8, -30]} scale={[22, 8.0, 22]}>
+      <mesh position={[0, 0.8, -42]} scale={[30, 5.2, 30]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#7cb268" roughness={0.8} />
-      </mesh>
-
-      <mesh position={[-26, 1.2, -10]} scale={[18, 6.5, 18]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#84b574" roughness={0.85} />
-      </mesh>
-      <mesh position={[-25, 1.0, 12]} scale={[16, 5.8, 16]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#94c480" roughness={0.85} />
-      </mesh>
-
-      <mesh position={[26, 1.2, -10]} scale={[18, 6.5, 18]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#84b574" roughness={0.85} />
-      </mesh>
-      <mesh position={[25, 1.0, 12]} scale={[16, 5.8, 16]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#94c480" roughness={0.85} />
+        <meshStandardMaterial color="#7cb268" roughness={0.85} />
       </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  3. BACKGROUND FOREST TREES & SKY SCENERY
+ *  3. MULTI-DIRECTIONAL 360° SCENERY GROVES
  * ------------------------------------------------------------- */
-function BackgroundForest() {
-  const treePositions = [
-    { pos: [-14, 0.8, -22], scale: 1.6 },
-    { pos: [-18, 1.2, -25], scale: 2.0 },
-    { pos: [-8, 0.5, -23], scale: 1.4 },
-    { pos: [8, 0.7, -22], scale: 1.7 },
-    { pos: [15, 1.1, -26], scale: 2.1 },
-    { pos: [20, 1.4, -28], scale: 2.4 },
-  ];
-
+function BlossomTree({ position, scale = 1 }) {
   return (
-    <group>
-      {treePositions.map((t, idx) => (
-        <group key={idx} position={t.pos} scale={t.scale}>
-          <mesh position={[0, 0.8, 0]}>
-            <cylinderGeometry args={[0.2, 0.35, 1.6, 12]} />
-            <meshStandardMaterial color="#5c3e28" roughness={0.9} />
-          </mesh>
-          <mesh position={[0, 2.0, 0]}>
-            <sphereGeometry args={[1.1, 20, 20]} />
-            <meshStandardMaterial color={idx % 2 === 0 ? '#7aa867' : '#88b574'} roughness={0.6} />
-          </mesh>
-        </group>
-      ))}
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <cylinderGeometry args={[0.15, 0.25, 1.4, 12]} />
+        <meshStandardMaterial color="#5c381e" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.6, 0]} castShadow>
+        <sphereGeometry args={[0.85, 20, 20]} />
+        <meshStandardMaterial color="#ffc6ff" roughness={0.5} />
+      </mesh>
+      <mesh position={[-0.35, 2.0, 0.2]} castShadow>
+        <sphereGeometry args={[0.6, 16, 16]} />
+        <meshStandardMaterial color="#ffb5a7" roughness={0.5} />
+      </mesh>
     </group>
   );
 }
 
+function MultiDirectionalScenery() {
+  return (
+    <group>
+      {/* WEST SIDE (Left): Woodland Grove & Mushroom Clearing */}
+      <group position={[-12, 0, 0]}>
+        <StorybookTree position={[0, 0, -4]} scale={1.4} colorScale={1} />
+        <StorybookTree position={[-3, 0, 2]} scale={1.6} colorScale={0} />
+        <StorybookTree position={[2, 0, 5]} scale={1.3} colorScale={2} />
+        <MushroomGroup position={[-1, 0.08, 0]} scale={1.5} />
+        <MushroomGroup position={[1, 0.08, 3]} scale={1.2} />
+        <SoftFlowerCluster position={[-2, 0.04, -2]} color="#ffb5a7" />
+      </group>
+
+      {/* EAST SIDE (Right): Flower Meadow & Pink Blossom Trees */}
+      <group position={[12, 0, 0]}>
+        <BlossomTree position={[0, 0, -3]} scale={1.5} />
+        <BlossomTree position={[3, 0, 3]} scale={1.4} />
+        <BlossomTree position={[-1, 0, 6]} scale={1.3} />
+        <SoftFlowerCluster position={[1, 0.04, 0]} color="#c77dff" />
+        <SoftFlowerCluster position={[-2, 0.04, 2]} color="#ffb5a7" />
+        {/* Scattered Storybook Rocks */}
+        <mesh position={[2, 0.15, -1]} castShadow>
+          <dodecahedronGeometry args={[0.35, 1]} />
+          <meshStandardMaterial color="#8a8a8a" roughness={0.8} />
+        </mesh>
+        <mesh position={[-1, 0.12, 4]} castShadow>
+          <dodecahedronGeometry args={[0.28, 1]} />
+          <meshStandardMaterial color="#a0a0a0" roughness={0.8} />
+        </mesh>
+      </group>
+
+      {/* NORTH SIDE (Back): Distant Forest Tree Line */}
+      <group position={[0, 0, -18]}>
+        {[-16, -10, -4, 4, 10, 16].map((x, idx) => (
+          <StorybookTree key={idx} position={[x, 0, (idx % 2) * 2]} scale={1.5 + (idx % 3) * 0.2} colorScale={idx % 3} />
+        ))}
+      </group>
+
+      {/* SOUTH SIDE (Front): Blossom Meadow Entrance */}
+      <group position={[0, 0, 14]}>
+        <BlossomTree position={[-6, 0, 0]} scale={1.3} />
+        <BlossomTree position={[6, 0, 0]} scale={1.3} />
+        <SoftFlowerCluster position={[-3, 0.04, 2]} color="#ffb5a7" />
+        <SoftFlowerCluster position={[3, 0.04, 2]} color="#c77dff" />
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  4. SOFT FLUFFY SKY CLOUDS & BIRDS
+ * ------------------------------------------------------------- */
 function FluffyClouds() {
   const cloudsRef = useRef();
 
@@ -184,7 +210,7 @@ function DistantBirds() {
 }
 
 /** -------------------------------------------------------------
- *  4. HOME HORSE STABLE AREA
+ *  5. HOME HORSE STABLE AREA
  * ------------------------------------------------------------- */
 function HomeHorseStable({ position = [-3.5, 0, 0.8] }) {
   return (
@@ -214,7 +240,7 @@ function HomeHorseStable({ position = [-3.5, 0, 0.8] }) {
 }
 
 /** -------------------------------------------------------------
- *  5. PET 1: POLISHED SMALL COMPANION PET (Bunny 🐰)
+ *  6. PET 1: POLISHED SMALL COMPANION PET (Bunny 🐰)
  * ------------------------------------------------------------- */
 function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
   const petRef = useRef();
@@ -242,25 +268,20 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
 
   return (
     <group ref={petRef} position={[-0.7, 0, 0.7]} scale={0.75}>
-      {/* Detailed Storybook Bunny Model */}
       {petType === 'bunny' && (
         <group position={[0, 0.22, 0]}>
-          {/* Bunny Body */}
           <mesh castShadow>
             <sphereGeometry args={[0.2, 18, 18]} />
             <meshStandardMaterial color="#ffffff" roughness={0.5} />
           </mesh>
-          {/* Head */}
           <mesh position={[0, 0.15, 0.14]} castShadow>
             <sphereGeometry args={[0.14, 16, 16]} />
             <meshStandardMaterial color="#ffffff" />
           </mesh>
-          {/* Pink Nose */}
           <mesh position={[0, 0.14, 0.27]}>
             <sphereGeometry args={[0.025, 10, 10]} />
             <meshStandardMaterial color="#ffb5a7" />
           </mesh>
-          {/* Floppy Ears with Inner Pink Lining */}
           <group position={[-0.07, 0.32, 0.08]} rotation={[0.2, 0, -0.15]}>
             <mesh castShadow>
               <capsuleGeometry args={[0.035, 0.24, 6, 12]} />
@@ -281,7 +302,6 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
               <meshStandardMaterial color="#ffc6ff" />
             </mesh>
           </group>
-          {/* Eyes with Catchlight */}
           <mesh position={[-0.06, 0.18, 0.24]}>
             <sphereGeometry args={[0.022, 8, 8]} />
             <meshStandardMaterial color="#222222" />
@@ -290,7 +310,6 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
             <sphereGeometry args={[0.022, 8, 8]} />
             <meshStandardMaterial color="#222222" />
           </mesh>
-          {/* Fluffy Tail */}
           <mesh position={[0, 0.06, -0.2]}>
             <sphereGeometry args={[0.06, 10, 10]} />
             <meshStandardMaterial color="#ffffff" />
@@ -298,7 +317,6 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
         </group>
       )}
 
-      {/* Other Pets Fallback */}
       {petType !== 'bunny' && (
         <group position={[0, 0.2, 0]}>
           <mesh castShadow>
@@ -316,7 +334,7 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
 }
 
 /** -------------------------------------------------------------
- *  6. PET 2: POLISHED STYLIZED STORYBOOK HORSE 🐴
+ *  7. PET 2: POLISHED STYLIZED STORYBOOK HORSE 🐴
  * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
@@ -364,13 +382,11 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
 
   return (
     <group ref={horseRef} position={[-2.8, 0, 0.8]} scale={1.1}>
-      {/* Torso & Splayed Chest Geometry */}
       <mesh position={[0, 0.58, 0]} castShadow>
         <capsuleGeometry args={[0.29, 0.78, 8, 16]} rotation={[Math.PI / 2, 0, 0]} />
         <meshStandardMaterial color="#c68a4c" roughness={0.55} />
       </mesh>
 
-      {/* Detailed Leather Saddle & Brass Stirrups */}
       <group position={[0, 0.75, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.44, 0.15, 0.46]} />
@@ -390,19 +406,15 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
         </mesh>
       </group>
 
-      {/* Anatomical Head & Arched Neck */}
       <group ref={headNeckGroupRef} position={[0, 0.78, 0.4]}>
         <mesh position={[0, 0.26, 0.12]} rotation={[0.38, 0, 0]} castShadow>
           <cylinderGeometry args={[0.17, 0.23, 0.58, 12]} />
           <meshStandardMaterial color="#c68a4c" roughness={0.55} />
         </mesh>
-
-        {/* Head */}
         <mesh position={[0, 0.54, 0.28]} rotation={[-0.18, 0, 0]} castShadow>
           <boxGeometry args={[0.25, 0.25, 0.44]} />
           <meshStandardMaterial color="#c68a4c" roughness={0.55} />
         </mesh>
-        {/* Soft Muzzle with Nostrils */}
         <group position={[0, 0.48, 0.48]}>
           <mesh>
             <boxGeometry args={[0.23, 0.21, 0.19]} />
@@ -417,14 +429,10 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
             <meshStandardMaterial color="#4a2c11" />
           </mesh>
         </group>
-
-        {/* Fluffy Soft Yarn Mane */}
         <mesh position={[0, 0.44, 0.02]} rotation={[0.38, 0, 0]}>
           <boxGeometry args={[0.09, 0.62, 0.16]} />
           <meshStandardMaterial color="#4a2c11" roughness={0.8} />
         </mesh>
-
-        {/* Ears */}
         <mesh position={[-0.09, 0.68, 0.2]} rotation={[0.1, 0, -0.2]}>
           <coneGeometry args={[0.045, 0.16, 8]} />
           <meshStandardMaterial color="#c68a4c" />
@@ -433,7 +441,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <coneGeometry args={[0.045, 0.16, 8]} />
           <meshStandardMaterial color="#c68a4c" />
         </mesh>
-        {/* Expressive Eyes */}
         <mesh position={[-0.14, 0.56, 0.33]}>
           <sphereGeometry args={[0.032, 8, 8]} />
           <meshStandardMaterial color="#222222" />
@@ -444,13 +451,11 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
         </mesh>
       </group>
 
-      {/* Tail */}
       <mesh position={[0, 0.58, -0.44]} rotation={[-0.4, 0, 0]}>
         <cylinderGeometry args={[0.04, 0.09, 0.48, 8]} />
         <meshStandardMaterial color="#4a2c11" />
       </mesh>
 
-      {/* 4 Legs & Hooves with Silver Shoes */}
       <group ref={leftFrontLegRef} position={[-0.17, 0.28, 0.26]}>
         <mesh position={[0, -0.14, 0]} castShadow>
           <cylinderGeometry args={[0.065, 0.055, 0.32, 10]} />
@@ -499,7 +504,7 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
 }
 
 /** -------------------------------------------------------------
- *  7. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
+ *  8. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
  * ------------------------------------------------------------- */
 function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, resetSignal, isMounted, toggleMount }) {
   const { camera } = useThree();
@@ -620,7 +625,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
 }
 
 /** -------------------------------------------------------------
- *  8. HIGH-QUALITY STYLIZED STORYBOOK PLAYER AVATAR
+ *  9. HIGH-QUALITY STYLIZED STORYBOOK PLAYER AVATAR
  * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   const leftLegRef = useRef();
@@ -645,7 +650,7 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
     const clock = state.clock.getElapsedTime();
 
     if (isMounted) {
-      groupRef.current.position.y = 0.68; // Sitting elevated on saddle
+      groupRef.current.position.y = 0.68;
 
       if (dist > 0.06) {
         groupRef.current.position.x += dx * 0.095;
@@ -698,14 +703,12 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Detailed Head & Expressions */}
       <group ref={headGroupRef} position={[0, 0.96, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.26, 24, 24]} />
           <meshStandardMaterial color={skinTone} roughness={0.45} />
         </mesh>
 
-        {/* Eyes with Double Catchlights */}
         <group position={[0, 0.03, 0.22]}>
           <mesh position={[-0.09, 0, 0]}>
             <sphereGeometry args={[0.036, 12, 12]} />
@@ -725,7 +728,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           </mesh>
         </group>
 
-        {/* Blushing Cheeks */}
         <mesh position={[-0.14, -0.04, 0.2]}>
           <sphereGeometry args={[0.048, 12, 12]} />
           <meshStandardMaterial color="#ffb5a7" transparent opacity={0.65} />
@@ -735,7 +737,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshStandardMaterial color="#ffb5a7" transparent opacity={0.65} />
         </mesh>
 
-        {/* Button Nose & Gentle Smile Curve */}
         <mesh position={[0, -0.01, 0.25]}>
           <sphereGeometry args={[0.026, 10, 10]} />
           <meshStandardMaterial color={skinTone} roughness={0.5} />
@@ -745,7 +746,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshStandardMaterial color="#a85d48" />
         </mesh>
 
-        {/* Detailed Hairstyles */}
         {hairStyle === 'wanderer_cap' && (
           <group>
             <mesh position={[0, 0.1, 0]}>
@@ -777,7 +777,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         )}
       </group>
 
-      {/* Torso & Clothing Details */}
       <group position={[0, 0.48, 0]}>
         <mesh castShadow>
           <capsuleGeometry args={[0.26, 0.38, 8, 16]} />
@@ -789,7 +788,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      {/* Arms & Sleeve Cuffs */}
       <group ref={leftArmRef} position={[-0.32, 0.58, 0]}>
         <mesh position={[0, -0.16, 0]} castShadow>
           <cylinderGeometry args={[0.052, 0.05, 0.32, 10]} />
@@ -812,7 +810,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      {/* Legs & Leather Boots */}
       <group ref={leftLegRef} position={[-0.12, 0.22, 0]}>
         <mesh position={[0, -0.1, 0]} castShadow>
           <cylinderGeometry args={[0.06, 0.055, 0.22, 10]} />
@@ -839,31 +836,27 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 }
 
 /** -------------------------------------------------------------
- *  9. COZY STORYBOOK COTTAGE (POLISHED ARCHITECTURE & DETAILS)
+ *  10. COZY STORYBOOK COTTAGE & DIORAMA TERRAIN
  * ------------------------------------------------------------- */
 function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      {/* Plaster Walls with Timber Trim */}
       <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.85, 1.8, 1.65]} />
         <meshStandardMaterial color="#faf0ca" roughness={0.7} />
       </mesh>
 
-      {/* Curved Overhanging Roof with Clay Tiles */}
       <group position={[0, 2.1, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[1.7, 1.35, 4]} />
           <meshStandardMaterial color="#c96850" roughness={0.55} />
         </mesh>
-        {/* Timber Eaves Trim */}
         <mesh position={[0, -0.65, 0]}>
           <boxGeometry args={[1.92, 0.1, 1.72]} />
           <meshStandardMaterial color="#6b4c35" roughness={0.8} />
         </mesh>
       </group>
 
-      {/* Arched Wooden Front Door with Brass Latch */}
       <group position={[0.2, 0.65, 0.84]}>
         <mesh castShadow>
           <boxGeometry args={[0.52, 0.92, 0.06]} />
@@ -875,7 +868,6 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
         </mesh>
       </group>
 
-      {/* Window Panes, Shutters & Glowing Light */}
       <group position={[-0.45, 1.0, 0.84]}>
         <mesh>
           <boxGeometry args={[0.45, 0.45, 0.06]} />
@@ -889,7 +881,6 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
           <boxGeometry args={[0.12, 0.47, 0.04]} />
           <meshStandardMaterial color="#8c5a3c" />
         </mesh>
-        {/* Window Flower Box */}
         <group position={[0, -0.28, 0.06]}>
           <mesh castShadow>
             <boxGeometry args={[0.52, 0.16, 0.16]} />
@@ -904,7 +895,6 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
         </group>
       </group>
 
-      {/* Porch Lantern */}
       <group position={[0.52, 1.15, 0.86]}>
         <mesh castShadow>
           <boxGeometry args={[0.12, 0.2, 0.12]} />
@@ -912,7 +902,6 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
         </mesh>
       </group>
 
-      {/* Stone Chimney with Smoke Sparkles */}
       <group position={[-0.65, 2.0, -0.3]}>
         <mesh castShadow>
           <boxGeometry args={[0.38, 1.25, 0.38]} />
@@ -1091,7 +1080,7 @@ function StorybookTree({ position, scale = 1, rotation = 0, colorScale = 0 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH HIGH-QUALITY POLISHED STORYBOOK MODELS
+ *  MAIN SCENE WITH NATURAL 360° OPEN STORYBOOK LANDSCAPE
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount }) {
   const [targetPos, setTargetPos] = useState([0, 0]);
@@ -1101,7 +1090,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   return (
     <Canvas shadows camera={{ position: [0, 4.5, 7.0], fov: 42 }}>
       <color attach="background" args={['#e6f2ee']} />
-      <fogExp2 attach="fog" color="#dbebe6" density={0.011} />
+      <fogExp2 attach="fog" color="#dbebe6" density={0.009} />
       
       <Sky sunPosition={[8, 5, 4]} turbidity={0.8} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
       <ambientLight intensity={0.8} color="#fff7ed" />
@@ -1117,14 +1106,14 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         toggleMount={toggleMount}
       />
 
-      {/* Scenery */}
+      {/* 360° Open Storybook Landscape (No Blocky Walls) */}
       <ExtendedMeadowTerrain />
       <FluffyClouds />
       <DistantBirds />
-      <StorybookPanoramaHills />
-      <BackgroundForest />
+      <DistantCountrysideHills />
+      <MultiDirectionalScenery />
 
-      {/* Upgraded Storybook Cottage & Props */}
+      {/* Playable Diorama & Cottage */}
       <NaturalDioramaTerrain onGroundClick={setTargetPos} />
       <CozyCottage position={[-2.6, 0.1, -2.4]} rotation={0.45} />
       <FairytalePond position={[-1.6, 0.02, 1.9]} />
@@ -1132,13 +1121,9 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <StorybookMailbox position={[1.8, 0.05, -1.2]} />
       <HomeHorseStable position={[-3.5, 0, 0.8]} />
 
-      {/* Polished Player Character */}
+      {/* Characters & Companions */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
-
-      {/* Polished Rideable Storybook Horse 🐴 */}
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} horsePosRef={horsePosRef} />
-
-      {/* Polished Small Companion Pet 🐰 */}
       <SmallCompanionPet petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
       {/* Garden Trees & Flowers */}
