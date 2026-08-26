@@ -33,6 +33,7 @@ export default function App() {
   const { user, loading: authLoading, signInWithEmail, signInAsGuest, signOut } = useAuth();
   const { character, loading: charLoading, saving, save } = useCharacter(user?.id);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [resetCameraSignal, setResetCameraSignal] = useState(0);
 
   if (authLoading) {
     return <Centered>Loading your little world…</Centered>;
@@ -48,8 +49,8 @@ export default function App() {
 
   return (
     <div style={{ height: '100%', position: 'relative' }}>
-      {/* 3D Storybook World Canvas */}
-      <GardenScene character={character} />
+      {/* 3D Storybook World Canvas with 360 Camera Controls */}
+      <GardenScene character={character} resetCameraSignal={resetCameraSignal} />
 
       {/* HUD Overlay Bar */}
       <div style={styles.hud}>
@@ -59,9 +60,17 @@ export default function App() {
         <button style={styles.pill} onClick={() => setIsCustomizerOpen(true)}>
           🎨 Customize Character
         </button>
+        <button style={styles.pillSecondary} onClick={() => setResetCameraSignal(Date.now())}>
+          🎥 Reset View [R]
+        </button>
         <button style={styles.pillGhost} onClick={signOut}>
           Sign out
         </button>
+      </div>
+
+      {/* Controls Hint Overlay */}
+      <div style={styles.controlsHint}>
+        🖱️ Left Drag: Rotate 360° | 📜 Scroll: Zoom | ⌨️ WASD / Click: Move
       </div>
 
       {/* Character Customizer Overlay Modal */}
@@ -81,7 +90,6 @@ export default function App() {
             </div>
 
             <div style={styles.modalBody}>
-              
               {/* Character Name */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Name</label>
@@ -206,7 +214,6 @@ export default function App() {
                   ))}
                 </div>
               </div>
-
             </div>
 
             <div style={styles.modalFooter}>
@@ -251,7 +258,7 @@ const styles = {
   },
   badge: {
     background: 'rgba(255,250,241,0.92)',
-    padding: '0.5rem 0.9rem',
+    padding: '0.55rem 1rem',
     borderRadius: 999,
     fontSize: '0.9rem',
     color: '#5b4a34',
@@ -268,6 +275,17 @@ const styles = {
     fontWeight: 600,
     boxShadow: '0 2px 8px rgba(224,122,95,0.3)',
   },
+  pillSecondary: {
+    background: '#457b9d',
+    color: 'white',
+    border: 'none',
+    padding: '0.55rem 1rem',
+    borderRadius: 999,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    boxShadow: '0 2px 8px rgba(69,123,157,0.3)',
+  },
   pillGhost: {
     background: 'rgba(255,250,241,0.92)',
     color: '#7a5c3e',
@@ -276,6 +294,21 @@ const styles = {
     borderRadius: 999,
     cursor: 'pointer',
     fontSize: '0.85rem',
+  },
+  controlsHint: {
+    position: 'absolute',
+    bottom: 16,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: 'rgba(255,250,241,0.9)',
+    color: '#5b4a34',
+    padding: '0.5rem 1.2rem',
+    borderRadius: 999,
+    fontSize: '0.82rem',
+    fontWeight: 600,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+    pointerEvents: 'none',
+    zIndex: 10,
   },
   modalOverlay: {
     position: 'fixed',

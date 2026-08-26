@@ -1,6 +1,6 @@
-import React, { useRef, useState, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { ContactShadows, Sky, Sparkles } from '@react-three/drei';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, ContactShadows, Sky, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 
 /** -------------------------------------------------------------
@@ -43,7 +43,7 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. EXPANSIVE 360° MEADOW GROUND PLANE (ELIMINATES WHITE HOLES)
+ *  1. EXPANSIVE 360° MEADOW GROUND PLANE
  * ------------------------------------------------------------- */
 function ExtendedMeadowTerrain() {
   return (
@@ -55,12 +55,11 @@ function ExtendedMeadowTerrain() {
 }
 
 /** -------------------------------------------------------------
- *  2. 360° PANORAMA ROLLING HILLS (FULL HORIZON COVERAGE)
+ *  2. 360° PANORAMA ROLLING HILLS
  * ------------------------------------------------------------- */
 function StorybookPanoramaHills() {
   return (
     <group position={[0, -1.2, 0]}>
-      {/* North / Back Hills (Z <= -24) */}
       <mesh position={[-18, 1.2, -26]} scale={[22, 8, 22]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#8ab874" roughness={0.8} />
@@ -74,7 +73,6 @@ function StorybookPanoramaHills() {
         <meshStandardMaterial color="#7cb268" roughness={0.8} />
       </mesh>
 
-      {/* West / Left Flank Hills (X <= -26) */}
       <mesh position={[-28, 1.5, -12]} scale={[22, 8, 22]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#84b574" roughness={0.85} />
@@ -84,7 +82,6 @@ function StorybookPanoramaHills() {
         <meshStandardMaterial color="#94c480" roughness={0.85} />
       </mesh>
 
-      {/* East / Right Flank Hills (X >= 26) */}
       <mesh position={[28, 1.5, -12]} scale={[22, 8, 22]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#84b574" roughness={0.85} />
@@ -94,7 +91,6 @@ function StorybookPanoramaHills() {
         <meshStandardMaterial color="#94c480" roughness={0.85} />
       </mesh>
 
-      {/* Far Distant Horizon Mountain Ridges */}
       <mesh position={[-32, 4.0, -40]} scale={[40, 15, 40]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#6a9957" roughness={0.9} />
@@ -108,7 +104,7 @@ function StorybookPanoramaHills() {
 }
 
 /** -------------------------------------------------------------
- *  3. BACKGROUND FOREST TREES (POSITIONS PUSHED FAR BACK)
+ *  3. BACKGROUND FOREST TREES
  * ------------------------------------------------------------- */
 function BackgroundForest() {
   const treePositions = [
@@ -225,28 +221,126 @@ function DistantBirds() {
 }
 
 /** -------------------------------------------------------------
- *  6. SMOOTH CAMERA FOLLOW
+ *  6. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE
  * ------------------------------------------------------------- */
-function CameraFollow({ playerGroupRef }) {
-  useFrame((state) => {
+function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, resetSignal }) {
+  const { camera } = useThree();
+  const orbitRef = useRef();
+  const keysPressed = useRef({});
+
+  // Reset Camera View handler
+  useEffect(() => {
+    if (resetSignal && orbitRef.current) {
+      orbitRef.current.reset();
+      if (playerGroupRef.current) {
+        orbitRef.current.target.set(
+          playerGroupRef.current.position.x,
+          playerGroupRef.current.position.y + 0.8,
+          playerGroupRef.current.position.z
+        );
+      }
+    }
+  }, [resetSignal]);
+
+  // Keyboard Listeners (WASD + Arrows + R key reset)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const k = e.key.toLowerCase();
+      keysPressed.current[k] = true;
+      if (k === 'r' && orbitRef.current) {
+        orbitRef.current.reset();
+      }
+    };
+    const handleKeyUp = (e) => {
+      keysPressed.current[e.key.toLowerCase()] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  useFrame((state, delta) => {
     if (!playerGroupRef.current) return;
 
-    const px = playerGroupRef.current.position.x;
-    const py = playerGroupRef.current.position.y;
-    const pz = playerGroupRef.current.position.z;
+    // 1. WASD Camera-Relative Movement
+    const keys = keysPressed.current;
+    const isW = keys['w'] || keys['arrowup'];
+    const isS = keys['s'] || keys['arrowdown'];
+    const isA = keys['a'] || keys['arrowleft'];
+    const isD = keys['d'] || keys['arrowright'];
 
-    const targetCamX = px * 0.4;
-    const targetCamY = Math.max(3.6, py + 4.2);
-    const targetCamZ = pz + 6.2;
+    if (isW || isS || isA || isD) {
+      // Calculate camera horizontal forward & right vectors
+      const camDir = new THREE.Vector3();
+      camera.getWorldDirection(camDir);
+      camDir.y = 0; // Project to XZ plane
+      camDir.normalize();
 
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetCamX, 0.06);
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetCamY, 0.06);
-    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetCamZ, 0.06);
+      const camRight = new THREE.Vector3();
+      camRight.crossVectors(camDir, new THREE.Vector3(0, 1, 0)).normalize();
 
-    state.camera.lookAt(px * 0.5, py + 0.7, pz * 0.5);
+      const moveVec = new THREE.Vector3(0, 0, 0);
+
+      if (isW) moveVec.add(camDir);
+      if (isS) moveVec.sub(camDir);
+      if (isD) moveVec.sub(camRight); // Correct right direction
+      if (isA) moveVec.add(camRight);
+
+      if (moveVec.lengthSq() > 0) {
+        moveVec.normalize();
+        const moveSpeed = 3.5 * delta;
+
+        let nextX = playerGroupRef.current.position.x + moveVec.x * moveSpeed;
+        let nextZ = playerGroupRef.current.position.z + moveVec.z * moveSpeed;
+
+        const [sanX, sanZ] = sanitizePlayableTarget(nextX, nextZ);
+        setTargetPos([sanX, sanZ]);
+      }
+    }
+
+    // 2. Smooth Orbit Target Tracking
+    if (orbitRef.current) {
+      const px = playerGroupRef.current.position.x;
+      const py = playerGroupRef.current.position.y;
+      const pz = playerGroupRef.current.position.z;
+
+      orbitRef.current.target.x = THREE.MathUtils.lerp(orbitRef.current.target.x, px, 0.1);
+      orbitRef.current.target.y = THREE.MathUtils.lerp(orbitRef.current.target.y, py + 0.8, 0.1);
+      orbitRef.current.target.z = THREE.MathUtils.lerp(orbitRef.current.target.z, pz, 0.1);
+
+      // 3. Basic Camera Obstacle Occlusion Check (Cottage collision guard)
+      for (const obs of OBSTACLES) {
+        const dx = camera.position.x - obs.x;
+        const dz = camera.position.z - obs.z;
+        const distToObs = Math.sqrt(dx * dx + dz * dz);
+        if (distToObs < obs.radius + 0.2) {
+          const pushOutAngle = Math.atan2(dz, dx);
+          camera.position.x = obs.x + Math.cos(pushOutAngle) * (obs.radius + 0.25);
+          camera.position.z = obs.z + Math.sin(pushOutAngle) * (obs.radius + 0.25);
+        }
+      }
+
+      orbitRef.current.update();
+    }
   });
 
-  return null;
+  return (
+    <OrbitControls
+      ref={orbitRef}
+      enablePan={false}
+      enableZoom={true}
+      minDistance={3.0}
+      maxDistance={12.0}
+      minPolarAngle={Math.PI * 0.12} // ~21°
+      maxPolarAngle={Math.PI * 0.46} // ~83° (Never go underground)
+      rotateSpeed={0.6}
+      zoomSpeed={0.8}
+    />
+  );
 }
 
 /** -------------------------------------------------------------
@@ -275,14 +369,14 @@ function StorybookHuman({ character, targetPos, groupRef }) {
     const clock = state.clock.getElapsedTime();
 
     if (dist > 0.06) {
-      groupRef.current.position.x += dx * 0.075;
-      groupRef.current.position.z += dz * 0.075;
+      groupRef.current.position.x += dx * 0.085;
+      groupRef.current.position.z += dz * 0.085;
 
       const targetAngle = Math.atan2(dx, dz);
       let diff = targetAngle - groupRef.current.rotation.y;
       while (diff < -Math.PI) diff += Math.PI * 2;
       while (diff > Math.PI) diff -= Math.PI * 2;
-      groupRef.current.rotation.y += diff * 0.15;
+      groupRef.current.rotation.y += diff * 0.18;
 
       groupRef.current.position.y = Math.abs(Math.sin(clock * 14)) * 0.06;
 
@@ -906,14 +1000,14 @@ function NaturalDioramaTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN GARDEN SCENE ASSEMBLY WITH 360° CONTINUOUS SCENERY
+ *  MAIN GARDEN SCENE ASSEMBLY WITH 360° ORBIT CAMERA & CONTROLS
  * ------------------------------------------------------------- */
-export default function GardenScene({ character }) {
+export default function GardenScene({ character, resetCameraSignal }) {
   const [targetPos, setTargetPos] = useState([0, 0]);
   const playerGroupRef = useRef();
 
   return (
-    <Canvas shadows camera={{ position: [0, 4.2, 6.5], fov: 42 }}>
+    <Canvas shadows camera={{ position: [0, 4.5, 7.0], fov: 42 }}>
       {/* Soft Pastel Sky Atmosphere & Haze Fog */}
       <color attach="background" args={['#e6f2ee']} />
       <fogExp2 attach="fog" color="#dbebe6" density={0.011} />
@@ -932,10 +1026,15 @@ export default function GardenScene({ character }) {
         shadow-camera-bottom={-7}
       />
 
-      {/* Camera Follow */}
-      <CameraFollow playerGroupRef={playerGroupRef} />
+      {/* 360° Camera Orbit & WASD Movement Engine */}
+      <CharacterCameraController
+        playerGroupRef={playerGroupRef}
+        targetPos={targetPos}
+        setTargetPos={setTargetPos}
+        resetSignal={resetCameraSignal}
+      />
 
-      {/* 360° Extended Meadow Ground (Seamlessly covers horizon beneath diorama) */}
+      {/* 360° Extended Meadow Ground */}
       <ExtendedMeadowTerrain />
 
       {/* 360° Panorama Rolling Hills & Sky Scenery */}
