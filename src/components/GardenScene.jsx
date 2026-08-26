@@ -5,7 +5,6 @@ import * as THREE from 'three';
 
 /** -------------------------------------------------------------
  *  COLLISION & BOUNDARY HELPER
- *  Prevents player from walking outside diorama or inside obstacles
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -2.6, z: -2.4, radius: 1.5 },
@@ -21,7 +20,6 @@ function sanitizePlayableTarget(x, z) {
   let targetX = x;
   let targetZ = z;
 
-  // 1. Diorama World Boundary Clamp (Max Radius 4.2m)
   const distFromCenter = Math.sqrt(targetX * targetX + targetZ * targetZ);
   const maxRadius = 4.1;
   if (distFromCenter > maxRadius) {
@@ -30,7 +28,6 @@ function sanitizePlayableTarget(x, z) {
     targetZ = Math.sin(angle) * maxRadius;
   }
 
-  // 2. Obstacle Collision Avoidance
   for (const obs of OBSTACLES) {
     const dx = targetX - obs.x;
     const dz = targetZ - obs.z;
@@ -46,51 +43,83 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. DISTANT 3D ROLLING HILLS (POSITIONED FAR BEHIND Z <= -22)
+ *  1. EXPANSIVE 360° MEADOW GROUND PLANE (ELIMINATES WHITE HOLES)
  * ------------------------------------------------------------- */
-function DistantHills() {
+function ExtendedMeadowTerrain() {
+  return (
+    <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <planeGeometry args={[100, 100]} />
+      <meshStandardMaterial color="#94c77d" roughness={0.8} />
+    </mesh>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  2. 360° PANORAMA ROLLING HILLS (FULL HORIZON COVERAGE)
+ * ------------------------------------------------------------- */
+function StorybookPanoramaHills() {
   return (
     <group position={[0, -1.2, 0]}>
-      {/* Inner Hill Ridge (Pushed far back Z <= -22) */}
-      <mesh position={[-16, 1.2, -24]} scale={[18, 7, 18]}>
+      {/* North / Back Hills (Z <= -24) */}
+      <mesh position={[-18, 1.2, -26]} scale={[22, 8, 22]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#8ab874" roughness={0.8} />
+      </mesh>
+      <mesh position={[18, 1.0, -28]} scale={[24, 9, 24]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#9ec891" roughness={0.8} />
       </mesh>
-      <mesh position={[16, 1.0, -26]} scale={[20, 8, 20]}>
+      <mesh position={[0, 0.8, -30]} scale={[28, 10, 28]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#a7c957" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.8, -28]} scale={[24, 9, 24]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#8cb87a" roughness={0.8} />
+        <meshStandardMaterial color="#7cb268" roughness={0.8} />
       </mesh>
 
-      {/* Far Background Mountain Ridges (Z <= -34) */}
-      <mesh position={[-25, 3.5, -36]} scale={[34, 13, 34]}>
+      {/* West / Left Flank Hills (X <= -26) */}
+      <mesh position={[-28, 1.5, -12]} scale={[22, 8, 22]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#649354" roughness={0.9} />
+        <meshStandardMaterial color="#84b574" roughness={0.85} />
       </mesh>
-      <mesh position={[25, 3.8, -38]} scale={[36, 14, 36]}>
+      <mesh position={[-26, 1.2, 12]} scale={[20, 7, 20]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#5a864b" roughness={0.9} />
+        <meshStandardMaterial color="#94c480" roughness={0.85} />
+      </mesh>
+
+      {/* East / Right Flank Hills (X >= 26) */}
+      <mesh position={[28, 1.5, -12]} scale={[22, 8, 22]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#84b574" roughness={0.85} />
+      </mesh>
+      <mesh position={[26, 1.2, 12]} scale={[20, 7, 20]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#94c480" roughness={0.85} />
+      </mesh>
+
+      {/* Far Distant Horizon Mountain Ridges */}
+      <mesh position={[-32, 4.0, -40]} scale={[40, 15, 40]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#6a9957" roughness={0.9} />
+      </mesh>
+      <mesh position={[32, 4.2, -42]} scale={[42, 16, 42]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#5e8c4f" roughness={0.9} />
       </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  2. BACKGROUND FOREST TREES (PUSHED FAR BEHIND Z <= -20)
+ *  3. BACKGROUND FOREST TREES (POSITIONS PUSHED FAR BACK)
  * ------------------------------------------------------------- */
 function BackgroundForest() {
   const treePositions = [
-    { pos: [-12, 0.8, -20], scale: 1.6 },
-    { pos: [-16, 1.2, -23], scale: 2.0 },
-    { pos: [-6, 0.5, -21], scale: 1.4 },
-    { pos: [8, 0.7, -20], scale: 1.7 },
-    { pos: [14, 1.1, -24], scale: 2.1 },
-    { pos: [18, 1.4, -26], scale: 2.4 },
-    { pos: [-20, 1.8, -28], scale: 2.3 },
-    { pos: [0, 1.0, -23], scale: 1.8 },
+    { pos: [-14, 0.8, -22], scale: 1.6 },
+    { pos: [-18, 1.2, -25], scale: 2.0 },
+    { pos: [-8, 0.5, -23], scale: 1.4 },
+    { pos: [8, 0.7, -22], scale: 1.7 },
+    { pos: [15, 1.1, -26], scale: 2.1 },
+    { pos: [20, 1.4, -28], scale: 2.4 },
+    { pos: [-22, 1.8, -30], scale: 2.3 },
+    { pos: [0, 1.0, -25], scale: 1.8 },
   ];
 
   return (
@@ -120,7 +149,7 @@ function BackgroundForest() {
 }
 
 /** -------------------------------------------------------------
- *  3. SOFT FLUFFY SKY CLOUDS
+ *  4. SOFT FLUFFY SKY CLOUDS
  * ------------------------------------------------------------- */
 function FluffyClouds() {
   const cloudsRef = useRef();
@@ -163,7 +192,7 @@ function FluffyClouds() {
 }
 
 /** -------------------------------------------------------------
- *  4. DISTANT FLYING BIRDS
+ *  5. DISTANT FLYING BIRDS
  * ------------------------------------------------------------- */
 function DistantBirds() {
   const birdsGroupRef = useRef();
@@ -196,7 +225,7 @@ function DistantBirds() {
 }
 
 /** -------------------------------------------------------------
- *  5. SMOOTH CAMERA FOLLOW & CLIPPING PROTECTION
+ *  6. SMOOTH CAMERA FOLLOW
  * ------------------------------------------------------------- */
 function CameraFollow({ playerGroupRef }) {
   useFrame((state) => {
@@ -206,17 +235,14 @@ function CameraFollow({ playerGroupRef }) {
     const py = playerGroupRef.current.position.y;
     const pz = playerGroupRef.current.position.z;
 
-    // Desired Third-Person Isometric Offset (Behind & Above Player)
     const targetCamX = px * 0.4;
     const targetCamY = Math.max(3.6, py + 4.2);
     const targetCamZ = pz + 6.2;
 
-    // Smooth Lerp Camera Interpolation
     state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetCamX, 0.06);
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetCamY, 0.06);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetCamZ, 0.06);
 
-    // Look at player center
     state.camera.lookAt(px * 0.5, py + 0.7, pz * 0.5);
   });
 
@@ -224,7 +250,7 @@ function CameraFollow({ playerGroupRef }) {
 }
 
 /** -------------------------------------------------------------
- *  6. STYLIZED STORYBOOK HUMAN AVATAR
+ *  7. STYLIZED STORYBOOK HUMAN AVATAR
  * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef }) {
   const leftLegRef = useRef();
@@ -514,7 +540,7 @@ function StorybookHuman({ character, targetPos, groupRef }) {
 }
 
 /** -------------------------------------------------------------
- *  7. EXISTING GARDEN PROPS & ENVIRONMENT
+ *  8. EXISTING GARDEN PROPS & ENVIRONMENT
  * ------------------------------------------------------------- */
 function StorybookTree({ position, scale = 1, rotation = 0, colorScale = 0 }) {
   const groupRef = useRef();
@@ -880,7 +906,7 @@ function NaturalDioramaTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN GARDEN SCENE ASSEMBLY WITH CAMERA FOLLOW & BOUNDARIES
+ *  MAIN GARDEN SCENE ASSEMBLY WITH 360° CONTINUOUS SCENERY
  * ------------------------------------------------------------- */
 export default function GardenScene({ character }) {
   const [targetPos, setTargetPos] = useState([0, 0]);
@@ -888,12 +914,12 @@ export default function GardenScene({ character }) {
 
   return (
     <Canvas shadows camera={{ position: [0, 4.2, 6.5], fov: 42 }}>
-      {/* Atmosphere Fog */}
-      <color attach="background" args={['#faede1']} />
-      <fogExp2 attach="fog" color="#fcf6ec" density={0.016} />
+      {/* Soft Pastel Sky Atmosphere & Haze Fog */}
+      <color attach="background" args={['#e6f2ee']} />
+      <fogExp2 attach="fog" color="#dbebe6" density={0.011} />
       
       {/* Sunlight */}
-      <Sky sunPosition={[6, 4, 3]} turbidity={1.2} rayleigh={0.4} />
+      <Sky sunPosition={[8, 5, 4]} turbidity={0.8} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
       <ambientLight intensity={0.8} color="#fff7ed" />
       <directionalLight
         position={[6, 8, 4]}
@@ -906,13 +932,16 @@ export default function GardenScene({ character }) {
         shadow-camera-bottom={-7}
       />
 
-      {/* Smooth Third-Person Camera Follow */}
+      {/* Camera Follow */}
       <CameraFollow playerGroupRef={playerGroupRef} />
 
-      {/* Sky & Distant Background Layers (Pushed far behind) */}
+      {/* 360° Extended Meadow Ground (Seamlessly covers horizon beneath diorama) */}
+      <ExtendedMeadowTerrain />
+
+      {/* 360° Panorama Rolling Hills & Sky Scenery */}
       <FluffyClouds />
       <DistantBirds />
-      <DistantHills />
+      <StorybookPanoramaHills />
       <BackgroundForest />
 
       {/* Playable Garden & Environment Props */}
@@ -925,7 +954,7 @@ export default function GardenScene({ character }) {
       {/* Player Character */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} />
 
-      {/* Garden Trees */}
+      {/* Storybook Garden Trees */}
       <StorybookTree position={[-3.8, 0.2, -1.2]} scale={1.25} colorScale={0} />
       <StorybookTree position={[-2.4, 0.2, -3.8]} scale={1.1} colorScale={1} />
       <StorybookTree position={[3.2, 0.1, -3.2]} scale={1.35} colorScale={2} />
