@@ -2,18 +2,20 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Sky, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
+import VillageSquare from './VillageSquare';
+import VillageHouses from './VillageHouses';
+import Villagers from './Villagers';
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER
+ *  COLLISION & BOUNDARY HELPER (VILLAGE EXTENDED BOUNDS)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -2.6, z: -2.4, radius: 1.6 },
   { name: 'Pond', x: -1.6, z: 1.9, radius: 1.4 },
+  { name: 'Fountain', x: 0, z: -6.0, radius: 1.5 },
   { name: 'Tree1', x: -3.8, z: -1.2, radius: 0.7 },
   { name: 'Tree2', x: -2.4, z: -3.8, radius: 0.7 },
   { name: 'Tree3', x: 3.2, z: -3.2, radius: 0.7 },
-  { name: 'Tree4', x: 3.8, z: -1.5, radius: 0.7 },
-  { name: 'Tree5', x: 4.2, z: 1.2, radius: 0.7 },
 ];
 
 function sanitizePlayableTarget(x, z) {
@@ -21,7 +23,7 @@ function sanitizePlayableTarget(x, z) {
   let targetZ = z;
 
   const distFromCenter = Math.sqrt(targetX * targetX + targetZ * targetZ);
-  const maxRadius = 4.1;
+  const maxRadius = 14.5;
   if (distFromCenter > maxRadius) {
     const angle = Math.atan2(targetZ, targetX);
     targetX = Math.cos(angle) * maxRadius;
@@ -48,19 +50,43 @@ function sanitizePlayableTarget(x, z) {
 function ExtendedMeadowTerrain() {
   return (
     <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[120, 120]} />
+      <planeGeometry args={[140, 140]} />
       <meshStandardMaterial color="#94c77d" roughness={0.8} />
     </mesh>
   );
 }
 
 /** -------------------------------------------------------------
- *  2. NATURAL 360° OPEN COUNTRYSIDE HILLS (FAR NORTH)
+ *  2. CONNECTING VILLAGE COBBLESTONE PATHS
+ * ------------------------------------------------------------- */
+function VillageCobblestonePaths() {
+  return (
+    <group position={[0, 0.015, 0]}>
+      {/* Path from Player Cottage to Village Square */}
+      <mesh position={[-1.2, 0, -4.2]} rotation={[-Math.PI / 2, 0, -0.4]}>
+        <planeGeometry args={[1.2, 4.5]} />
+        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+      </mesh>
+      {/* Main Street Path (North-South) */}
+      <mesh position={[0, 0, -3.0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[2.2, 16.0]} />
+        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+      </mesh>
+      {/* Cross Street Path (East-West) */}
+      <mesh position={[0, 0, -6.0]} rotation={[-Math.PI / 2, 0, Math.PI / 2]}>
+        <planeGeometry args={[2.2, 22.0]} />
+        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  3. NATURAL 360° OPEN COUNTRYSIDE HILLS (FAR NORTH)
  * ------------------------------------------------------------- */
 function DistantCountrysideHills() {
   return (
     <group position={[0, -1.8, 0]}>
-      {/* Low Rolling Far Countryside Swells */}
       <mesh position={[-28, 1.2, -35]} scale={[24, 4.5, 24]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#8ab874" roughness={0.85} />
@@ -73,77 +99,6 @@ function DistantCountrysideHills() {
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#7cb268" roughness={0.85} />
       </mesh>
-    </group>
-  );
-}
-
-/** -------------------------------------------------------------
- *  3. MULTI-DIRECTIONAL 360° SCENERY GROVES
- * ------------------------------------------------------------- */
-function BlossomTree({ position, scale = 1 }) {
-  return (
-    <group position={position} scale={scale}>
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <cylinderGeometry args={[0.15, 0.25, 1.4, 12]} />
-        <meshStandardMaterial color="#5c381e" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 1.6, 0]} castShadow>
-        <sphereGeometry args={[0.85, 20, 20]} />
-        <meshStandardMaterial color="#ffc6ff" roughness={0.5} />
-      </mesh>
-      <mesh position={[-0.35, 2.0, 0.2]} castShadow>
-        <sphereGeometry args={[0.6, 16, 16]} />
-        <meshStandardMaterial color="#ffb5a7" roughness={0.5} />
-      </mesh>
-    </group>
-  );
-}
-
-function MultiDirectionalScenery() {
-  return (
-    <group>
-      {/* WEST SIDE (Left): Woodland Grove & Mushroom Clearing */}
-      <group position={[-12, 0, 0]}>
-        <StorybookTree position={[0, 0, -4]} scale={1.4} colorScale={1} />
-        <StorybookTree position={[-3, 0, 2]} scale={1.6} colorScale={0} />
-        <StorybookTree position={[2, 0, 5]} scale={1.3} colorScale={2} />
-        <MushroomGroup position={[-1, 0.08, 0]} scale={1.5} />
-        <MushroomGroup position={[1, 0.08, 3]} scale={1.2} />
-        <SoftFlowerCluster position={[-2, 0.04, -2]} color="#ffb5a7" />
-      </group>
-
-      {/* EAST SIDE (Right): Flower Meadow & Pink Blossom Trees */}
-      <group position={[12, 0, 0]}>
-        <BlossomTree position={[0, 0, -3]} scale={1.5} />
-        <BlossomTree position={[3, 0, 3]} scale={1.4} />
-        <BlossomTree position={[-1, 0, 6]} scale={1.3} />
-        <SoftFlowerCluster position={[1, 0.04, 0]} color="#c77dff" />
-        <SoftFlowerCluster position={[-2, 0.04, 2]} color="#ffb5a7" />
-        {/* Scattered Storybook Rocks */}
-        <mesh position={[2, 0.15, -1]} castShadow>
-          <dodecahedronGeometry args={[0.35, 1]} />
-          <meshStandardMaterial color="#8a8a8a" roughness={0.8} />
-        </mesh>
-        <mesh position={[-1, 0.12, 4]} castShadow>
-          <dodecahedronGeometry args={[0.28, 1]} />
-          <meshStandardMaterial color="#a0a0a0" roughness={0.8} />
-        </mesh>
-      </group>
-
-      {/* NORTH SIDE (Back): Distant Forest Tree Line */}
-      <group position={[0, 0, -18]}>
-        {[-16, -10, -4, 4, 10, 16].map((x, idx) => (
-          <StorybookTree key={idx} position={[x, 0, (idx % 2) * 2]} scale={1.5 + (idx % 3) * 0.2} colorScale={idx % 3} />
-        ))}
-      </group>
-
-      {/* SOUTH SIDE (Front): Blossom Meadow Entrance */}
-      <group position={[0, 0, 14]}>
-        <BlossomTree position={[-6, 0, 0]} scale={1.3} />
-        <BlossomTree position={[6, 0, 0]} scale={1.3} />
-        <SoftFlowerCluster position={[-3, 0.04, 2]} color="#ffb5a7" />
-        <SoftFlowerCluster position={[3, 0.04, 2]} color="#c77dff" />
-      </group>
     </group>
   );
 }
@@ -615,7 +570,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
       enablePan={false}
       enableZoom={true}
       minDistance={3.0}
-      maxDistance={12.0}
+      maxDistance={14.0}
       minPolarAngle={Math.PI * 0.12}
       maxPolarAngle={Math.PI * 0.46}
       rotateSpeed={0.6}
@@ -638,8 +593,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   const hairColor = character?.hair_color || '#7a4a2b';
   const hairStyle = character?.hair_style || 'wanderer_cap';
   const outfitColor = character?.outfit_color || '#c9a7e0';
-  const outfitStyle = character?.outfit_style || 'wanderer_coat';
-  const accessory = character?.accessory || 'backpack';
 
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
@@ -881,18 +834,6 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
           <boxGeometry args={[0.12, 0.47, 0.04]} />
           <meshStandardMaterial color="#8c5a3c" />
         </mesh>
-        <group position={[0, -0.28, 0.06]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.52, 0.16, 0.16]} />
-            <meshStandardMaterial color="#6b4c35" />
-          </mesh>
-          {[-0.18, 0, 0.18].map((x, i) => (
-            <mesh key={i} position={[x, 0.12, 0]}>
-              <sphereGeometry args={[0.06, 8, 8]} />
-              <meshStandardMaterial color={i % 2 === 0 ? '#ffb5a7' : '#ffc6ff'} />
-            </mesh>
-          ))}
-        </group>
       </group>
 
       <group position={[0.52, 1.15, 0.86]}>
@@ -909,93 +850,6 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
         </mesh>
         <Sparkles position={[0, 0.85, 0]} count={14} scale={0.6} size={4} speed={0.5} color="#ffffff" />
       </group>
-    </group>
-  );
-}
-
-function FairytalePond({ position = [-1.6, 0.02, 1.9] }) {
-  const waterRef = useRef();
-
-  useFrame((state) => {
-    if (waterRef.current) {
-      waterRef.current.position.y = 0.02 + Math.sin(state.clock.getElapsedTime() * 1.5) * 0.008;
-    }
-  });
-
-  return (
-    <group position={position}>
-      <mesh position={[0, -0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.3, 1.65, 32]} />
-        <meshStandardMaterial color="#d8c5b0" roughness={0.9} />
-      </mesh>
-      <mesh ref={waterRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <circleGeometry args={[1.38, 32]} />
-        <meshStandardMaterial color="#64dfdf" roughness={0.1} metalness={0.1} transparent opacity={0.88} />
-      </mesh>
-    </group>
-  );
-}
-
-function MushroomGroup({ position, scale = 1 }) {
-  return (
-    <group position={position} scale={scale}>
-      <mesh position={[0, 0.18, 0]}>
-        <cylinderGeometry args={[0.04, 0.07, 0.36, 12]} />
-        <meshStandardMaterial color="#fdf0d5" roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.35, 0]} castShadow>
-        <sphereGeometry args={[0.22, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
-        <meshStandardMaterial color="#e63946" roughness={0.4} />
-      </mesh>
-    </group>
-  );
-}
-
-function SoftFlowerCluster({ position, color = '#ffb5a7' }) {
-  return (
-    <group position={position}>
-      {[-0.12, 0, 0.14].map((offset, idx) => (
-        <group key={idx} position={[offset, 0, (idx % 2) * 0.1]}>
-          <mesh position={[0, 0.2, 0]}>
-            <cylinderGeometry args={[0.015, 0.02, 0.4, 6]} />
-            <meshStandardMaterial color="#70e000" />
-          </mesh>
-          <mesh position={[0, 0.4, 0]}>
-            <sphereGeometry args={[0.09, 12, 12]} />
-            <meshStandardMaterial color={color} roughness={0.4} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function GardenFenceGate({ position = [2.5, 0, 1.4], rotation = -0.6 }) {
-  return (
-    <group position={position} rotation={[0, rotation, 0]}>
-      <mesh position={[-0.35, 0.6, 0]} castShadow>
-        <boxGeometry args={[0.12, 1.2, 0.12]} />
-        <meshStandardMaterial color="#7f5539" />
-      </mesh>
-      <mesh position={[0.35, 0.6, 0]} castShadow>
-        <boxGeometry args={[0.12, 1.2, 0.12]} />
-        <meshStandardMaterial color="#7f5539" />
-      </mesh>
-    </group>
-  );
-}
-
-function StorybookMailbox({ position = [1.8, 0, -1.2] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <cylinderGeometry args={[0.08, 0.1, 1.0, 12]} />
-        <meshStandardMaterial color="#6b4c35" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 1.08, 0]} castShadow>
-        <capsuleGeometry args={[0.22, 0.38, 6, 16]} rotation={[0, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#e07a5f" roughness={0.4} />
-      </mesh>
     </group>
   );
 }
@@ -1043,44 +897,8 @@ function NaturalDioramaTerrain({ onGroundClick }) {
   );
 }
 
-function StorybookTree({ position, scale = 1, rotation = 0, colorScale = 0 }) {
-  const groupRef = useRef();
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.z = Math.sin(state.clock.getElapsedTime() * 0.7 + position[0]) * 0.025;
-      groupRef.current.rotation.x = Math.cos(state.clock.getElapsedTime() * 0.5 + position[2]) * 0.015;
-    }
-  });
-
-  const leafColors = [
-    { c1: '#84b574', c2: '#97c987', c3: '#afde9f' },
-    { c1: '#739e65', c2: '#83b273', c3: '#9ec48f' },
-    { c1: '#9eb87d', c2: '#b3cd93', c3: '#cce6ad' },
-  ];
-  const theme = leafColors[colorScale % leafColors.length];
-
-  return (
-    <group ref={groupRef} position={position} scale={scale} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <cylinderGeometry args={[0.16, 0.28, 1.4, 16]} />
-        <meshStandardMaterial color="#6b4c35" roughness={0.8} />
-      </mesh>
-      
-      <mesh position={[0, 1.6, 0]} castShadow>
-        <sphereGeometry args={[0.85, 24, 24]} />
-        <meshStandardMaterial color={theme.c1} roughness={0.5} />
-      </mesh>
-      <mesh position={[-0.4, 2.1, 0.2]} castShadow>
-        <sphereGeometry args={[0.65, 20, 20]} />
-        <meshStandardMaterial color={theme.c2} roughness={0.5} />
-      </mesh>
-    </group>
-  );
-}
-
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH NATURAL 360° OPEN STORYBOOK LANDSCAPE
+ *  MAIN SCENE WITH COMPLETE LIVING 3D STORYBOOK VILLAGE WORLD
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount }) {
   const [targetPos, setTargetPos] = useState([0, 0]);
@@ -1090,11 +908,11 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   return (
     <Canvas shadows camera={{ position: [0, 4.5, 7.0], fov: 42 }}>
       <color attach="background" args={['#e6f2ee']} />
-      <fogExp2 attach="fog" color="#dbebe6" density={0.009} />
+      <fogExp2 attach="fog" color="#dbebe6" density={0.007} />
       
       <Sky sunPosition={[8, 5, 4]} turbidity={0.8} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
-      <ambientLight intensity={0.8} color="#fff7ed" />
-      <directionalLight position={[6, 8, 4]} intensity={1.35} castShadow shadow-mapSize={[1024, 1024]} />
+      <ambientLight intensity={0.85} color="#fff7ed" />
+      <directionalLight position={[6, 8, 4]} intensity={1.4} castShadow shadow-mapSize={[1024, 1024]} />
 
       {/* Camera & WASD Controller (100% Untouched) */}
       <CharacterCameraController
@@ -1106,35 +924,34 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         toggleMount={toggleMount}
       />
 
-      {/* 360° Open Storybook Landscape (No Blocky Walls) */}
+      {/* Ground & Sky Scenery */}
       <ExtendedMeadowTerrain />
       <FluffyClouds />
       <DistantBirds />
       <DistantCountrysideHills />
-      <MultiDirectionalScenery />
+      <VillageCobblestonePaths />
 
-      {/* Playable Diorama & Cottage */}
+      {/* CENTRAL VILLAGE SQUARE & SHOPS */}
+      <VillageSquare position={[0, 0, -6.0]} />
+
+      {/* 12 RESIDENTIAL VILLAGE COTTAGES */}
+      <VillageHouses />
+
+      {/* 12 ANIMATED VILLAGER NPCS & PETS */}
+      <Villagers />
+
+      {/* Player's Home Cottage & Yard */}
       <NaturalDioramaTerrain onGroundClick={setTargetPos} />
       <CozyCottage position={[-2.6, 0.1, -2.4]} rotation={0.45} />
-      <FairytalePond position={[-1.6, 0.02, 1.9]} />
-      <GardenFenceGate position={[2.5, 0, 1.4]} rotation={-0.6} />
-      <StorybookMailbox position={[1.8, 0.05, -1.2]} />
       <HomeHorseStable position={[-3.5, 0, 0.8]} />
 
-      {/* Characters & Companions */}
+      {/* Player Character & Companions */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} horsePosRef={horsePosRef} />
       <SmallCompanionPet petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
-      {/* Garden Trees & Flowers */}
-      <StorybookTree position={[-3.8, 0.2, -1.2]} scale={1.25} colorScale={0} />
-      <StorybookTree position={[3.2, 0.1, -3.2]} scale={1.35} colorScale={2} />
-      <MushroomGroup position={[-1.2, 0.08, -1.6]} scale={1.1} />
-      <SoftFlowerCluster position={[-0.8, 0.04, 0.8]} color="#ffb5a7" />
-      <SoftFlowerCluster position={[1.2, 0.04, 2.1]} color="#c77dff" />
-
-      <Sparkles count={75} scale={14} size={3.5} speed={0.4} color="#ffe5ec" />
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={14} blur={2.5} />
+      <Sparkles count={80} scale={18} size={3.5} speed={0.4} color="#ffe5ec" />
+      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={18} blur={2.5} />
     </Canvas>
   );
 }
