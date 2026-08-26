@@ -10,6 +10,8 @@ create table if not exists public.characters (
   outfit_color text not null default '#c9a7e0',
   outfit_style text not null default 'wanderer_coat', -- 'wanderer_coat', 'cozy_sweater', 'gardener_overalls', 'fairy_dress'
   accessory text not null default 'backpack', -- 'none', 'backpack', 'cozy_scarf', 'flower_crown', 'round_glasses'
+  pet1_type text not null default 'bunny',
+  has_horse boolean not null default true,
   position jsonb not null default '{"x":0,"y":0,"z":0}'::jsonb,
   updated_at timestamptz not null default now()
 );
@@ -18,6 +20,8 @@ create table if not exists public.characters (
 ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS hair_style text DEFAULT 'wanderer_cap';
 ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS outfit_style text DEFAULT 'wanderer_coat';
 ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS accessory text DEFAULT 'backpack';
+ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS pet1_type text DEFAULT 'bunny';
+ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS has_horse boolean DEFAULT true;
 
 -- Keep updated_at fresh on every save.
 create or replace function public.set_updated_at()

@@ -9,6 +9,8 @@ const DEFAULT_CHARACTER = {
   outfit_color: '#c9a7e0',
   outfit_style: 'wanderer_coat',
   accessory: 'backpack',
+  pet1_type: 'bunny',
+  has_horse: true,
   position: { x: 0, y: 0, z: 0 },
 };
 

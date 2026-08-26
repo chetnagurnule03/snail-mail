@@ -29,11 +29,25 @@ const ACCESSORIES = [
   { id: 'none', name: '🚫 None' },
 ];
 
+const SMALL_PETS = [
+  { id: 'bunny', name: '🐰 Bunny' },
+  { id: 'cat', name: '🐱 Cat' },
+  { id: 'dog', name: '🐶 Dog' },
+  { id: 'fox', name: '🦊 Fox' },
+  { id: 'frog', name: '🐸 Frog' },
+  { id: 'squirrel', name: '🐿️ Squirrel' },
+];
+
 export default function App() {
   const { user, loading: authLoading, signInWithEmail, signInAsGuest, signOut } = useAuth();
   const { character, loading: charLoading, saving, save } = useCharacter(user?.id);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  const toggleMount = () => {
+    setIsMounted((prev) => !prev);
+  };
 
   if (authLoading) {
     return <Centered>Loading your little world…</Centered>;
@@ -49,18 +63,29 @@ export default function App() {
 
   return (
     <div style={{ height: '100%', position: 'relative' }}>
-      {/* 3D Storybook World Canvas with 360 Camera Controls */}
-      <GardenScene character={character} resetCameraSignal={resetCameraSignal} />
+      {/* 3D Storybook World Canvas */}
+      <GardenScene
+        character={character}
+        resetCameraSignal={resetCameraSignal}
+        isMounted={isMounted}
+        toggleMount={toggleMount}
+      />
 
       {/* HUD Overlay Bar */}
       <div style={styles.hud}>
         <div style={styles.badge}>
           🐌 {character.name} {saving ? '(saving…)' : ''}
         </div>
-        <button style={styles.pill} onClick={() => setIsCustomizerOpen(true)}>
-          🎨 Customize Character
+        <button
+          style={{ ...styles.pill, background: isMounted ? '#e76f51' : '#e07a5f' }}
+          onClick={toggleMount}
+        >
+          {isMounted ? '🚶 Dismount [E]' : '🐴 Ride Horse [E]'}
         </button>
-        <button style={styles.pillSecondary} onClick={() => setResetCameraSignal(Date.now())}>
+        <button style={styles.pillSecondary} onClick={() => setIsCustomizerOpen(true)}>
+          🎨 Customize
+        </button>
+        <button style={styles.pillGhost} onClick={() => setResetCameraSignal(Date.now())}>
           🎥 Reset View [R]
         </button>
         <button style={styles.pillGhost} onClick={signOut}>
@@ -70,7 +95,7 @@ export default function App() {
 
       {/* Controls Hint Overlay */}
       <div style={styles.controlsHint}>
-        🖱️ Left Drag: Rotate 360° | 📜 Scroll: Zoom | ⌨️ WASD / Click: Move
+        {isMounted ? '🐴 WASD: Ride Horse' : '⌨️ WASD: Move'} | 🖱️ Left Drag: Rotate 360° | 📜 Scroll: Zoom | ⌨️ E: {isMounted ? 'Dismount' : 'Ride'}
       </div>
 
       {/* Character Customizer Overlay Modal */}
@@ -79,7 +104,7 @@ export default function App() {
           <div style={styles.modalCard}>
             <div style={styles.modalHeader}>
               <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#5b4a34' }}>
-                🎨 Customize Your Character
+                🎨 Customize Character & Companions
               </h2>
               <button
                 style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#8a7a63' }}
@@ -99,6 +124,26 @@ export default function App() {
                   onChange={(e) => save({ name: e.target.value })}
                   style={styles.input}
                 />
+              </div>
+
+              {/* Small Pet Companion (PET 1) */}
+              <div style={styles.fieldGroup}>
+                <label style={styles.label}>Companion Pet 1</label>
+                <div style={styles.grid2}>
+                  {SMALL_PETS.map((p) => (
+                    <button
+                      key={p.id}
+                      style={{
+                        ...styles.choiceBtn,
+                        borderColor: character.pet1_type === p.id ? '#e07a5f' : '#e3d7bf',
+                        background: character.pet1_type === p.id ? '#fdf0ed' : '#fffaf1',
+                      }}
+                      onClick={() => save({ pet1_type: p.id })}
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Hairstyle */}
