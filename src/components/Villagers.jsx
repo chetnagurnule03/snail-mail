@@ -2,21 +2,21 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE 3D STORYBOOK VILLAGER NPCS (NATURAL DISTRIBUTION)
+ *  12 UNIQUE VILLAGER NPCS (SPACIOUS HAMLET DISTRIBUTION)
  * ------------------------------------------------------------- */
 const VILLAGERS_DATA = [
-  { id: 1, name: 'Mia', job: 'Florist', pos: [4.6, 0.12, -6.8], outfitColor: '#ffb5a7', hairColor: '#e6c594', pet: 'bunny' },
-  { id: 2, name: 'Theo', job: 'Baker', pos: [-4.2, 0.1, -2.2], outfitColor: '#f4a261', hairColor: '#7a4a2b', pet: 'cat' },
-  { id: 3, name: 'Nora', job: 'Café Owner', pos: [-3.5, 0.15, 2.1], outfitColor: '#fae1c5', hairColor: '#3d2616', pet: 'dog' },
-  { id: 4, name: 'Luna', job: 'Librarian', pos: [4.2, 0.1, 3.5], outfitColor: '#a8dadc', hairColor: '#b55239', pet: 'cat' },
-  { id: 5, name: 'Leo', job: 'Postman', pos: [-5.4, 0.08, 4.5], outfitColor: '#e63946', hairColor: '#7a4a2b', pet: 'dog' },
-  { id: 6, name: 'Emma', job: 'Shopkeeper', pos: [2.2, 0.08, -2.8], outfitColor: '#e07a5f', hairColor: '#e6c594', pet: 'bunny' },
-  { id: 7, name: 'Oliver', job: 'Gardener', pos: [7.8, 0.22, -8.5], outfitColor: '#84b574', hairColor: '#3d2616', pet: 'dog' },
-  { id: 8, name: 'Sophie', job: 'Artist', pos: [-6.0, 0.15, -8.0], outfitColor: '#c9a7e0', hairColor: '#b55239', pet: 'cat' },
-  { id: 9, name: 'Milo', job: 'Carpenter', pos: [-8.8, 0.18, 5.8], outfitColor: '#d4a373', hairColor: '#7a4a2b', pet: 'dog' },
-  { id: 10, name: 'Noah', job: 'Herbalist', pos: [9.8, 0.18, -4.2], outfitColor: '#2a9d8f', hairColor: '#e6c594', pet: 'bunny' },
-  { id: 11, name: 'Clara', job: 'Weaver', pos: [-9.6, 0.25, -5.5], outfitColor: '#e9c46a', hairColor: '#3d2616', pet: 'cat' },
-  { id: 12, name: 'Felix', job: 'Astronomer', pos: [7.8, 0.28, 7.2], outfitColor: '#1d3557', hairColor: '#7a4a2b', pet: 'dog' },
+  { id: 1, name: 'Mia', job: 'Florist', pos: [20.5, 0.18, -26.5], outfitColor: '#ffb5a7', hairColor: '#e6c594', pet: 'bunny' },
+  { id: 2, name: 'Theo', job: 'Baker', pos: [-5.2, 0.1, -20.5], outfitColor: '#f4a261', hairColor: '#7a4a2b', pet: 'cat' },
+  { id: 3, name: 'Nora', job: 'Café Owner', pos: [-5.8, 0.15, -19.5], outfitColor: '#fae1c5', hairColor: '#3d2616', pet: 'dog' },
+  { id: 4, name: 'Luna', job: 'Librarian', pos: [22.5, 0.14, 12.5], outfitColor: '#a8dadc', hairColor: '#b55239', pet: 'cat' },
+  { id: 5, name: 'Leo', job: 'Postman', pos: [-24.2, 0.15, 10.5], outfitColor: '#e63946', hairColor: '#7a4a2b', pet: 'dog' },
+  { id: 6, name: 'Emma', job: 'Shopkeeper', pos: [5.2, 0.08, -20.8], outfitColor: '#e07a5f', hairColor: '#e6c594', pet: 'bunny' },
+  { id: 7, name: 'Oliver', job: 'Gardener', pos: [-22.5, 0.2, -24.5], outfitColor: '#84b574', hairColor: '#3d2616', pet: 'dog' },
+  { id: 8, name: 'Sophie', job: 'Artist', pos: [-30.5, 0.25, -18.5], outfitColor: '#c9a7e0', hairColor: '#b55239', pet: 'cat' },
+  { id: 9, name: 'Milo', job: 'Carpenter', pos: [-32.5, 0.2, 20.5], outfitColor: '#d4a373', hairColor: '#7a4a2b', pet: 'dog' },
+  { id: 10, name: 'Noah', job: 'Herbalist', pos: [28.5, 0.22, -16.5], outfitColor: '#2a9d8f', hairColor: '#e6c594', pet: 'bunny' },
+  { id: 11, name: 'Clara', job: 'Weaver', pos: [-26.5, 0.22, -32.5], outfitColor: '#e9c46a', hairColor: '#3d2616', pet: 'cat' },
+  { id: 12, name: 'Felix', job: 'Astronomer', pos: [30.5, 0.18, 22.5], outfitColor: '#1d3557', hairColor: '#7a4a2b', pet: 'dog' },
 ];
 
 function VillagerNPC({ npc }) {

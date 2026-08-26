@@ -7,15 +7,14 @@ import VillageHouses from './VillageHouses';
 import Villagers from './Villagers';
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER
+ *  COLLISION & BOUNDARY HELPER (PLAYABLE RADIUS = 45m)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
-  { name: 'Cottage', x: -2.6, z: -2.4, radius: 1.6 },
-  { name: 'Pond', x: -1.6, z: 1.9, radius: 1.4 },
-  { name: 'Fountain', x: -2.3, z: -6.0, radius: 1.4 },
-  { name: 'Tree1', x: -3.8, z: -1.2, radius: 0.7 },
-  { name: 'Tree2', x: -2.4, z: -3.8, radius: 0.7 },
-  { name: 'Tree3', x: 3.2, z: -3.2, radius: 0.7 },
+  { name: 'Cottage', x: -14.0, z: -12.0, radius: 1.8 },
+  { name: 'Pond', x: -13.0, z: -7.5, radius: 1.5 },
+  { name: 'Fountain', x: 0, z: -22.0, radius: 1.6 },
+  { name: 'Tree1', x: -15.2, z: -10.8, radius: 0.7 },
+  { name: 'Tree2', x: -13.8, z: -14.2, radius: 0.7 },
 ];
 
 function sanitizePlayableTarget(x, z) {
@@ -23,7 +22,7 @@ function sanitizePlayableTarget(x, z) {
   let targetZ = z;
 
   const distFromCenter = Math.sqrt(targetX * targetX + targetZ * targetZ);
-  const maxRadius = 14.5;
+  const maxRadius = 45.0; // Spacious countryside map size
   if (distFromCenter > maxRadius) {
     const angle = Math.atan2(targetZ, targetX);
     targetX = Math.cos(angle) * maxRadius;
@@ -45,41 +44,46 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. EXPANSIVE 360° MEADOW GROUND PLANE
+ *  1. EXPANSIVE 360° MEADOW GROUND PLANE (180x180m)
  * ------------------------------------------------------------- */
 function ExtendedMeadowTerrain() {
   return (
     <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[140, 140]} />
+      <planeGeometry args={[180, 180]} />
       <meshStandardMaterial color="#94c77d" roughness={0.8} />
     </mesh>
   );
 }
 
 /** -------------------------------------------------------------
- *  2. ORGANIC WINDING PATH NETWORK
+ *  2. LONG WINDING COUNTRYSIDE PATH NETWORK
  * ------------------------------------------------------------- */
 function VillageWindingPaths() {
   return (
     <group position={[0, 0.015, 0]}>
-      <mesh position={[-1.8, 0, -4.0]} rotation={[-Math.PI / 2, 0, -0.32]}>
-        <planeGeometry args={[1.4, 4.8]} />
+      {/* Long Path from Player Home Edge [-14, -12] to Market Plaza [0, -22] */}
+      <mesh position={[-7.0, 0, -17.0]} rotation={[-Math.PI / 2, 0, -0.6]}>
+        <planeGeometry args={[1.5, 18.0]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
-      <mesh position={[2.8, 0, -5.2]} rotation={[-Math.PI / 2, 0, 0.85]}>
-        <planeGeometry args={[1.3, 7.5]} />
+      {/* Path to North-West Woodland Hamlet */}
+      <mesh position={[-16.0, 0, -23.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
+        <planeGeometry args={[1.4, 20.0]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
-      <mesh position={[-5.8, 0, -5.8]} rotation={[-Math.PI / 2, 0, -0.75]}>
-        <planeGeometry args={[1.3, 7.0]} />
+      {/* Path to North-East Blossom Knoll */}
+      <mesh position={[14.0, 0, -24.0]} rotation={[-Math.PI / 2, 0, -0.3]}>
+        <planeGeometry args={[1.4, 22.0]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
-      <mesh position={[-4.5, 0, 1.8]} rotation={[-Math.PI / 2, 0, 0.45]}>
-        <planeGeometry args={[1.4, 8.2]} />
+      {/* Path to South-West Craftsman Creek */}
+      <mesh position={[-16.0, 0, 0.0]} rotation={[-Math.PI / 2, 0, -0.9]}>
+        <planeGeometry args={[1.4, 24.0]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
-      <mesh position={[3.5, 0, 2.5]} rotation={[-Math.PI / 2, 0, -0.5]}>
-        <planeGeometry args={[1.4, 8.5]} />
+      {/* Path to South-East Quiet Meadow */}
+      <mesh position={[16.0, 0, 0.0]} rotation={[-Math.PI / 2, 0, 0.8]}>
+        <planeGeometry args={[1.4, 25.0]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
     </group>
@@ -87,20 +91,57 @@ function VillageWindingPaths() {
 }
 
 /** -------------------------------------------------------------
- *  3. NATURAL 360° OPEN COUNTRYSIDE HILLS
+ *  3. NATURAL FILLERS BETWEEN HOUSES (Trees, Flowers, Rocks, Mushrooms)
+ * ------------------------------------------------------------- */
+function CountrysideNaturalFillers() {
+  return (
+    <group>
+      {/* Tree Clusters in Spaces Between Hamlets */}
+      <group position={[-18, 0, -18]}>
+        <StorybookTree position={[0, 0, 0]} scale={1.4} colorScale={0} />
+        <StorybookTree position={[-3, 0, 2]} scale={1.6} colorScale={1} />
+        <MushroomGroup position={[-1, 0.08, 3]} scale={1.4} />
+      </group>
+
+      <group position={[18, 0, -16]}>
+        <StorybookTree position={[0, 0, 0]} scale={1.5} colorScale={2} />
+        <StorybookTree position={[3, 0, -2]} scale={1.3} colorScale={0} />
+        <SoftFlowerCluster position={[1, 0.04, 2]} color="#ffb5a7" />
+      </group>
+
+      <group position={[-18, 0, 8]}>
+        <StorybookTree position={[0, 0, 0]} scale={1.4} colorScale={1} />
+        <SoftFlowerCluster position={[-2, 0.04, -1]} color="#c77dff" />
+        <mesh position={[2, 0.15, 1]} castShadow>
+          <dodecahedronGeometry args={[0.35, 1]} />
+          <meshStandardMaterial color="#8a8a8a" roughness={0.8} />
+        </mesh>
+      </group>
+
+      <group position={[18, 0, 8]}>
+        <StorybookTree position={[0, 0, 0]} scale={1.5} colorScale={0} />
+        <MushroomGroup position={[2, 0.08, -1]} scale={1.3} />
+        <SoftFlowerCluster position={[-1, 0.04, 2]} color="#ffb5a7" />
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  4. NATURAL 360° OPEN COUNTRYSIDE HILLS
  * ------------------------------------------------------------- */
 function DistantCountrysideHills() {
   return (
     <group position={[0, -1.8, 0]}>
-      <mesh position={[-28, 1.2, -35]} scale={[24, 4.5, 24]}>
+      <mesh position={[-42, 1.2, -50]} scale={[32, 5.5, 32]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#8ab874" roughness={0.85} />
       </mesh>
-      <mesh position={[28, 1.0, -38]} scale={[26, 4.8, 26]}>
+      <mesh position={[42, 1.0, -52]} scale={[34, 5.8, 34]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#9ec891" roughness={0.85} />
       </mesh>
-      <mesh position={[0, 0.8, -42]} scale={[30, 5.2, 30]}>
+      <mesh position={[0, 0.8, -55]} scale={[38, 6.2, 38]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshStandardMaterial color="#7cb268" roughness={0.85} />
       </mesh>
@@ -109,24 +150,24 @@ function DistantCountrysideHills() {
 }
 
 /** -------------------------------------------------------------
- *  4. SOFT SKY CLOUDS & BIRDS
+ *  5. SOFT SKY CLOUDS & BIRDS
  * ------------------------------------------------------------- */
 function FluffyClouds() {
   const cloudsRef = useRef();
 
   useFrame((state) => {
     if (cloudsRef.current) {
-      cloudsRef.current.position.x = (state.clock.getElapsedTime() * 0.15) % 24 - 12;
+      cloudsRef.current.position.x = (state.clock.getElapsedTime() * 0.15) % 36 - 18;
     }
   });
 
   return (
     <group ref={cloudsRef}>
       {[
-        { pos: [-14, 8.5, -18], scale: 1.8 },
-        { pos: [-2, 9.2, -22], scale: 2.2 },
-        { pos: [10, 8.8, -16], scale: 1.6 },
-        { pos: [20, 9.5, -24], scale: 2.0 },
+        { pos: [-24, 9.5, -28], scale: 2.2 },
+        { pos: [-4, 10.2, -32], scale: 2.8 },
+        { pos: [16, 9.8, -26], scale: 2.0 },
+        { pos: [30, 10.5, -34], scale: 2.5 },
       ].map((c, idx) => (
         <group key={idx} position={c.pos} scale={c.scale}>
           <mesh position={[0, 0, 0]}>
@@ -145,15 +186,15 @@ function DistantBirds() {
   useFrame((state) => {
     if (birdsGroupRef.current) {
       const t = state.clock.getElapsedTime() * 0.4;
-      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 8;
-      birdsGroupRef.current.position.y = 7.5 + Math.cos(t * 0.3) * 0.5;
+      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 12;
+      birdsGroupRef.current.position.y = 8.5 + Math.cos(t * 0.3) * 0.5;
       birdsGroupRef.current.rotation.y = Math.cos(t * 0.5) * 0.3;
     }
   });
 
   return (
-    <group ref={birdsGroupRef} position={[0, 7.5, -12]}>
-      {[-0.8, 0, 0.8].map((offset, idx) => (
+    <group ref={birdsGroupRef} position={[0, 8.5, -18]}>
+      {[-1.2, 0, 1.2].map((offset, idx) => (
         <group key={idx} position={[offset * 0.8, idx * 0.2, offset * 0.5]}>
           <mesh position={[-0.1, 0, 0]} rotation={[0, 0, 0.3]}>
             <boxGeometry args={[0.2, 0.02, 0.08]} />
@@ -170,9 +211,9 @@ function DistantBirds() {
 }
 
 /** -------------------------------------------------------------
- *  5. HOME HORSE STABLE AREA
+ *  6. HOME HORSE STABLE AREA
  * ------------------------------------------------------------- */
-function HomeHorseStable({ position = [-3.5, 0, 0.8] }) {
+function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
   return (
     <group position={position} rotation={[0, 0.3, 0]}>
       <mesh position={[-0.6, 0.35, 0]} castShadow>
@@ -200,7 +241,7 @@ function HomeHorseStable({ position = [-3.5, 0, 0.8] }) {
 }
 
 /** -------------------------------------------------------------
- *  6. PET 1: KNEE-HEIGHT CARTOON SMALL COMPANION PET (Bunny 🐰)
+ *  7. PET 1: KNEE-HEIGHT CARTOON SMALL COMPANION PET (Bunny 🐰)
  * ------------------------------------------------------------- */
 function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
   const petRef = useRef();
@@ -227,8 +268,7 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
   });
 
   return (
-    <group ref={petRef} position={[-0.65, 0, 0.65]} scale={0.55}>
-      {/* Scaled Knee-Height Storybook Bunny */}
+    <group ref={petRef} position={[-14.65, 0, -11.35]} scale={0.55}>
       {petType === 'bunny' && (
         <group position={[0, 0.18, 0]}>
           <mesh castShadow>
@@ -295,7 +335,7 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
 }
 
 /** -------------------------------------------------------------
- *  7. PET 2: SHOULDER-HEIGHT CARTOON STORYBOOK HORSE 🐴
+ *  8. PET 2: SHOULDER-HEIGHT CARTOON STORYBOOK HORSE 🐴
  * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
@@ -342,14 +382,12 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   });
 
   return (
-    <group ref={horseRef} position={[-2.8, 0, 0.8]} scale={1.05}>
-      {/* Torso & Withers at Human Upper Chest/Shoulder Height */}
+    <group ref={horseRef} position={[-15.2, 0, -9.5]} scale={1.05}>
       <mesh position={[0, 0.62, 0]} castShadow>
         <capsuleGeometry args={[0.32, 0.82, 8, 16]} rotation={[Math.PI / 2, 0, 0]} />
         <meshStandardMaterial color="#c68a4c" roughness={0.55} />
       </mesh>
 
-      {/* Leather Saddle & Brass Stirrups */}
       <group position={[0, 0.78, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.15, 0.48]} />
@@ -369,7 +407,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
         </mesh>
       </group>
 
-      {/* Arched Neck & Friendly Head */}
       <group ref={headNeckGroupRef} position={[0, 0.82, 0.42]}>
         <mesh position={[0, 0.28, 0.14]} rotation={[0.36, 0, 0]} castShadow>
           <cylinderGeometry args={[0.18, 0.24, 0.62, 12]} />
@@ -379,7 +416,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <boxGeometry args={[0.26, 0.26, 0.46]} />
           <meshStandardMaterial color="#c68a4c" roughness={0.55} />
         </mesh>
-        {/* Soft Muzzle with Nostrils */}
         <group position={[0, 0.52, 0.5]}>
           <mesh>
             <boxGeometry args={[0.24, 0.22, 0.2]} />
@@ -421,7 +457,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
         <meshStandardMaterial color="#4a2c11" />
       </mesh>
 
-      {/* 4 Legs & Hooves */}
       <group ref={leftFrontLegRef} position={[-0.18, 0.3, 0.28]}>
         <mesh position={[0, -0.15, 0]} castShadow>
           <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
@@ -470,7 +505,7 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
 }
 
 /** -------------------------------------------------------------
- *  8. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
+ *  9. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
  * ------------------------------------------------------------- */
 function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, resetSignal, isMounted, toggleMount }) {
   const { camera } = useThree();
@@ -540,7 +575,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
 
       if (moveVec.lengthSq() > 0) {
         moveVec.normalize();
-        const speedMultiplier = isMounted ? 4.8 : 3.5;
+        const speedMultiplier = isMounted ? 5.2 : 3.8;
         const moveSpeed = speedMultiplier * delta;
 
         let nextX = playerGroupRef.current.position.x + moveVec.x * moveSpeed;
@@ -581,7 +616,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
       enablePan={false}
       enableZoom={true}
       minDistance={3.0}
-      maxDistance={14.0}
+      maxDistance={15.0}
       minPolarAngle={Math.PI * 0.12}
       maxPolarAngle={Math.PI * 0.46}
       rotateSpeed={0.6}
@@ -591,7 +626,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
 }
 
 /** -------------------------------------------------------------
- *  9. CHIBI CARTOON HUMAN AVATAR (22% HEAD / 38% BODY / 40% LEGS)
+ *  10. STYLIZED STORYBOOK PLAYER AVATAR
  * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   const leftLegRef = useRef();
@@ -614,7 +649,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
     const clock = state.clock.getElapsedTime();
 
     if (isMounted) {
-      // Sitting Elevated on Saddle (Hips at y=0.72m)
       groupRef.current.position.y = 0.72;
 
       if (dist > 0.06) {
@@ -667,15 +701,13 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   });
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Head (~22% Total Height) */}
+    <group ref={groupRef} position={[-14.0, 0, -12.0]}>
       <group ref={headGroupRef} position={[0, 0.94, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.26, 24, 24]} />
           <meshStandardMaterial color={skinTone} roughness={0.45} />
         </mesh>
 
-        {/* Expressive Eyes with Double Catchlights */}
         <group position={[0, 0.03, 0.22]}>
           <mesh position={[-0.09, 0, 0]}>
             <sphereGeometry args={[0.036, 12, 12]} />
@@ -695,7 +727,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           </mesh>
         </group>
 
-        {/* Blushing Cheeks */}
         <mesh position={[-0.14, -0.04, 0.2]}>
           <sphereGeometry args={[0.048, 12, 12]} />
           <meshStandardMaterial color="#ffb5a7" transparent opacity={0.65} />
@@ -705,7 +736,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshStandardMaterial color="#ffb5a7" transparent opacity={0.65} />
         </mesh>
 
-        {/* Cute Button Nose & Smiling Mouth */}
         <mesh position={[0, -0.01, 0.25]}>
           <sphereGeometry args={[0.026, 10, 10]} />
           <meshStandardMaterial color={skinTone} roughness={0.5} />
@@ -715,7 +745,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshStandardMaterial color="#a85d48" />
         </mesh>
 
-        {/* Multi-Layer Hairstyle Silhouettes */}
         {hairStyle === 'wanderer_cap' && (
           <group>
             <mesh position={[0, 0.1, 0]}>
@@ -747,7 +776,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         )}
       </group>
 
-      {/* Torso & Sculpted Cardigan/Coat (~38% Height) */}
       <group position={[0, 0.48, 0]}>
         <mesh castShadow>
           <capsuleGeometry args={[0.25, 0.38, 8, 16]} />
@@ -759,7 +787,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      {/* Arms & Sleeve Cuffs */}
       <group ref={leftArmRef} position={[-0.31, 0.58, 0]}>
         <mesh position={[0, -0.16, 0]} castShadow>
           <cylinderGeometry args={[0.052, 0.05, 0.32, 10]} />
@@ -782,7 +809,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      {/* Legs & Leather Boots (~40% Height) */}
       <group ref={leftLegRef} position={[-0.12, 0.22, 0]}>
         <mesh position={[0, -0.1, 0]} castShadow>
           <cylinderGeometry args={[0.06, 0.055, 0.22, 10]} />
@@ -809,9 +835,9 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 }
 
 /** -------------------------------------------------------------
- *  10. COZY STORYBOOK COTTAGE
+ *  11. COZY STORYBOOK COTTAGE & PLAYER DIORAMA TERRAIN
  * ------------------------------------------------------------- */
-function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
+function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
   return (
     <group position={position} rotation={[0, rotation, 0]}>
       <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
@@ -874,7 +900,7 @@ function CozyCottage({ position = [-2.6, 0.1, -2.4], rotation = 0.45 }) {
   );
 }
 
-function NaturalDioramaTerrain({ onGroundClick }) {
+function NaturalDioramaTerrain({ position = [-14.0, 0, -12.0], onGroundClick }) {
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(14, 14, 48, 48);
     const pos = geo.attributes.position;
@@ -894,7 +920,7 @@ function NaturalDioramaTerrain({ onGroundClick }) {
   }, []);
 
   return (
-    <group>
+    <group position={position}>
       <mesh
         geometry={geometry}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -917,18 +943,87 @@ function NaturalDioramaTerrain({ onGroundClick }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  MAIN SCENE WITH CHIBI CARTOON PROPORTIONS
- * ------------------------------------------------------------- */
-export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount }) {
-  const [targetPos, setTargetPos] = useState([0, 0]);
-  const playerGroupRef = useRef();
-  const horsePosRef = useRef([-2.8, 0.8]);
+function StorybookTree({ position, scale = 1, rotation = 0, colorScale = 0 }) {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.z = Math.sin(state.clock.getElapsedTime() * 0.7 + position[0]) * 0.025;
+      groupRef.current.rotation.x = Math.cos(state.clock.getElapsedTime() * 0.5 + position[2]) * 0.015;
+    }
+  });
+
+  const leafColors = [
+    { c1: '#84b574', c2: '#97c987', c3: '#afde9f' },
+    { c1: '#739e65', c2: '#83b273', c3: '#9ec48f' },
+    { c1: '#9eb87d', c2: '#b3cd93', c3: '#cce6ad' },
+  ];
+  const theme = leafColors[colorScale % leafColors.length];
 
   return (
-    <Canvas shadows camera={{ position: [0, 4.5, 7.0], fov: 42 }}>
+    <group ref={groupRef} position={position} scale={scale} rotation={[0, rotation, 0]}>
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <cylinderGeometry args={[0.16, 0.28, 1.4, 16]} />
+        <meshStandardMaterial color="#6b4c35" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.6, 0]} castShadow>
+        <sphereGeometry args={[0.85, 24, 24]} />
+        <meshStandardMaterial color={theme.c1} roughness={0.5} />
+      </mesh>
+      <mesh position={[-0.4, 2.1, 0.2]} castShadow>
+        <sphereGeometry args={[0.65, 20, 20]} />
+        <meshStandardMaterial color={theme.c2} roughness={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+function MushroomGroup({ position, scale = 1 }) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.18, 0]}>
+        <cylinderGeometry args={[0.04, 0.07, 0.36, 12]} />
+        <meshStandardMaterial color="#fdf0d5" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <sphereGeometry args={[0.22, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
+        <meshStandardMaterial color="#e63946" roughness={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+function SoftFlowerCluster({ position, color = '#ffb5a7' }) {
+  return (
+    <group position={position}>
+      {[-0.12, 0, 0.14].map((offset, idx) => (
+        <group key={idx} position={[offset, 0, (idx % 2) * 0.1]}>
+          <mesh position={[0, 0.2, 0]}>
+            <cylinderGeometry args={[0.015, 0.02, 0.4, 6]} />
+            <meshStandardMaterial color="#70e000" />
+          </mesh>
+          <mesh position={[0, 0.4, 0]}>
+            <sphereGeometry args={[0.09, 12, 12]} />
+            <meshStandardMaterial color={color} roughness={0.4} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  MAIN SCENE WITH SPACIOUS COUNTRYSIDE SCALE (PLAYABLE RADIUS = 45m)
+ * ------------------------------------------------------------- */
+export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount }) {
+  const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
+  const playerGroupRef = useRef();
+  const horsePosRef = useRef([-15.2, -9.5]);
+
+  return (
+    <Canvas shadows camera={{ position: [-14.0, 4.5, -5.0], fov: 42 }}>
       <color attach="background" args={['#e6f2ee']} />
-      <fogExp2 attach="fog" color="#dbebe6" density={0.007} />
+      <fogExp2 attach="fog" color="#dbebe6" density={0.006} />
       
       <Sky sunPosition={[8, 5, 4]} turbidity={0.8} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
       <ambientLight intensity={0.85} color="#fff7ed" />
@@ -950,28 +1045,29 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <DistantBirds />
       <DistantCountrysideHills />
       <VillageWindingPaths />
+      <CountrysideNaturalFillers />
 
-      {/* 1. MARKET CORNER */}
-      <VillageSquare position={[-1.5, 0, -5.5]} />
+      {/* 1. MARKET PLAZA CENTER (AT Z = -22m) */}
+      <VillageSquare position={[0, 0, -22.0]} />
 
-      {/* 2. 5 ORGANIC NEIGHBORHOOD COTTAGES */}
+      {/* 2. 4 SPACIOUS COUNTRYSIDE HAMLETS (20m-35m SPACING) */}
       <VillageHouses />
 
-      {/* 3. 12 ANIMATED VILLAGER NPCS & PETS */}
+      {/* 3. 12 SPACIOUS VILLAGER NPCS & PETS */}
       <Villagers />
 
-      {/* Player's Home Cottage & Yard */}
-      <NaturalDioramaTerrain onGroundClick={setTargetPos} />
-      <CozyCottage position={[-2.6, 0.1, -2.4]} rotation={0.45} />
-      <HomeHorseStable position={[-3.5, 0, 0.8]} />
+      {/* Player's Home Cottage & Yard at Quiet Edge [-14, -12] */}
+      <NaturalDioramaTerrain position={[-14.0, 0, -12.0]} onGroundClick={setTargetPos} />
+      <CozyCottage position={[-16.6, 0.1, -14.4]} rotation={0.45} />
+      <HomeHorseStable position={[-17.5, 0, -11.2]} />
 
       {/* Player Character & Companions */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} horsePosRef={horsePosRef} />
       <SmallCompanionPet petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
-      <Sparkles count={80} scale={18} size={3.5} speed={0.4} color="#ffe5ec" />
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={18} blur={2.5} />
+      <Sparkles count={100} scale={28} size={3.5} speed={0.4} color="#ffe5ec" />
+      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={28} blur={2.5} />
     </Canvas>
   );
 }
