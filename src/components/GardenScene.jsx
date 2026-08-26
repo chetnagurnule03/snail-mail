@@ -48,101 +48,101 @@ function sanitizePlayableTarget(x, z) {
 function ExtendedMeadowTerrain() {
   return (
     <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[120, 120]} />
+      <planeGeometry args={[100, 100]} />
       <meshStandardMaterial color="#94c77d" roughness={0.8} />
     </mesh>
   );
 }
 
 /** -------------------------------------------------------------
- *  2. NATURAL OPEN 360° ROLLING LANDSCAPE (NO GIANTS HILL WALLS)
+ *  2. NATURAL OPEN 360° ROLLING HILLS (SAFE RADIUS - NO CAMERA ENGULFMENT)
  * ------------------------------------------------------------- */
-function OpenStorybookLandscape() {
+function StorybookPanoramaHills() {
   return (
-    <group position={[0, -1.6, 0]}>
-      {/* Gentle Distant Rolling Waves (Low profile, pushed 30-55m out) */}
-      <mesh position={[-25, 0.8, -35]} scale={[48, 4.5, 48]}>
+    <group position={[0, -1.2, 0]}>
+      {/* North / Back Hills (Z <= -25, safe radius <= 18) */}
+      <mesh position={[-16, 1.2, -26]} scale={[18, 6.5, 18]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#a5cba1" roughness={0.85} />
+        <meshStandardMaterial color="#8ab874" roughness={0.8} />
       </mesh>
-      <mesh position={[25, 0.6, -38]} scale={[52, 4.8, 52]}>
+      <mesh position={[16, 1.0, -28]} scale={[20, 7.5, 20]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#b2d8ad" roughness={0.85} />
+        <meshStandardMaterial color="#9ec891" roughness={0.8} />
       </mesh>
-      <mesh position={[0, 0.5, -42]} scale={[58, 5.2, 58]}>
+      <mesh position={[0, 0.8, -30]} scale={[22, 8.0, 22]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#9bc298" roughness={0.85} />
-      </mesh>
-
-      {/* West Flank Gentle Waves */}
-      <mesh position={[-38, 0.7, 0]} scale={[50, 4.6, 50]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#a2cc9e" roughness={0.85} />
-      </mesh>
-      {/* East Flank Gentle Waves */}
-      <mesh position={[38, 0.7, 0]} scale={[50, 4.6, 50]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#a2cc9e" roughness={0.85} />
+        <meshStandardMaterial color="#7cb268" roughness={0.8} />
       </mesh>
 
-      {/* South / Foreground Distant Low Swells */}
-      <mesh position={[-20, 0.4, 35]} scale={[45, 3.8, 45]}>
+      {/* West / Left Flank Hills (X <= -25) */}
+      <mesh position={[-26, 1.2, -10]} scale={[18, 6.5, 18]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#afd8ab" roughness={0.85} />
+        <meshStandardMaterial color="#84b574" roughness={0.85} />
       </mesh>
-      <mesh position={[20, 0.5, 38]} scale={[48, 4.0, 48]}>
+      <mesh position={[-25, 1.0, 12]} scale={[16, 5.8, 16]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#a5d2a1" roughness={0.85} />
+        <meshStandardMaterial color="#94c480" roughness={0.85} />
+      </mesh>
+
+      {/* East / Right Flank Hills (X >= 25) */}
+      <mesh position={[26, 1.2, -10]} scale={[18, 6.5, 18]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#84b574" roughness={0.85} />
+      </mesh>
+      <mesh position={[25, 1.0, 12]} scale={[16, 5.8, 16]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#94c480" roughness={0.85} />
+      </mesh>
+
+      {/* Far Distant Horizon Mountain Ridges (Z <= -38) */}
+      <mesh position={[-28, 3.2, -40]} scale={[30, 11, 30]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#6a9957" roughness={0.9} />
+      </mesh>
+      <mesh position={[28, 3.4, -42]} scale={[32, 12, 32]}>
+        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        <meshStandardMaterial color="#5e8c4f" roughness={0.9} />
       </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  3. MIDDLE-GROUND SCATTERED WOODLAND & BUSH CLUSTERS
+ *  3. BACKGROUND FOREST TREES
  * ------------------------------------------------------------- */
-function MiddleGroundLandscape() {
-  const scatteredTrees = [
-    { pos: [-10, 0.4, -14], scale: 1.3, color: '#88b574' },
-    { pos: [-16, 0.8, -18], scale: 1.7, color: '#7aa867' },
-    { pos: [11, 0.5, -15], scale: 1.4, color: '#9ec891' },
-    { pos: [17, 0.9, -19], scale: 1.8, color: '#6a9957' },
-    { pos: [-15, 0.6, 12], scale: 1.5, color: '#88b574' },
-    { pos: [16, 0.6, 11], scale: 1.4, color: '#94c480' },
-    { pos: [-12, 0.3, -8], scale: 1.1, color: '#a7c957' },
-    { pos: [13, 0.3, -7], scale: 1.2, color: '#88b574' },
+function BackgroundForest() {
+  const treePositions = [
+    { pos: [-14, 0.8, -22], scale: 1.6 },
+    { pos: [-18, 1.2, -25], scale: 2.0 },
+    { pos: [-8, 0.5, -23], scale: 1.4 },
+    { pos: [8, 0.7, -22], scale: 1.7 },
+    { pos: [15, 1.1, -26], scale: 2.1 },
+    { pos: [20, 1.4, -28], scale: 2.4 },
+    { pos: [-22, 1.8, -30], scale: 2.3 },
+    { pos: [0, 1.0, -25], scale: 1.8 },
   ];
 
   return (
     <group>
-      {scatteredTrees.map((t, idx) => (
+      {treePositions.map((t, idx) => (
         <group key={idx} position={t.pos} scale={t.scale}>
-          <mesh position={[0, 0.6, 0]}>
-            <cylinderGeometry args={[0.14, 0.25, 1.2, 12]} />
-            <meshStandardMaterial color="#6b4c35" roughness={0.8} />
+          <mesh position={[0, 0.8, 0]}>
+            <cylinderGeometry args={[0.2, 0.35, 1.6, 12]} />
+            <meshStandardMaterial color="#5c3e28" roughness={0.9} />
           </mesh>
-          <mesh position={[0, 1.5, 0]}>
-            <sphereGeometry args={[0.85, 18, 18]} />
-            <meshStandardMaterial color={t.color} roughness={0.6} />
+          <mesh position={[0, 2.0, 0]}>
+            <sphereGeometry args={[1.1, 20, 20]} />
+            <meshStandardMaterial color={idx % 2 === 0 ? '#7aa867' : '#88b574'} roughness={0.6} />
           </mesh>
-          <mesh position={[-0.35, 1.9, 0.15]}>
-            <sphereGeometry args={[0.6, 14, 14]} />
-            <meshStandardMaterial color="#9ec891" roughness={0.6} />
+          <mesh position={[-0.5, 2.6, 0.2]}>
+            <sphereGeometry args={[0.8, 16, 16]} />
+            <meshStandardMaterial color="#94c480" roughness={0.6} />
+          </mesh>
+          <mesh position={[0.4, 2.7, -0.2]}>
+            <sphereGeometry args={[0.75, 16, 16]} />
+            <meshStandardMaterial color="#6a9957" roughness={0.6} />
           </mesh>
         </group>
-      ))}
-
-      {/* Scattered Bushes */}
-      {[
-        [-7, 0.15, -9],
-        [8, 0.15, -10],
-        [-9, 0.15, 7],
-        [9, 0.15, 8],
-      ].map((bPos, i) => (
-        <mesh key={i} position={bPos} scale={0.7}>
-          <sphereGeometry args={[0.6, 14, 14]} />
-          <meshStandardMaterial color="#88b574" roughness={0.6} />
-        </mesh>
       ))}
     </group>
   );
@@ -156,17 +156,17 @@ function FluffyClouds() {
 
   useFrame((state) => {
     if (cloudsRef.current) {
-      cloudsRef.current.position.x = (state.clock.getElapsedTime() * 0.15) % 28 - 14;
+      cloudsRef.current.position.x = (state.clock.getElapsedTime() * 0.15) % 24 - 12;
     }
   });
 
   return (
     <group ref={cloudsRef}>
       {[
-        { pos: [-16, 9.0, -22], scale: 2.0 },
-        { pos: [-2, 9.8, -26], scale: 2.4 },
-        { pos: [12, 9.2, -20], scale: 1.8 },
-        { pos: [22, 10.0, -28], scale: 2.2 },
+        { pos: [-14, 8.5, -18], scale: 1.8 },
+        { pos: [-2, 9.2, -22], scale: 2.2 },
+        { pos: [10, 8.8, -16], scale: 1.6 },
+        { pos: [20, 9.5, -24], scale: 2.0 },
       ].map((c, idx) => (
         <group key={idx} position={c.pos} scale={c.scale}>
           <mesh position={[0, 0, 0]}>
@@ -200,14 +200,14 @@ function DistantBirds() {
   useFrame((state) => {
     if (birdsGroupRef.current) {
       const t = state.clock.getElapsedTime() * 0.4;
-      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 10;
-      birdsGroupRef.current.position.y = 8.0 + Math.cos(t * 0.3) * 0.5;
+      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 8;
+      birdsGroupRef.current.position.y = 7.5 + Math.cos(t * 0.3) * 0.5;
       birdsGroupRef.current.rotation.y = Math.cos(t * 0.5) * 0.3;
     }
   });
 
   return (
-    <group ref={birdsGroupRef} position={[0, 8.0, -15]}>
+    <group ref={birdsGroupRef} position={[0, 7.5, -12]}>
       {[-0.8, 0, 0.8].map((offset, idx) => (
         <group key={idx} position={[offset * 0.8, idx * 0.2, offset * 0.5]}>
           <mesh position={[-0.1, 0, 0]} rotation={[0, 0, 0.3]}>
@@ -998,7 +998,7 @@ function NaturalDioramaTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN GARDEN SCENE ASSEMBLY WITH OPEN 360° LANDSCAPE & ATMOSPHERE
+ *  MAIN GARDEN SCENE ASSEMBLY WITH 360° ORBIT CAMERA & SCENERY
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal }) {
   const [targetPos, setTargetPos] = useState([0, 0]);
@@ -1007,8 +1007,8 @@ export default function GardenScene({ character, resetCameraSignal }) {
   return (
     <Canvas shadows camera={{ position: [0, 4.5, 7.0], fov: 42 }}>
       {/* Soft Pastel Sky Atmosphere & Haze Fog */}
-      <color attach="background" args={['#e8f4f1']} />
-      <fogExp2 attach="fog" color="#e2efeb" density={0.009} />
+      <color attach="background" args={['#e6f2ee']} />
+      <fogExp2 attach="fog" color="#dbebe6" density={0.011} />
       
       {/* Sunlight */}
       <Sky sunPosition={[8, 5, 4]} turbidity={0.8} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
@@ -1035,11 +1035,10 @@ export default function GardenScene({ character, resetCameraSignal }) {
       {/* 360° Extended Meadow Ground */}
       <ExtendedMeadowTerrain />
 
-      {/* Natural Open 360° Rolling Landscape & Middle-Ground Woodland */}
+      {/* 360° Panorama Rolling Hills & Sky Scenery (SAFE RADII) */}
       <FluffyClouds />
       <DistantBirds />
-      <OpenStorybookLandscape />
-      <MiddleGroundLandscape />
+      <StorybookPanoramaHills />
       <BackgroundForest />
 
       {/* Playable Garden & Environment Props */}
