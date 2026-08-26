@@ -18,12 +18,16 @@ CREATE TABLE IF NOT EXISTS public.letters (
   body TEXT NOT NULL,
   deliver_at TIMESTAMPTZ NOT NULL,
   status TEXT NOT NULL DEFAULT 'in_transit', -- 'draft', 'in_transit', 'delivered'
-  stamp_type TEXT DEFAULT 'royal_snail', -- 'royal_snail', 'golden_leaf', 'vintage_owl', 'time_capsule'
+  stamp_type TEXT DEFAULT 'royal_snail', -- 'royal_snail', 'golden_snitch', 'golden_leaf', 'vintage_owl', 'time_capsule'
   stationery_theme TEXT DEFAULT 'classic_parchment', -- 'classic_parchment', 'midnight_star', 'rose_velvet', 'cyber_postal'
   wax_color TEXT DEFAULT '#9b111e', -- Crimson, Navy, Gold, Emerald
+  webhook_url TEXT, -- Optional Snitch Webhook Notifier URL
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Add column if table already exists
+ALTER TABLE public.letters ADD COLUMN IF NOT EXISTS webhook_url TEXT;
 
 -- 2. Create Index for fast querying by delivery date and recipient/sender
 CREATE INDEX IF NOT EXISTS idx_letters_sender ON public.letters(sender_id);
@@ -34,25 +38,21 @@ CREATE INDEX IF NOT EXISTS idx_letters_deliver_at ON public.letters(deliver_at);
 ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;
 
 -- 4. RLS Policies
--- Senders can see their own sent letters
 CREATE POLICY "Senders can view their sent letters"
   ON public.letters
   FOR SELECT
   USING (auth.uid() = sender_id OR recipient_email = auth.jwt() ->> 'email');
 
--- Authenticated users can insert new letters
 CREATE POLICY "Authenticated users can create letters"
   ON public.letters
   FOR INSERT
   WITH CHECK (auth.uid() = sender_id);
 
--- Senders can update their pending letters before delivery
 CREATE POLICY "Senders can update their own pending letters"
   ON public.letters
   FOR UPDATE
   USING (auth.uid() = sender_id AND status = 'in_transit');
 
--- Senders can delete their letters
 CREATE POLICY "Senders can delete their letters"
   ON public.letters
   FOR DELETE

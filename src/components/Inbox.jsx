@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Clock, CheckCircle2, Search, RefreshCw, Lock, Sparkles, Filter, Trash2, ChevronRight, Eye } from 'lucide-react';
-import { letterService } from '../lib/supabase';
+import { Mail, Clock, CheckCircle2, Search, RefreshCw, Lock, Sparkles, Zap, Bell, ChevronRight, Send } from 'lucide-react';
+import { letterService, triggerSnitchWebhook } from '../lib/supabase';
 
 export default function Inbox({ user, onNewLetterClick }) {
   const [letters, setLetters] = useState([]);
@@ -8,6 +8,7 @@ export default function Inbox({ user, onNewLetterClick }) {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'in_transit', 'delivered'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState(null);
+  const [snitchStatus, setSnitchStatus] = useState(null);
   const [now, setNow] = useState(new Date());
 
   const loadLetters = async () => {
@@ -42,6 +43,12 @@ export default function Inbox({ user, onNewLetterClick }) {
       delivered: false,
       text: `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
     };
+  };
+
+  const handleManualSnitchPing = async (letter) => {
+    setSnitchStatus({ loading: true });
+    const res = await triggerSnitchWebhook(letter);
+    setSnitchStatus(res);
   };
 
   const filteredLetters = letters.filter(l => {
@@ -132,11 +139,15 @@ export default function Inbox({ user, onNewLetterClick }) {
             filteredLetters.map(letter => {
               const timeInfo = getRemainingTime(letter.deliver_at);
               const isDelivered = timeInfo.delivered;
+              const isSnitch = letter.stamp_type === 'golden_snitch' || Boolean(letter.webhook_url);
 
               return (
                 <div
                   key={letter.id}
-                  onClick={() => setSelectedLetter(letter)}
+                  onClick={() => {
+                    setSelectedLetter(letter);
+                    setSnitchStatus(null);
+                  }}
                   className={`glass-panel p-5 glass-panel-hover cursor-pointer relative overflow-hidden transition-all ${
                     selectedLetter?.id === letter.id ? 'ring-2 ring-amber-400 border-amber-400/50 bg-amber-500/5' : ''
                   }`}
@@ -146,9 +157,12 @@ export default function Inbox({ user, onNewLetterClick }) {
                     <span className={`badge badge-${isDelivered ? 'delivered' : 'in_transit'}`}>
                       {isDelivered ? '✉️ Delivered' : '🐌 In Transit'}
                     </span>
-                    <span className="text-[11px] font-mono text-gray-400">
-                      {new Date(letter.created_at).toLocaleDateString()}
-                    </span>
+                    
+                    {isSnitch && (
+                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-amber-400" /> Golden Snitch
+                      </span>
+                    )}
                   </div>
 
                   {/* Letter Details */}
@@ -164,7 +178,7 @@ export default function Inbox({ user, onNewLetterClick }) {
                   <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
                     {isDelivered ? (
                       <span className="text-emerald-400 font-medium flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Ready to Read
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Unsealed & Ready
                       </span>
                     ) : (
                       <span className="text-amber-400 font-mono flex items-center gap-1.5">
@@ -199,7 +213,7 @@ export default function Inbox({ user, onNewLetterClick }) {
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">
-                    {selectedLetter.stamp_type === 'royal_snail' ? '🐌' : '🍂'}
+                    {selectedLetter.stamp_type === 'golden_snitch' ? '🪙⚡' : '🐌'}
                   </span>
                   <div>
                     <span className={`badge badge-${getRemainingTime(selectedLetter.deliver_at).delivered ? 'delivered' : 'in_transit'}`}>
@@ -215,6 +229,32 @@ export default function Inbox({ user, onNewLetterClick }) {
                   Close Reader ✕
                 </button>
               </div>
+
+              {/* Snitch Webhook Alert Trigger Button */}
+              {selectedLetter.webhook_url && (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                      <Bell className="w-3.5 h-3.5" /> Golden Snitch Webhook Notifier
+                    </span>
+                    <button
+                      onClick={() => handleManualSnitchPing(selectedLetter)}
+                      disabled={snitchStatus?.loading}
+                      className="btn btn-gold text-[11px] py-1 px-3"
+                    >
+                      {snitchStatus?.loading ? 'Dispatching...' : 'Fire Snitch Webhook Alert ⚡'}
+                    </button>
+                  </div>
+
+                  {snitchStatus && !snitchStatus.loading && (
+                    <p className={`text-[11px] font-mono p-2 rounded ${
+                      snitchStatus.success ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
+                    }`}>
+                      {snitchStatus.message}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Locked vs Unlocked Letter Content */}
               {!getRemainingTime(selectedLetter.deliver_at).delivered ? (
@@ -247,7 +287,7 @@ export default function Inbox({ user, onNewLetterClick }) {
 
                     <div 
                       className="wax-seal" 
-                      style={{ backgroundColor: selectedLetter.wax_color || '#9b111e' }}
+                      style={{ backgroundColor: selectedLetter.wax_color || '#d4af37' }}
                     >
                       <span className="text-amber-100 font-heading font-extrabold text-xs">
                         OPEN

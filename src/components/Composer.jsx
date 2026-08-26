@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Send, Clock, Sparkles, Shield, Check, Calendar, Lock, Image as ImageIcon } from 'lucide-react';
+import { Send, Clock, Sparkles, Shield, Check, Calendar, Lock, Zap, Bell, Share2 } from 'lucide-react';
 import { letterService } from '../lib/supabase';
 
 const STAMPS = [
   { id: 'royal_snail', name: 'Royal Snail', icon: '🐌', color: 'from-amber-600 to-yellow-500' },
+  { id: 'golden_snitch', name: 'Golden Snitch', icon: '🪙⚡', color: 'from-yellow-400 via-amber-300 to-amber-600' },
   { id: 'golden_leaf', name: 'Golden Autumn', icon: '🍂', color: 'from-orange-500 to-amber-700' },
   { id: 'vintage_owl', name: 'Postmaster Owl', icon: '🦉', color: 'from-purple-600 to-indigo-800' },
   { id: 'time_capsule', name: 'Time Capsule', icon: '⏳', color: 'from-blue-600 to-cyan-800' },
@@ -27,10 +28,11 @@ export default function Composer({ user, onLetterSent }) {
   const [recipientEmail, setRecipientEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
-  const [stampType, setStampType] = useState('royal_snail');
-  const [waxColor, setWaxColor] = useState('#9b111e');
+  const [stampType, setStampType] = useState('golden_snitch');
+  const [waxColor, setWaxColor] = useState('#d4af37');
   const [theme, setTheme] = useState('classic_parchment');
-  const [deliveryPreset, setDeliveryPreset] = useState('1_min'); // 'now', '1_min', '1_day', '1_year'
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [deliveryPreset, setDeliveryPreset] = useState('1_min');
   const [customDate, setCustomDate] = useState('');
   const [isSealing, setIsSealing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -64,6 +66,7 @@ export default function Composer({ user, onLetterSent }) {
       stamp_type: stampType,
       stationery_theme: theme,
       wax_color: waxColor,
+      webhook_url: webhookUrl,
     };
 
     setTimeout(async () => {
@@ -78,6 +81,7 @@ export default function Composer({ user, onLetterSent }) {
           setRecipientEmail('');
           setSubject('');
           setBody('');
+          setWebhookUrl('');
           if (onLetterSent) onLetterSent();
         }, 1800);
       }
@@ -92,11 +96,14 @@ export default function Composer({ user, onLetterSent }) {
       
       {/* Header Banner */}
       <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono mb-3">
+          <Zap className="w-3.5 h-3.5" /> Golden Snitch Express Notifier Enabled
+        </div>
         <h1 className="font-heading text-3xl sm:text-4xl font-bold gradient-text mb-2">
           Compose Delayed Snail Letter
         </h1>
         <p className="text-gray-400 font-serif italic max-w-xl mx-auto text-sm sm:text-base">
-          Craft a thoughtful message, affix a royal stamp, seal it with melted wax, and let Snail Express deliver it at your exact scheduled moment.
+          Craft a thoughtful message, affix the Golden Snitch stamp, seal it with wax, and send webhook pings automatically upon delivery.
         </p>
       </div>
 
@@ -156,7 +163,7 @@ export default function Composer({ user, onLetterSent }) {
                     onClick={() => setStampType(stamp.id)}
                     className={`p-2.5 rounded-lg border cursor-pointer flex items-center gap-2 transition-all ${
                       stampType === stamp.id
-                        ? 'bg-amber-500/10 border-amber-500 text-amber-200 shadow-md'
+                        ? 'bg-amber-500/10 border-amber-500 text-amber-200 shadow-md ring-1 ring-amber-400'
                         : 'bg-slate-900/40 border-white/5 hover:border-white/20 text-gray-400'
                     }`}
                   >
@@ -167,9 +174,26 @@ export default function Composer({ user, onLetterSent }) {
               </div>
             </div>
 
+            {/* Snitch Webhook Notifier Input */}
+            <div className="pt-2 border-t border-white/10">
+              <label className="input-label mb-1 flex items-center gap-1.5 text-amber-300">
+                <Bell className="w-3.5 h-3.5 text-amber-400" /> Golden Snitch Webhook URL (Optional)
+              </label>
+              <input
+                type="url"
+                placeholder="https://discord.com/api/webhooks/... or https://httpbin.org/post"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+                className="input-field text-xs font-mono"
+              />
+              <p className="text-[11px] text-gray-400 mt-1 italic">
+                Snitch will send an instant HTTP POST JSON payload to this endpoint upon delivery.
+              </p>
+            </div>
+
             {/* Wax Seal Color Picker */}
             <div className="pt-2 border-t border-white/10">
-              <label className="input-label mb-2">3. Wax Seal Stamp Color</label>
+              <label className="input-label mb-2">3. Wax Seal Color</label>
               <div className="flex items-center gap-3">
                 {WAX_COLORS.map((wax) => (
                   <button
@@ -215,11 +239,12 @@ export default function Composer({ user, onLetterSent }) {
         <div className="lg:col-span-7">
           <form onSubmit={handleSend} className={`p-8 rounded-2xl relative transition-all duration-500 ${activeThemeObj.bgClass}`}>
             
-            {/* Wax & Stamp Decorative Header */}
+            {/* Stamp & Header */}
             <div className="flex justify-between items-start mb-6 pb-4 border-b border-amber-900/20">
               <div className="space-y-1">
-                <p className="text-xs uppercase font-mono tracking-widest text-amber-900/60 font-semibold">
-                  Snail Post Dispatch #802
+                <p className="text-xs uppercase font-mono tracking-widest text-amber-900/60 font-semibold flex items-center gap-1">
+                  <span>Snail Express Dispatch</span>
+                  {stampType === 'golden_snitch' && <span className="text-amber-700">⚡ SNITCH ACTIVE</span>}
                 </p>
                 <div className="text-2xl font-heading font-bold text-amber-950">
                   Letter of Delivery
@@ -227,14 +252,18 @@ export default function Composer({ user, onLetterSent }) {
               </div>
 
               {/* Selected Postage Stamp Visual */}
-              <div className="w-16 h-20 border-2 border-dashed border-amber-800/40 rounded p-1 bg-amber-100/50 flex flex-col items-center justify-center text-center shadow-inner relative">
+              <div className={`w-20 h-24 border-2 border-dashed border-amber-800/40 rounded p-1 bg-amber-100/60 flex flex-col items-center justify-center text-center shadow-inner relative ${
+                stampType === 'golden_snitch' ? 'ring-2 ring-amber-500/80 bg-gradient-to-b from-amber-100 to-amber-200' : ''
+              }`}>
                 <span className="text-2xl mb-1">{activeStampObj.icon}</span>
-                <span className="text-[9px] font-mono uppercase font-bold text-amber-900">
-                  SNAIL POST
+                <span className="text-[9px] font-mono uppercase font-extrabold text-amber-950">
+                  {activeStampObj.name}
                 </span>
-                <div className="absolute -bottom-2 -left-2 text-[10px] font-mono bg-red-900/80 text-amber-100 px-1 rounded rotate-[-12deg]">
-                  AIR-MAIL
-                </div>
+                {webhookUrl && (
+                  <div className="absolute -top-2 -right-2 bg-amber-600 text-white text-[9px] p-1 rounded-full shadow" title="Snitch Webhook Armed">
+                    ⚡
+                  </div>
+                )}
               </div>
             </div>
 
@@ -302,12 +331,14 @@ export default function Composer({ user, onLetterSent }) {
                   title="Your custom wax seal"
                 >
                   <span className="text-amber-200 font-heading font-extrabold text-sm drop-shadow">
-                    S
+                    {stampType === 'golden_snitch' ? '⚡' : 'S'}
                   </span>
                 </div>
                 <div className="text-xs font-serif text-amber-950">
                   <p className="font-semibold">Secured by Snail Express</p>
-                  <p className="opacity-75">Encrypted with Supabase backend</p>
+                  <p className="opacity-75">
+                    {webhookUrl ? '⚡ Snitch Webhook Alert Armed' : 'Encrypted with Supabase backend'}
+                  </p>
                 </div>
               </div>
 
@@ -319,7 +350,7 @@ export default function Composer({ user, onLetterSent }) {
               >
                 {isSealing ? (
                   <>
-                    <span className="animate-spin text-lg">⏳</span> Sealing with Wax...
+                    <span className="animate-spin text-lg">🪙</span> Catching Golden Snitch...
                   </>
                 ) : isSuccess ? (
                   <>

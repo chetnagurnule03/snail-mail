@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Database, Github, CheckCircle2, AlertTriangle, ExternalLink, Copy, Check, Key, ShieldCheck, Code } from 'lucide-react';
+import { Database, Github, CheckCircle2, AlertTriangle, ExternalLink, Copy, Check, Key, ShieldCheck, Code, Zap, Bell, Send } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 
 export default function SupabaseConfigModal({ isOpen, onClose }) {
   const [url, setUrl] = useState(import.meta.env.VITE_SUPABASE_URL || '');
   const [anonKey, setAnonKey] = useState(import.meta.env.VITE_SUPABASE_ANON_KEY || '');
+  const [testWebhookUrl, setTestWebhookUrl] = useState('https://httpbin.org/post');
+  const [webhookResult, setWebhookResult] = useState(null);
+  const [isTestingWebhook, setIsTestingWebhook] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
   const [copiedEnv, setCopiedEnv] = useState(false);
-  const [activeTab, setActiveTab] = useState('credentials'); // 'credentials', 'sql', 'github'
+  const [activeTab, setActiveTab] = useState('credentials'); // 'credentials', 'snitch', 'sql', 'github'
 
   if (!isOpen) return null;
 
@@ -17,21 +20,41 @@ export default function SupabaseConfigModal({ isOpen, onClose }) {
 VITE_SUPABASE_ANON_KEY=${anonKey || 'your-actual-anon-key-here'}`;
 
   const sqlCode = `-- Run this in Supabase SQL Editor:
-CREATE TABLE IF NOT EXISTS public.letters (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  sender_email TEXT NOT NULL,
-  sender_name TEXT,
-  recipient_email TEXT NOT NULL,
-  recipient_name TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  body TEXT NOT NULL,
-  deliver_at TIMESTAMPTZ NOT NULL,
-  status TEXT NOT NULL DEFAULT 'in_transit',
-  stamp_type TEXT DEFAULT 'royal_snail',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
+ALTER TABLE public.letters ADD COLUMN IF NOT EXISTS webhook_url TEXT;`;
+
+  const handleTestWebhook = async () => {
+    if (!testWebhookUrl) return;
+    setIsTestingWebhook(true);
+    setWebhookResult(null);
+
+    try {
+      const payload = {
+        event: 'snail_email.snitch_test_ping',
+        timestamp: new Date().toISOString(),
+        message: '⚡ Golden Snitch Webhook Connection Successful!',
+        app: 'Snail Email'
+      };
+
+      const res = await fetch(testWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      setWebhookResult({
+        success: res.ok,
+        status: res.status,
+        message: res.ok ? `HTTP ${res.status}: Golden Snitch ping received!` : `HTTP ${res.status}: Webhook returned error response.`
+      });
+    } catch (err) {
+      setWebhookResult({
+        success: false,
+        message: `Connection Error: ${err.message}`
+      });
+    } finally {
+      setIsTestingWebhook(false);
+    }
+  };
 
   const copyToClipboard = (text, type) => {
     navigator.clipboard.writeText(text);
@@ -52,14 +75,14 @@ ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
         <div className="p-6 bg-slate-900/90 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <Database className="w-5 h-5" />
+              <Zap className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-heading font-bold text-xl text-gray-100">
-                GitHub & Supabase Connection Wizard
+                GitHub, Supabase & Snitch Setup
               </h3>
               <p className="text-xs text-gray-400 font-serif">
-                Connect your live database backend & GitHub OAuth authentication
+                Manage credentials, database schemas, and Golden Snitch webhooks
               </p>
             </div>
           </div>
@@ -73,16 +96,17 @@ ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
         </div>
 
         {/* Modal Tabs */}
-        <div className="flex border-b border-white/10 bg-slate-950/60 px-6">
+        <div className="flex border-b border-white/10 bg-slate-950/60 px-6 overflow-x-auto">
           {[
             { id: 'credentials', label: '1. Supabase API Keys' },
-            { id: 'sql', label: '2. Database SQL Schema' },
-            { id: 'github', label: '3. GitHub Integration' },
+            { id: 'snitch', label: '2. Snitch Webhook Tester ⚡' },
+            { id: 'sql', label: '3. Database Schema' },
+            { id: 'github', label: '4. GitHub OAuth' },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+              className={`py-3 px-4 text-xs font-semibold border-b-2 whitespace-nowrap transition-all ${
                 activeTab === tab.id
                   ? 'border-amber-400 text-amber-300 bg-white/5'
                   : 'border-transparent text-gray-400 hover:text-gray-200'
@@ -99,8 +123,6 @@ ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
           {/* TAB 1: Credentials */}
           {activeTab === 'credentials' && (
             <div className="space-y-4">
-              
-              {/* Status Banner */}
               <div className={`p-4 rounded-xl border flex items-start gap-3 text-xs ${
                 currentIsConfigured
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
@@ -164,11 +186,55 @@ ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
             </div>
           )}
 
-          {/* TAB 2: SQL Schema */}
+          {/* TAB 2: Snitch Webhook Tester */}
+          {activeTab === 'snitch' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                <h4 className="font-heading font-bold text-amber-300 text-sm flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Golden Snitch Express Webhook Tester
+                </h4>
+                <p className="text-xs text-gray-300">
+                  The Snitch engine automatically dispatches a JSON POST payload to your webhook (Discord, Slack, Make, Zapier, HTTP endpoint) when a letter is delivered.
+                </p>
+              </div>
+
+              <div>
+                <label className="input-label">Webhook URL to Test</label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={testWebhookUrl}
+                    onChange={(e) => setTestWebhookUrl(e.target.value)}
+                    placeholder="https://httpbin.org/post"
+                    className="input-field font-mono text-xs flex-1"
+                  />
+                  <button
+                    onClick={handleTestWebhook}
+                    disabled={isTestingWebhook}
+                    className="btn btn-gold text-xs py-2 px-4 whitespace-nowrap"
+                  >
+                    {isTestingWebhook ? 'Pinging...' : 'Send Test Ping ⚡'}
+                  </button>
+                </div>
+              </div>
+
+              {webhookResult && (
+                <div className={`p-4 rounded-xl border font-mono text-xs ${
+                  webhookResult.success
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                    : 'bg-red-500/10 border-red-500/30 text-red-300'
+                }`}>
+                  <p className="font-bold">{webhookResult.message}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: SQL Schema */}
           {activeTab === 'sql' && (
             <div className="space-y-4">
               <p className="text-xs text-gray-300 font-serif">
-                Open your <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="text-amber-400 underline">Supabase Dashboard</a> ➔ <strong>SQL Editor</strong>, then paste and execute the schema script below to create the required tables:
+                Run this SQL in your Supabase Dashboard SQL Editor to ensure the <code className="text-amber-200">webhook_url</code> column exists:
               </p>
 
               <div className="relative">
@@ -183,15 +249,10 @@ ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
                   {sqlCode}
                 </pre>
               </div>
-
-              <div className="text-xs text-gray-400 flex items-center gap-2">
-                <Code className="w-4 h-4 text-amber-400" />
-                <span>Full schema script available in <code className="text-amber-200">supabase/schema.sql</code></span>
-              </div>
             </div>
           )}
 
-          {/* TAB 3: GitHub Integration */}
+          {/* TAB 4: GitHub Integration */}
           {activeTab === 'github' && (
             <div className="space-y-4 text-xs">
               <div className="p-4 rounded-xl bg-slate-900 border border-white/10 space-y-3">
@@ -203,18 +264,6 @@ ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;`;
                   <li>Click <strong>New OAuth App</strong> and set Homepage URL to your web app address.</li>
                   <li>Copy Client ID & Client Secret into <strong>Supabase Dashboard ➔ Authentication ➔ Providers ➔ GitHub</strong>.</li>
                 </ol>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-900 border border-white/10 space-y-3">
-                <h4 className="font-heading font-bold text-amber-400 flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4" /> Push Code to GitHub Repository
-                </h4>
-                <div className="font-mono text-[11px] bg-black/60 p-3 rounded text-amber-200 space-y-1">
-                  <p># Initialize and push to your GitHub repo:</p>
-                  <p className="text-emerald-400">git remote add origin https://github.com/YOUR_USERNAME/snail-email.git</p>
-                  <p className="text-emerald-400">git branch -M main</p>
-                  <p className="text-emerald-400">git push -u origin main</p>
-                </div>
               </div>
             </div>
           )}
