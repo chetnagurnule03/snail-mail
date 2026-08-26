@@ -2,29 +2,98 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  SPACIOUS COUNTRYSIDE HAMLETS (20m - 35m House Spacing)
+ *  SPACIOUS COUNTRYSIDE HAMLETS & UNIQUE VILLAGER GARDENS
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
-  // Hamlet 1: North-West Woodland Hamlet (Radius ~28m)
-  { id: 1, name: "Oliver's Gardener Cottage", pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#94c480', roofColor: '#c96850' },
-  { id: 2, name: "Sophie's Artist Studio", pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#c9a7e0', roofColor: '#2a9d8f' },
-  { id: 3, name: "Clara's Weaver House", pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a' },
+  // Hamlet 1: North-West Woodland Hamlet
+  { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'vegetable', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#94c480', roofColor: '#c96850' },
+  { id: 2, name: "Sophie's Artist Studio", gardenType: 'artist', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#c9a7e0', roofColor: '#2a9d8f' },
+  { id: 3, name: "Clara's Weaver House", gardenType: 'weaver', pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a' },
 
-  // Hamlet 2: North-East Blossom Knoll (Radius ~30m)
-  { id: 4, name: "Mia's Blossom Boutique", pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#e9c46a', roofColor: '#2a9d8f' },
-  { id: 5, name: "Noah's Herbalist Haven", pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#f4a261', roofColor: '#e76f51' },
-  { id: 6, name: "Ivy's Botanist Lodge", pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#c7f9cc', roofColor: '#2d6a4f' },
+  // Hamlet 2: North-East Blossom Knoll
+  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'flower', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#e9c46a', roofColor: '#2a9d8f' },
+  { id: 5, name: "Noah's Herbalist Haven", gardenType: 'herb', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#f4a261', roofColor: '#e76f51' },
+  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'fruit', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#c7f9cc', roofColor: '#2d6a4f' },
 
-  // Hamlet 3: South-West Craftsman Creek (Radius ~28m)
-  { id: 7, name: "Leo's Snail Mail Post Office", pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f1faee', roofColor: '#e63946' },
-  { id: 8, name: "Milo's Timber Workshop", pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#d4a373', roofColor: '#7a4a2b' },
-  { id: 9, name: "Jasper's Potter House", pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#e07a5f', roofColor: '#6b4c35' },
+  // Hamlet 3: South-West Craftsman Creek
+  { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'post', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f1faee', roofColor: '#e63946' },
+  { id: 8, name: "Milo's Timber Workshop", gardenType: 'timber', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#d4a373', roofColor: '#7a4a2b' },
+  { id: 9, name: "Jasper's Potter House", gardenType: 'potter', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#e07a5f', roofColor: '#6b4c35' },
 
-  // Hamlet 4: South-East Quiet Meadow (Radius ~32m)
-  { id: 10, name: "Luna's Storybook Library", pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#a8dadc', roofColor: '#1d3557' },
-  { id: 11, name: "Felix's Astronomer Tower", pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#a8dadc', roofColor: '#1d3557' },
-  { id: 12, name: "Daisy's Honey Cottage", pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703' },
+  // Hamlet 4: South-East Quiet Meadow
+  { id: 10, name: "Luna's Storybook Library", gardenType: 'reading', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#a8dadc', roofColor: '#1d3557' },
+  { id: 11, name: "Felix's Astronomer Tower", gardenType: 'astronomy', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#a8dadc', roofColor: '#1d3557' },
+  { id: 12, name: "Daisy's Honey Cottage", gardenType: 'honey', pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703' },
 ];
+
+function UniqueVillagerGarden({ type }) {
+  return (
+    <group position={[0, 0, 1.4]}>
+      {/* Garden Fence */}
+      <mesh position={[-1.2, 0.25, 0.5]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.4]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.7} />
+      </mesh>
+      <mesh position={[1.2, 0.25, 0.5]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.4]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.7} />
+      </mesh>
+
+      {/* Flower Garden 🌷 */}
+      {type === 'flower' && (
+        <group>
+          {[-0.6, 0, 0.6].map((x, idx) => (
+            <mesh key={idx} position={[x, 0.15, 0.6]} castShadow>
+              <sphereGeometry args={[0.16, 12, 12]} />
+              <meshStandardMaterial color={idx === 0 ? '#ffb5a7' : idx === 1 ? '#c77dff' : '#ffb703'} />
+            </mesh>
+          ))}
+        </group>
+      )}
+
+      {/* Vegetable Garden 🥕 */}
+      {type === 'vegetable' && (
+        <group>
+          <mesh position={[-0.5, 0.08, 0.6]} castShadow>
+            <boxGeometry args={[0.6, 0.14, 0.8]} />
+            <meshStandardMaterial color="#5c381e" />
+          </mesh>
+          <mesh position={[-0.5, 0.2, 0.5]}>
+            <coneGeometry args={[0.08, 0.22, 8]} />
+            <meshStandardMaterial color="#f4a261" />
+          </mesh>
+        </group>
+      )}
+
+      {/* Honey Beehive Garden 🍯 */}
+      {type === 'honey' && (
+        <group position={[0.6, 0, 0.6]}>
+          <mesh position={[0, 0.35, 0]} castShadow>
+            <cylinderGeometry args={[0.22, 0.26, 0.5, 12]} />
+            <meshStandardMaterial color="#ffe0bd" roughness={0.6} />
+          </mesh>
+          <Sparkles position={[0, 0.45, 0]} count={10} scale={0.6} size={3} speed={0.8} color="#ffb703" />
+        </group>
+      )}
+
+      {/* Reading Bench Garden 📚 */}
+      {type === 'reading' && (
+        <group position={[0.5, 0, 0.6]}>
+          <mesh position={[0, 0.2, 0]} castShadow>
+            <boxGeometry args={[0.7, 0.2, 0.3]} />
+            <meshStandardMaterial color="#7a4a2b" />
+          </mesh>
+        </group>
+      )}
+
+      {/* Default Decorative Plant Pot */}
+      <mesh position={[-0.8, 0.12, 0.2]} castShadow>
+        <cylinderGeometry args={[0.12, 0.09, 0.22, 10]} />
+        <meshStandardMaterial color="#e07a5f" />
+      </mesh>
+    </group>
+  );
+}
 
 export default function VillageHouses() {
   return (
@@ -61,15 +130,14 @@ export default function VillageHouses() {
             </mesh>
           </group>
 
-          {/* Windows (Front & Back) */}
+          {/* Windows */}
           <mesh position={[-0.45, 1.0, 0.84]}>
             <boxGeometry args={[0.45, 0.45, 0.05]} />
             <meshStandardMaterial color="#ffdda1" emissive="#ffb703" emissiveIntensity={0.6} />
           </mesh>
-          <mesh position={[0, 1.0, -0.84]}>
-            <boxGeometry args={[0.48, 0.48, 0.05]} />
-            <meshStandardMaterial color="#ffdda1" emissive="#ffb703" emissiveIntensity={0.6} />
-          </mesh>
+
+          {/* Unique Villager Garden */}
+          <UniqueVillagerGarden type={c.gardenType} />
 
           {/* Chimney */}
           <group position={[-0.65, 2.0, -0.3]}>

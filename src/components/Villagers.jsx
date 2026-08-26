@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber';
 /** -------------------------------------------------------------
  *  12 UNIQUE VILLAGER NPCS (SPACIOUS HAMLET DISTRIBUTION)
  * ------------------------------------------------------------- */
-const VILLAGERS_DATA = [
+export const VILLAGERS_DATA = [
   { id: 1, name: 'Mia', job: 'Florist', pos: [20.5, 0.18, -26.5], outfitColor: '#ffb5a7', hairColor: '#e6c594', pet: 'bunny' },
   { id: 2, name: 'Theo', job: 'Baker', pos: [-5.2, 0.1, -20.5], outfitColor: '#f4a261', hairColor: '#7a4a2b', pet: 'cat' },
   { id: 3, name: 'Nora', job: 'Café Owner', pos: [-5.8, 0.15, -19.5], outfitColor: '#fae1c5', hairColor: '#3d2616', pet: 'dog' },

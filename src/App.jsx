@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import { useCharacter } from './hooks/useCharacter';
 import AuthGate from './components/AuthGate';
 import GardenScene from './components/GardenScene';
+import VillagerDialogueModal from './components/VillagerDialogueModal';
 
 const OUTFIT_COLORS = ['#c9a7e0', '#e07a5f', '#84b574', '#76c8e3', '#ffb5a7', '#f4a261'];
 const HAIR_COLORS = ['#7a4a2b', '#3d2616', '#e6c594', '#b55239', '#c9a7e0'];
@@ -45,6 +46,10 @@ export default function App() {
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
+  // Villager Interaction State
+  const [nearVillager, setNearVillager] = useState(null);
+  const [activeDialogueVillager, setActiveDialogueVillager] = useState(null);
+
   const toggleMount = () => {
     setIsMounted((prev) => !prev);
   };
@@ -62,16 +67,18 @@ export default function App() {
   }
 
   return (
-    <div style={{ height: '100%', position: 'relative' }}>
+    <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
       {/* 3D Storybook World Canvas */}
       <GardenScene
         character={character}
         resetCameraSignal={resetCameraSignal}
         isMounted={isMounted}
         toggleMount={toggleMount}
+        setNearVillager={setNearVillager}
+        onOpenDialogue={setActiveDialogueVillager}
       />
 
-      {/* HUD Overlay Bar */}
+      {/* Top HUD Bar */}
       <div style={styles.hud}>
         <div style={styles.badge}>
           🐌 {character.name} {saving ? '(saving…)' : ''}
@@ -93,9 +100,36 @@ export default function App() {
         </button>
       </div>
 
+      {/* Near Villager Interactive Prompt */}
+      {nearVillager && !isMounted && !activeDialogueVillager && (
+        <div
+          onClick={() => setActiveDialogueVillager(nearVillager)}
+          style={styles.villagerPrompt}
+        >
+          💬 Press [E] to talk to {nearVillager.name} ({nearVillager.job || 'Villager'})
+        </div>
+      )}
+
+      {/* Bottom Features Summary Bar */}
+      <div style={styles.featuresBar}>
+        <div style={styles.featureItem}>🧭 Explore</div>
+        <div style={styles.featureItem} onClick={toggleMount}>🐴 Ride Horse</div>
+        <div style={styles.featureItem}>💬 Talk to Villagers</div>
+        <div style={styles.featureItem}>❤️ Make Friends</div>
+        <div style={styles.featureItem}>📮 Send Snail Mail</div>
+      </div>
+
+      {/* Villager Dialogue Modal */}
+      {activeDialogueVillager && (
+        <VillagerDialogueModal
+          villager={activeDialogueVillager}
+          onClose={() => setActiveDialogueVillager(null)}
+        />
+      )}
+
       {/* Controls Hint Overlay */}
       <div style={styles.controlsHint}>
-        {isMounted ? '🐴 WASD: Ride Horse' : '⌨️ WASD: Move'} | 🖱️ Left Drag: Rotate 360° | 📜 Scroll: Zoom | ⌨️ E: {isMounted ? 'Dismount' : 'Ride'}
+        {isMounted ? '🐴 WASD: Ride Horse' : '⌨️ WASD: Move'} | 🖱️ Left Drag: Rotate 360° | 📜 Scroll: Zoom | ⌨️ E: {nearVillager ? `Talk to ${nearVillager.name}` : isMounted ? 'Dismount' : 'Ride'}
       </div>
 
       {/* Character Customizer Overlay Modal */}
@@ -339,6 +373,44 @@ const styles = {
     borderRadius: 999,
     cursor: 'pointer',
     fontSize: '0.85rem',
+  },
+  villagerPrompt: {
+    position: 'absolute',
+    top: '110px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: '#ffb5a7',
+    color: '#4a2c11',
+    padding: '10px 24px',
+    borderRadius: '999px',
+    fontSize: '15px',
+    fontWeight: 700,
+    border: '2.5px solid #ffffff',
+    boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+    cursor: 'pointer',
+    zIndex: 20,
+    animation: 'bounce 1.5s infinite',
+  },
+  featuresBar: {
+    position: 'absolute',
+    bottom: 56,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: 12,
+    background: 'rgba(255, 250, 240, 0.88)',
+    backdropFilter: 'blur(8px)',
+    padding: '6px 18px',
+    borderRadius: 999,
+    border: '1.5px solid #e0c987',
+    boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+    zIndex: 10,
+  },
+  featureItem: {
+    fontSize: '0.82rem',
+    fontWeight: 600,
+    color: '#5c381e',
+    cursor: 'pointer',
   },
   controlsHint: {
     position: 'absolute',
