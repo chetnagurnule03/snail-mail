@@ -7,12 +7,12 @@ import VillageHouses from './VillageHouses';
 import Villagers from './Villagers';
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER (VILLAGE EXTENDED BOUNDS)
+ *  COLLISION & BOUNDARY HELPER (ORGANIC VILLAGE EXTENDED BOUNDS)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -2.6, z: -2.4, radius: 1.6 },
   { name: 'Pond', x: -1.6, z: 1.9, radius: 1.4 },
-  { name: 'Fountain', x: 0, z: -6.0, radius: 1.5 },
+  { name: 'Fountain', x: -2.3, z: -6.0, radius: 1.4 },
   { name: 'Tree1', x: -3.8, z: -1.2, radius: 0.7 },
   { name: 'Tree2', x: -2.4, z: -3.8, radius: 0.7 },
   { name: 'Tree3', x: 3.2, z: -3.2, radius: 0.7 },
@@ -57,24 +57,34 @@ function ExtendedMeadowTerrain() {
 }
 
 /** -------------------------------------------------------------
- *  2. CONNECTING VILLAGE COBBLESTONE PATHS
+ *  2. ORGANIC WINDING & BRANCHING PATH NETWORK
  * ------------------------------------------------------------- */
-function VillageCobblestonePaths() {
+function VillageWindingPaths() {
   return (
     <group position={[0, 0.015, 0]}>
-      {/* Path from Player Cottage to Village Square */}
-      <mesh position={[-1.2, 0, -4.2]} rotation={[-Math.PI / 2, 0, -0.4]}>
-        <planeGeometry args={[1.2, 4.5]} />
+      {/* Curved Path from Player Cottage to Market Corner */}
+      <mesh position={[-1.8, 0, -4.0]} rotation={[-Math.PI / 2, 0, -0.32]}>
+        <planeGeometry args={[1.3, 4.8]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
-      {/* Main Street Path (North-South) */}
-      <mesh position={[0, 0, -3.0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[2.2, 16.0]} />
+      {/* Branching Path East to Garden Neighborhood */}
+      <mesh position={[2.8, 0, -5.2]} rotation={[-Math.PI / 2, 0, 0.85]}>
+        <planeGeometry args={[1.2, 7.5]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
-      {/* Cross Street Path (East-West) */}
-      <mesh position={[0, 0, -6.0]} rotation={[-Math.PI / 2, 0, Math.PI / 2]}>
-        <planeGeometry args={[2.2, 22.0]} />
+      {/* Branching Path West to Cozy Residential Corner */}
+      <mesh position={[-5.8, 0, -5.8]} rotation={[-Math.PI / 2, 0, -0.75]}>
+        <planeGeometry args={[1.2, 7.0]} />
+        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+      </mesh>
+      {/* South-West Path to Craftsman & Post Corner */}
+      <mesh position={[-4.5, 0, 1.8]} rotation={[-Math.PI / 2, 0, 0.45]}>
+        <planeGeometry args={[1.3, 8.2]} />
+        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+      </mesh>
+      {/* South-East Path to Quiet Library Corner */}
+      <mesh position={[3.5, 0, 2.5]} rotation={[-Math.PI / 2, 0, -0.5]}>
+        <planeGeometry args={[1.3, 8.5]} />
         <meshStandardMaterial color="#cbb994" roughness={0.8} />
       </mesh>
     </group>
@@ -898,7 +908,7 @@ function NaturalDioramaTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH COMPLETE LIVING 3D STORYBOOK VILLAGE WORLD
+ *  MAIN SCENE WITH ORGANIC ASYMMETRICAL STORYBOOK VILLAGE WORLD
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount }) {
   const [targetPos, setTargetPos] = useState([0, 0]);
@@ -924,20 +934,20 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         toggleMount={toggleMount}
       />
 
-      {/* Ground & Sky Scenery */}
+      {/* Ground, Sky & Winding Paths */}
       <ExtendedMeadowTerrain />
       <FluffyClouds />
       <DistantBirds />
       <DistantCountrysideHills />
-      <VillageCobblestonePaths />
+      <VillageWindingPaths />
 
-      {/* CENTRAL VILLAGE SQUARE & SHOPS */}
-      <VillageSquare position={[0, 0, -6.0]} />
+      {/* 1. MARKET CORNER (ASYMMETRICAL VILLAGE SQUARE) */}
+      <VillageSquare position={[-1.5, 0, -5.5]} />
 
-      {/* 12 RESIDENTIAL VILLAGE COTTAGES */}
+      {/* 2. 5 ORGANIC NEIGHBORHOOD COTTAGES */}
       <VillageHouses />
 
-      {/* 12 ANIMATED VILLAGER NPCS & PETS */}
+      {/* 3. 12 ANIMATED VILLAGER NPCS & PETS */}
       <Villagers />
 
       {/* Player's Home Cottage & Yard */}

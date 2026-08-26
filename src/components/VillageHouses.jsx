@@ -2,21 +2,28 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  RESIDENTIAL VILLAGE HOUSES (12 Unique Storybook Cottages)
+ *  ORGANIC RESIDENTIAL NEIGHBORHOODS (12 Unique Storybook Cottages)
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
-  { id: 1, name: "Oliver's Gardener Cottage", pos: [-8.5, 0, -6.5], rot: 0.5, wallColor: '#94c480', roofColor: '#c96850' },
-  { id: 2, name: "Sophie's Artist Studio", pos: [8.5, 0, -6.5], rot: -0.5, wallColor: '#c9a7e0', roofColor: '#2a9d8f' },
-  { id: 3, name: "Milo's Timber Workshop", pos: [-10.2, 0, -2.2], rot: 1.1, wallColor: '#d4a373', roofColor: '#7a4a2b' },
-  { id: 4, name: "Noah's Herbalist Haven", pos: [10.2, 0, -2.2], rot: -1.1, wallColor: '#f4a261', roofColor: '#e76f51' },
-  { id: 5, name: "Clara's Weaver House", pos: [-9.8, 0, 3.5], rot: 1.8, wallColor: '#fae1c5', roofColor: '#e9c46a' },
-  { id: 6, name: "Felix's Astronomer Tower", pos: [9.8, 0, 3.5], rot: -1.8, wallColor: '#a8dadc', roofColor: '#1d3557' },
-  { id: 7, name: "Daisy's Honey Cottage", pos: [-7.5, 0, 8.2], rot: 2.4, wallColor: '#ffe0bd', roofColor: '#ffb703' },
-  { id: 8, name: "Jasper's Potter House", pos: [7.5, 0, 8.2], rot: -2.4, wallColor: '#e07a5f', roofColor: '#6b4c35' },
-  { id: 9, name: "Violet's Flower Nook", pos: [-5.2, 0, 11.5], rot: 2.9, wallColor: '#b5e2fa', roofColor: '#c77dff' },
-  { id: 10, name: "Rowan's Toymaker House", pos: [5.2, 0, 11.5], rot: -2.9, wallColor: '#fbf8cc', roofColor: '#e63946' },
-  { id: 11, name: "Ivy's Botanist Lodge", pos: [-11.5, 0, -10.5], rot: 0.2, wallColor: '#c7f9cc', roofColor: '#2d6a4f' },
-  { id: 12, name: "Barnaby's Clockmaker Nook", pos: [11.5, 0, -10.5], rot: -0.2, wallColor: '#ffcad4', roofColor: '#b5e2fa' },
+  // Neighborhood 1: Garden Neighborhood (North-East)
+  { id: 1, name: "Mia's Blossom Boutique", pos: [5.2, 0.12, -7.5], rot: -0.35, wallColor: '#e9c46a', roofColor: '#2a9d8f' },
+  { id: 2, name: "Oliver's Gardener Cottage", pos: [8.6, 0.22, -9.2], rot: -0.85, wallColor: '#94c480', roofColor: '#c96850' },
+  { id: 3, name: "Noah's Herbalist Haven", pos: [10.8, 0.18, -4.8], rot: -1.45, wallColor: '#f4a261', roofColor: '#e76f51' },
+
+  // Neighborhood 2: Cozy Residential Corner (North-West)
+  { id: 4, name: "Sophie's Artist Studio", pos: [-6.8, 0.15, -8.8], rot: 0.42, wallColor: '#c9a7e0', roofColor: '#2a9d8f' },
+  { id: 5, name: "Clara's Weaver House", pos: [-10.4, 0.25, -6.2], rot: 1.15, wallColor: '#fae1c5', roofColor: '#e9c46a' },
+  { id: 6, name: "Ivy's Botanist Lodge", pos: [-11.8, 0.32, -1.8], rot: 1.75, wallColor: '#c7f9cc', roofColor: '#2d6a4f' },
+
+  // Neighborhood 3: Craftsman & Post Corner (South-West)
+  { id: 7, name: "Leo's Snail Mail Post Office", pos: [-6.2, 0.08, 3.8], rot: 2.15, wallColor: '#f1faee', roofColor: '#e63946' },
+  { id: 8, name: "Milo's Timber Workshop", pos: [-9.5, 0.18, 6.5], rot: 2.55, wallColor: '#d4a373', roofColor: '#7a4a2b' },
+  { id: 9, name: "Jasper's Potter House", pos: [-5.8, 0.12, 10.2], rot: 2.85, wallColor: '#e07a5f', roofColor: '#6b4c35' },
+
+  // Neighborhood 4: Quiet Library Corner (South-East)
+  { id: 10, name: "Luna's Storybook Library", pos: [4.8, 0.1, 4.2], rot: -2.1, wallColor: '#a8dadc', roofColor: '#1d3557' },
+  { id: 11, name: "Felix's Astronomer Tower", pos: [8.5, 0.28, 7.8], rot: -2.5, wallColor: '#a8dadc', roofColor: '#1d3557' },
+  { id: 12, name: "Daisy's Honey Cottage", pos: [6.2, 0.14, 11.2], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703' },
 ];
 
 export default function VillageHouses() {
