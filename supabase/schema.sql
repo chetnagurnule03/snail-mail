@@ -1,76 +1,49 @@
--- ==========================================
--- SNAIL EMAIL - SUPABASE DATABASE SCHEMA
--- Execute this SQL script in your Supabase Dashboard SQL Editor
--- ==========================================
+-- Snail Mail — starter schema
+-- Run this in the Supabase SQL editor for your project.
+-- This covers just the character save/load slice of the PRD's data
+-- model (section 23). Pets, gardens, letters and notifications follow
+-- the same pattern: one table per entity, user_id FK, RLS "own rows only".
 
--- Enable UUID extension if not already enabled
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- 1. Create Letters Table
-CREATE TABLE IF NOT EXISTS public.letters (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  sender_email TEXT NOT NULL,
-  sender_name TEXT,
-  recipient_email TEXT NOT NULL,
-  recipient_name TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  body TEXT NOT NULL,
-  deliver_at TIMESTAMPTZ NOT NULL,
-  status TEXT NOT NULL DEFAULT 'in_transit', -- 'draft', 'in_transit', 'delivered'
-  stamp_type TEXT DEFAULT 'royal_snail', -- 'royal_snail', 'golden_snitch', 'golden_leaf', 'vintage_owl', 'time_capsule'
-  stationery_theme TEXT DEFAULT 'classic_parchment', -- 'classic_parchment', 'midnight_star', 'rose_velvet', 'cyber_postal'
-  wax_color TEXT DEFAULT '#9b111e', -- Crimson, Navy, Gold, Emerald
-  webhook_url TEXT, -- Optional Snitch Webhook Notifier URL
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+create table if not exists public.characters (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  name text not null default 'Little Wanderer',
+  skin_tone text not null default '#f2c9a0',
+  hair_color text not null default '#7a4a2b',
+  outfit_color text not null default '#c9a7e0',
+  position jsonb not null default '{"x":0,"y":0,"z":0}'::jsonb,
+  updated_at timestamptz not null default now()
 );
 
--- Add column if table already exists
-ALTER TABLE public.letters ADD COLUMN IF NOT EXISTS webhook_url TEXT;
+-- Keep updated_at fresh on every save.
+create or replace function public.set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
 
--- 2. Create Index for fast querying by delivery date and recipient/sender
-CREATE INDEX IF NOT EXISTS idx_letters_sender ON public.letters(sender_id);
-CREATE INDEX IF NOT EXISTS idx_letters_recipient ON public.letters(recipient_email);
-CREATE INDEX IF NOT EXISTS idx_letters_deliver_at ON public.letters(deliver_at);
+drop trigger if exists characters_set_updated_at on public.characters;
+create trigger characters_set_updated_at
+  before update on public.characters
+  for each row execute procedure public.set_updated_at();
 
--- 3. Enable Row Level Security (RLS)
-ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;
+-- Row Level Security: a user (including anonymous/guest sessions)
+-- can only read and write their own character row.
+alter table public.characters enable row level security;
 
--- 4. RLS Policies
-CREATE POLICY "Senders can view their sent letters"
-  ON public.letters
-  FOR SELECT
-  USING (auth.uid() = sender_id OR recipient_email = auth.jwt() ->> 'email');
+drop policy if exists "characters_select_own" on public.characters;
+create policy "characters_select_own"
+  on public.characters for select
+  using (auth.uid() = user_id);
 
-CREATE POLICY "Authenticated users can create letters"
-  ON public.letters
-  FOR INSERT
-  WITH CHECK (auth.uid() = sender_id);
+drop policy if exists "characters_upsert_own" on public.characters;
+create policy "characters_upsert_own"
+  on public.characters for insert
+  with check (auth.uid() = user_id);
 
-CREATE POLICY "Senders can update their own pending letters"
-  ON public.letters
-  FOR UPDATE
-  USING (auth.uid() = sender_id AND status = 'in_transit');
-
-CREATE POLICY "Senders can delete their letters"
-  ON public.letters
-  FOR DELETE
-  USING (auth.uid() = sender_id);
-
--- 5. Auto-update status function for delivered letters
-CREATE OR REPLACE FUNCTION update_delivered_letters_status()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.deliver_at <= NOW() AND NEW.status = 'in_transit' THEN
-    NEW.status := 'delivered';
-  END IF;
-  NEW.updated_at := NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trigger_update_letter_status
-  BEFORE INSERT OR UPDATE ON public.letters
-  FOR EACH ROW
-  EXECUTE FUNCTION update_delivered_letters_status();
+drop policy if exists "characters_update_own" on public.characters;
+create policy "characters_update_own"
+  on public.characters for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);

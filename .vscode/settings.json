@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": false,
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true
+  }
+}

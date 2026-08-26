@@ -1,91 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Composer from './components/Composer';
-import Inbox from './components/Inbox';
-import SupabaseConfigModal from './components/SupabaseConfigModal';
-import { authService, isSupabaseConfigured } from './lib/supabase';
-import { Github, Database, ShieldCheck, Heart } from 'lucide-react';
+import { useAuth } from './hooks/useAuth';
+import { useCharacter } from './hooks/useCharacter';
+import AuthGate from './components/AuthGate';
+import GardenScene from './components/GardenScene';
+
+const OUTFIT_COLORS = ['#c9a7e0', '#f2a6a0', '#a6d0e0', '#e0c987'];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('inbox');
-  const [user, setUser] = useState(null);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const { user, loading: authLoading, signInWithEmail, signInAsGuest, signOut } =
+    useAuth();
+  const {
+    character,
+    loading: charLoading,
+    saving,
+    save,
+  } = useCharacter(user?.id);
 
-  useEffect(() => {
-    // Check initial user session
-    authService.getCurrentUser().then((u) => {
-      if (u) setUser(u);
-    });
-  }, []);
+  if (authLoading) {
+    return <Centered>Loading your little world…</Centered>;
+  }
+
+  if (!user) {
+    return <AuthGate onSignInWithEmail={signInWithEmail} onSignInAsGuest={signInAsGuest} />;
+  }
+
+  if (charLoading || !character) {
+    return <Centered>Waking up your garden…</Centered>;
+  }
+
+  const cycleOutfit = () => {
+    const currentIndex = OUTFIT_COLORS.indexOf(character.outfit_color);
+    const next = OUTFIT_COLORS[(currentIndex + 1) % OUTFIT_COLORS.length];
+    save({ outfit_color: next });
+  };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between selection:bg-amber-500/30 selection:text-amber-200">
-      
-      {/* Top Header Navigation */}
-      <div>
-        <Navbar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          user={user}
-          setUser={setUser}
-          onOpenConfig={() => setIsConfigOpen(true)}
-        />
+    <div style={{ height: '100%', position: 'relative' }}>
+      <GardenScene character={character} />
 
-        {/* Main Content Area */}
-        <main className="pb-16">
-          {activeTab === 'inbox' ? (
-            <Inbox
-              user={user}
-              onNewLetterClick={() => setActiveTab('compose')}
-            />
-          ) : (
-            <Composer
-              user={user}
-              onLetterSent={() => setActiveTab('inbox')}
-            />
-          )}
-        </main>
-      </div>
-
-      {/* Footer Banner */}
-      <footer className="border-t border-white/10 bg-slate-950/80 backdrop-blur-md py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-          
-          <div className="flex items-center gap-2 font-serif">
-            <span>🐌 Snail Email</span>
-            <span>•</span>
-            <span>Wax-Sealed Digital Mail Service</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsConfigOpen(true)}
-              className="hover:text-amber-400 flex items-center gap-1.5 transition-colors"
-            >
-              <Database className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isSupabaseConfigured() ? 'Supabase Connected' : 'Supabase Config'}</span>
-            </button>
-
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-white flex items-center gap-1.5 transition-colors"
-            >
-              <Github className="w-3.5 h-3.5" />
-              <span>GitHub Repo Ready</span>
-            </a>
-          </div>
-
+      <div style={styles.hud}>
+        <div style={styles.badge}>
+          🐌 {character.name} {saving ? '(saving…)' : ''}
         </div>
-      </footer>
-
-      {/* Supabase Configuration Modal */}
-      <SupabaseConfigModal
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-      />
-
+        <button style={styles.pill} onClick={cycleOutfit}>
+          Change outfit color
+        </button>
+        <button style={styles.pillGhost} onClick={signOut}>
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }
+
+function Centered({ children }) {
+  return (
+    <div
+      style={{
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#8a7a63',
+        fontSize: '1.1rem',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+const styles = {
+  hud: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    display: 'flex',
+    gap: 10,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  badge: {
+    background: 'rgba(255,250,241,0.9)',
+    padding: '0.5rem 0.9rem',
+    borderRadius: 999,
+    fontSize: '0.9rem',
+    color: '#5b4a34',
+  },
+  pill: {
+    background: '#e07a5f',
+    color: 'white',
+    border: 'none',
+    padding: '0.5rem 0.9rem',
+    borderRadius: 999,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+  },
+  pillGhost: {
+    background: 'transparent',
+    color: '#7a5c3e',
+    border: '1px solid #cbb994',
+    padding: '0.5rem 0.9rem',
+    borderRadius: 999,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+  },
+};
