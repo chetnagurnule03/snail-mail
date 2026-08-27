@@ -6,19 +6,19 @@ function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
 }
 
 /** -------------------------------------------------------------
- *  LOW-POLY HOUSE MODEL WITH GARDEN & MAILBOX
+ *  LOW-POLY COTTAGE MODEL WITH FENCED FLOWER GARDEN & MAILBOX
  * ------------------------------------------------------------- */
 function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallColor = '#f4f1de' }) {
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      {/* Cottage Walls */}
+      {/* Cottage Base & Walls */}
       <mesh position={[0, 0.75, 0]} castShadow receiveShadow>
         <boxGeometry args={[2.2, 1.5, 1.8]} />
         <meshToonMaterial color={wallColor} />
         <ToonOutline thickness={0.03} />
       </mesh>
 
-      {/* Hip/Pyramid Roof */}
+      {/* Four-Sided Hip Roof */}
       <group position={[0, 1.5, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[1.85, 1.0, 4]} />
@@ -33,7 +33,7 @@ function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallCol
         <meshToonMaterial color="#5c381e" />
       </mesh>
 
-      {/* Warm Glowing Windows */}
+      {/* Warm Pale-Yellow Glass Windows */}
       <mesh position={[-0.65, 0.85, 0.91]} castShadow>
         <boxGeometry args={[0.35, 0.35, 0.06]} />
         <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
@@ -43,7 +43,7 @@ function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallCol
         <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
       </mesh>
 
-      {/* Cute Low-Poly Snail Mailbox Outside Cottage 📮🐌 */}
+      {/* Cute Low-Poly Snail Mailbox 📮🐌 */}
       <group position={[1.3, 0.02, 1.1]}>
         <mesh position={[0, 0.35, 0]} castShadow>
           <cylinderGeometry args={[0.035, 0.035, 0.7, 8]} />
@@ -59,9 +59,8 @@ function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallCol
         </mesh>
       </group>
 
-      {/* Fenced Flower Garden Plot Outside House */}
+      {/* Large Fenced Flower & Crop Garden Plot */}
       <group position={[-1.2, 0, 1.2]}>
-        {/* Wooden Fence Posts */}
         {[-0.8, 0.8].map((x, i) =>
           [0, 0.8].map((z, j) => (
             <mesh key={`${i}-${j}`} position={[x, 0.2, z]} castShadow>
@@ -71,7 +70,7 @@ function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallCol
           ))
         )}
 
-        {/* Multi-Colored Flowers */}
+        {/* Multi-Colored Low-Poly Flower Beds */}
         {[-0.5, 0, 0.5].map((x, idx) => (
           <group key={idx} position={[x, 0.02, 0.4]}>
             <mesh position={[0, 0.12, 0]}>
@@ -91,15 +90,16 @@ function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallCol
 
 export default function VillageHouses() {
   const HOUSES_CONFIG = [
-    { pos: [-16.0, 0, -18.0], rot: 0.3, roof: '#e63946', wall: '#f4f1de' }, // Red Roof Cottage
-    { pos: [-24.0, 0, -22.0], rot: 0.5, roof: '#457b9d', wall: '#f4f1de' }, // Blue Roof Cottage
-    { pos: [-28.0, 0, -32.0], rot: 0.2, roof: '#7209b7', wall: '#f4f1de' }, // Purple Roof Cottage
-    { pos: [16.0, 0, -18.0], rot: -0.3, roof: '#ffb703', wall: '#f4f1de' }, // Yellow Roof Cottage
-    { pos: [24.0, 0, -22.0], rot: -0.5, roof: '#2a9d8f', wall: '#f4f1de' }, // Sage Roof Cottage
-    { pos: [28.0, 0, -32.0], rot: -0.2, roof: '#e76f51', wall: '#f4f1de' }, // Orange Roof Cottage
-    { pos: [0.0, 0, -38.0], rot: 0.0, roof: '#e63946', wall: '#f4f1de' }, // Central North Cottage
-    { pos: [-14.0, 0, -38.0], rot: 0.1, roof: '#457b9d', wall: '#f4f1de' }, // North West Cottage
-    { pos: [14.0, 0, -38.0], rot: -0.1, roof: '#7209b7', wall: '#f4f1de' }, // North East Cottage
+    { pos: [-16.0, 0, -18.0], rot: 0.3, roof: '#e63946', wall: '#f4f1de' }, // Red Roof
+    { pos: [-24.0, 0, -22.0], rot: 0.5, roof: '#457b9d', wall: '#f4f1de' }, // Blue Roof
+    { pos: [-28.0, 0, -32.0], rot: 0.2, roof: '#7209b7', wall: '#f4f1de' }, // Purple Roof
+    { pos: [16.0, 0, -18.0], rot: -0.3, roof: '#ffb703', wall: '#f4f1de' }, // Yellow Roof
+    { pos: [24.0, 0, -22.0], rot: -0.5, roof: '#2a9d8f', wall: '#f4f1de' }, // Sage Roof
+    { pos: [28.0, 0, -32.0], rot: -0.2, roof: '#e76f51', wall: '#f4f1de' }, // Orange Roof
+    { pos: [0.0, 0, -38.0], rot: 0.0, roof: '#e63946', wall: '#f4f1de' }, // North Red Roof
+    { pos: [-14.0, 0, -38.0], rot: 0.1, roof: '#457b9d', wall: '#f4f1de' }, // North West Blue Roof
+    { pos: [14.0, 0, -38.0], rot: -0.1, roof: '#7209b7', wall: '#f4f1de' }, // North East Purple Roof
+    { pos: [0.0, 0, -12.0], rot: 0.0, roof: '#8c5a3c', wall: '#f4f1de' }, // Center Brown Roof
   ];
 
   return (
