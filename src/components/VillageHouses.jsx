@@ -2,14 +2,14 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER COTTAGES WITH LARGE FENCED FLOWER & CROP GARDENS
+ *  12 UNIQUE VILLAGER COTTAGES ACROSS 6 ROOF COLORS (RED, BLUE, PURPLE, YELLOW, BROWN, GREEN)
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
-  // 🔴 TYPE 1: RED/ORANGE ROOF COTTAGES (LEFT FOREGROUND COTTAGE)
+  // 🔴 TYPE 1: RED/ORANGE ROOF COTTAGES
   { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'crops', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#f4f1de', roofColor: '#e63946', trimColor: '#6b4c35' },
   { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'flowers', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f4f1de', roofColor: '#d62828', trimColor: '#8c5a3c' },
 
-  // 🔵 TYPE 2: BRIGHT BLUE ROOF COTTAGES (RIGHT FOREGROUND COTTAGE)
+  // 🔵 TYPE 2: BRIGHT BLUE ROOF COTTAGES
   { id: 4, name: "Mia's Blossom Boutique", gardenType: 'flowers', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#f4f1de', roofColor: '#2a9d8f', trimColor: '#7a4a2b' },
   { id: 11, name: "Felix's Astronomer Tower", gardenType: 'berry', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#fdf0d5', roofColor: '#457b9d', trimColor: '#5c381e' },
 
@@ -17,42 +17,56 @@ const VILLAGE_COTTAGES = [
   { id: 2, name: "Sophie's Artist Studio", gardenType: 'flowers', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#fdf0d5', roofColor: '#9c89b8', trimColor: '#5c381e' },
   { id: 10, name: "Luna's Storybook Library", gardenType: 'sunflower', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#f4f1de', roofColor: '#7b2cbf', trimColor: '#7a4a2b' },
 
-  // 🟡 TYPE 4: GOLDEN YELLOW/ORANGE ROOF COTTAGES
+  // 🟡 TYPE 4: GOLDEN YELLOW ROOF COTTAGES
   { id: 3, name: "Clara's Weaver House", gardenType: 'corn', pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a', trimColor: '#8c5a3c' },
   { id: 12, name: "Daisy's Honey Cottage", gardenType: 'sunflower', pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703', trimColor: '#8c5a3c' },
 
   // 🟤 TYPE 5: WARM BROWN ROOF COTTAGES
   { id: 5, name: "Noah's Herbalist Haven", gardenType: 'berry', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#fdf0d5', roofColor: '#f4a261', trimColor: '#5c381e' },
-  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'crops', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#e8e8e4', roofColor: '#6b4c35', trimColor: '#3d2616' },
-  { id: 8, name: "Milo's Timber Workshop", gardenType: 'corn', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#fdf0d5', roofColor: '#7a4a2b', trimColor: '#4a2c11' },
   { id: 9, name: "Jasper's Potter House", gardenType: 'crops', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#fae1c5', roofColor: '#e07a5f', trimColor: '#3d2616' },
+
+  // 🟢 TYPE 6: SAGE GREEN ROOF COTTAGES
+  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'crops', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#e8e8e4', roofColor: '#52b788', trimColor: '#2d6a4f' },
+  { id: 8, name: "Milo's Timber Workshop", gardenType: 'corn', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#fdf0d5', roofColor: '#40916c', trimColor: '#1b4332' },
 ];
 
 /** -------------------------------------------------------------
- *  LARGE FENCED FLOWER & CROP GARDENS MATCHING IN-GAME SCREENSHOT
+ *  LARGE FENCED FLOWER & CROP GARDENS WITH WOODEN POST-AND-RAIL FENCES
  * ------------------------------------------------------------- */
 function LargeFencedCottageGarden({ gardenType }) {
   return (
     <group position={[0, 0, 1.8]}>
-      {/* Brick Soil Bed Border (Large Multi-Row Plot) */}
+      {/* Soil Bed Base */}
       <mesh position={[0, 0.08, 0.9]} castShadow receiveShadow>
         <boxGeometry args={[2.4, 0.16, 1.6]} />
         <meshToonMaterial color="#6b4326" />
       </mesh>
 
-      {/* Wooden Fence Perimeter & Signboard */}
-      <mesh position={[-1.25, 0.25, 0.9]} castShadow>
-        <boxGeometry args={[0.06, 0.5, 1.6]} />
-        <meshToonMaterial color="#8c5a3c" />
-      </mesh>
-      <mesh position={[1.25, 0.25, 0.9]} castShadow>
-        <boxGeometry args={[0.06, 0.5, 1.6]} />
-        <meshToonMaterial color="#8c5a3c" />
-      </mesh>
-      <mesh position={[0, 0.25, 1.7]} castShadow>
-        <boxGeometry args={[2.5, 0.5, 0.06]} />
-        <meshToonMaterial color="#8c5a3c" />
-      </mesh>
+      {/* Chunky Wooden Post-and-Rail Fence */}
+      <group position={[0, 0, 0]}>
+        {/* Posts */}
+        {[-1.25, 1.25].map((x, i) =>
+          [0.1, 1.7].map((z, j) => (
+            <mesh key={`post-${i}-${j}`} position={[x, 0.35, z]} castShadow>
+              <boxGeometry args={[0.1, 0.7, 0.1]} />
+              <meshToonMaterial color="#8c5a3c" />
+            </mesh>
+          ))
+        )}
+        {/* Horizontal Rails */}
+        <mesh position={[-1.25, 0.42, 0.9]} castShadow>
+          <boxGeometry args={[0.06, 0.1, 1.6]} />
+          <meshToonMaterial color="#8c5a3c" />
+        </mesh>
+        <mesh position={[1.25, 0.42, 0.9]} castShadow>
+          <boxGeometry args={[0.06, 0.1, 1.6]} />
+          <meshToonMaterial color="#8c5a3c" />
+        </mesh>
+        <mesh position={[0, 0.42, 1.7]} castShadow>
+          <boxGeometry args={[2.5, 0.1, 0.06]} />
+          <meshToonMaterial color="#8c5a3c" />
+        </mesh>
+      </group>
 
       {/* Wooden Crop Signboard */}
       <group position={[0.7, 0.5, 1.72]}>
@@ -66,7 +80,7 @@ function LargeFencedCottageGarden({ gardenType }) {
         </mesh>
       </group>
 
-      {/* 🌹🌻🌼🌷 LARGE FLOWER GARDEN PLOT (SUNFLOWERS, ROSES, DAISIES, TULIPS) */}
+      {/* 🌹🌻🌼🌷 LARGE FLOWER GARDEN PLOT */}
       {(gardenType === 'flowers' || gardenType === 'sunflower') && (
         <group position={[0, 0.16, 0.9]}>
           {/* Row 1: Giant Sunflowers */}
@@ -119,7 +133,7 @@ function LargeFencedCottageGarden({ gardenType }) {
         </group>
       )}
 
-      {/* 🥕🍅🥬🎃 LARGE FARM CROP PLOT (CARROTS, TOMATOES, CABBAGES, PUMPKINS) */}
+      {/* 🥕🍅🥬🎃 LARGE FARM CROP PLOT */}
       {(gardenType === 'crops' || gardenType === 'tomato' || gardenType === 'corn' || gardenType === 'berry') && (
         <group position={[0, 0.16, 0.9]}>
           {/* Row 1: Tomatoes */}
@@ -174,7 +188,7 @@ export default function VillageHouses() {
     <group>
       {VILLAGE_COTTAGES.map((c) => (
         <group key={c.id} position={c.pos} rotation={[0, c.rot, 0]}>
-          {/* [45% Height Weight] Main Cottage Wall Body */}
+          {/* Main Cottage Wall Body */}
           <mesh position={[0, 0.68, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.8, 1.35, 1.5]} />
             <meshToonMaterial color={c.wallColor} />
@@ -190,7 +204,7 @@ export default function VillageHouses() {
             ))
           )}
 
-          {/* [30% Height Weight] 4-Sided Pyramid Roof with White Trim */}
+          {/* 4-Sided Pyramid Roof with White Trim (6 Roof Colors) */}
           <group position={[0, 1.35, 0]}>
             <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
               <coneGeometry args={[1.45, 0.85, 4]} />
@@ -206,7 +220,7 @@ export default function VillageHouses() {
             </mesh>
           </group>
 
-          {/* [15% Height Weight] Stone Chimney & Smoke Sparkles */}
+          {/* Stone Chimney & Smoke Sparkles */}
           <group position={[-0.55, 1.7, -0.25]}>
             <mesh castShadow>
               <boxGeometry args={[0.32, 1.1, 0.32]} />
@@ -219,7 +233,7 @@ export default function VillageHouses() {
             <Sparkles position={[0, 0.75, 0]} count={10} scale={0.4} size={3} speed={0.4} color="#ffffff" />
           </group>
 
-          {/* [10% Details] Front Porch Steps & Wooden Pillars */}
+          {/* Front Porch Steps & Wooden Pillars */}
           <group position={[0.2, 0, 0.75]}>
             <mesh position={[0, 0.08, 0.2]} castShadow receiveShadow>
               <boxGeometry args={[0.75, 0.16, 0.4]} />
@@ -249,7 +263,6 @@ export default function VillageHouses() {
 
           {/* Glowing Windows with Yellow Sun-Shade Awnings & Flower Boxes */}
           <group position={[-0.45, 0.78, 0.76]}>
-            {/* Yellow Sun-Shade Awning */}
             <mesh position={[0, 0.26, 0.08]} rotation={[0.3, 0, 0]} castShadow>
               <boxGeometry args={[0.52, 0.04, 0.24]} />
               <meshToonMaterial color="#ffb703" />
@@ -266,7 +279,6 @@ export default function VillageHouses() {
               <boxGeometry args={[0.08, 0.42, 0.03]} />
               <meshToonMaterial color={c.trimColor} />
             </mesh>
-            {/* Window Flower Box */}
             <mesh position={[0, -0.25, 0.06]} castShadow>
               <boxGeometry args={[0.48, 0.12, 0.14]} />
               <meshToonMaterial color="#6b4c35" />

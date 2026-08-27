@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  CENTRAL MARKET PLAZA & 3 MULTI-COLOR CANOPY STALLS (MATCHES IN-GAME SCREENSHOT)
+ *  CENTRAL MARKET PLAZA & 4 MULTI-COLOR CANOPY STALLS
  * ------------------------------------------------------------- */
 export default function VillageSquare({ position = [0, 0, -22.0] }) {
   return (
@@ -42,7 +42,7 @@ export default function VillageSquare({ position = [0, 0, -22.0] }) {
         <Sparkles position={[0, 1.45, 0]} count={15} scale={1.2} size={3} speed={0.6} color="#ffffff" />
       </group>
 
-      {/* 🪵 2. THREE MULTI-COLOR CANOPY MARKET STALLS */}
+      {/* 🪵 2. FOUR MULTI-COLOR STRIPED CANOPY MARKET STALLS */}
       {/* Stall 1: Red/White Striped Canopy (Fruit & Vegetable Stall) */}
       <group position={[-4.5, 0.1, -2.5]} rotation={[0, 0.4, 0]}>
         <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
@@ -77,8 +77,8 @@ export default function VillageSquare({ position = [0, 0, -22.0] }) {
         </mesh>
       </group>
 
-      {/* Stall 2: Purple/Yellow Striped Canopy (Flower & Seed Stall) */}
-      <group position={[0, 0.1, -4.8]} rotation={[0, 0, 0]}>
+      {/* Stall 2: Purple/White Striped Canopy (Flower & Seed Stall) */}
+      <group position={[-1.6, 0.1, -4.8]} rotation={[0, 0.1, 0]}>
         <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.5, 0.9, 0.75]} />
           <meshToonMaterial color="#8c5a3c" />
@@ -90,7 +90,7 @@ export default function VillageSquare({ position = [0, 0, -22.0] }) {
           </mesh>
           <mesh position={[0, 0.12, 0]}>
             <boxGeometry args={[1.72, 0.04, 0.97]} />
-            <meshToonMaterial color="#ffb703" />
+            <meshToonMaterial color="#ffffff" />
           </mesh>
         </group>
         <mesh position={[-0.75, 0.95, 0.35]} castShadow>
@@ -112,7 +112,7 @@ export default function VillageSquare({ position = [0, 0, -22.0] }) {
       </group>
 
       {/* Stall 3: Green/White Striped Canopy (Fresh Produce Stall) */}
-      <group position={[4.5, 0.1, -2.5]} rotation={[0, -0.4, 0]}>
+      <group position={[1.6, 0.1, -4.8]} rotation={[0, -0.1, 0]}>
         <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.5, 0.9, 0.75]} />
           <meshToonMaterial color="#8c5a3c" />
@@ -142,6 +142,40 @@ export default function VillageSquare({ position = [0, 0, -22.0] }) {
         <mesh position={[0.35, 0.95, 0.1]} castShadow>
           <sphereGeometry args={[0.15, 10, 10]} />
           <meshToonMaterial color="#fb8500" />
+        </mesh>
+      </group>
+
+      {/* Stall 4: Yellow/White Striped Canopy (General Goods Stall) */}
+      <group position={[4.5, 0.1, -2.5]} rotation={[0, -0.4, 0]}>
+        <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
+          <boxGeometry args={[1.5, 0.9, 0.75]} />
+          <meshToonMaterial color="#8c5a3c" />
+        </mesh>
+        <group position={[0, 1.5, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[1.7, 0.22, 0.95]} />
+            <meshToonMaterial color="#ffb703" />
+          </mesh>
+          <mesh position={[0, 0.12, 0]}>
+            <boxGeometry args={[1.72, 0.04, 0.97]} />
+            <meshToonMaterial color="#ffffff" />
+          </mesh>
+        </group>
+        <mesh position={[-0.75, 0.95, 0.35]} castShadow>
+          <cylinderGeometry args={[0.03, 0.03, 1.1, 8]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+        <mesh position={[0.75, 0.95, 0.35]} castShadow>
+          <cylinderGeometry args={[0.03, 0.03, 1.1, 8]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+        <mesh position={[-0.35, 0.95, 0.1]} castShadow>
+          <boxGeometry args={[0.22, 0.2, 0.22]} />
+          <meshToonMaterial color="#a89f91" />
+        </mesh>
+        <mesh position={[0.35, 0.95, 0.1]} castShadow>
+          <sphereGeometry args={[0.14, 10, 10]} />
+          <meshToonMaterial color="#ffb703" />
         </mesh>
       </group>
 
