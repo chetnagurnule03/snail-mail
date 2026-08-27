@@ -68,22 +68,17 @@ function ExtendedMeadowTerrain() {
 function StoneRiverBridge() {
   return (
     <group position={[-2.0, 0, -10.0]}>
-      {/* Blue Winding Stream Water */}
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0.4]}>
         <planeGeometry args={[3.2, 34.0]} />
         <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
       </mesh>
 
-      {/* 🌉 Stone Arch Bridge */}
       <group position={[0, 0.35, 0]} rotation={[0, 0.4, 0]}>
-        {/* Arch Walkway */}
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.2, 0.45, 4.2]} />
           <meshToonMaterial color="#8a7e70" />
           <ToonOutline thickness={0.03} />
         </mesh>
-
-        {/* Wooden Railings */}
         <mesh position={[-1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
           <meshToonMaterial color="#6b4c35" />
@@ -243,45 +238,90 @@ function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
   );
 }
 
-function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
-  const petRef = useRef();
+/** -------------------------------------------------------------
+ *  5. DUAL PET COMPANION FOLLOW SYSTEM (PET 1 + PET 2) 🐰🐶
+ * ------------------------------------------------------------- */
+function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
+  const pet1Ref = useRef();
+  const pet2Ref = useRef();
 
   useFrame((state) => {
-    if (!petRef.current || !targetGroupRef.current) return;
+    if (!targetGroupRef.current) return;
 
-    const tx = targetGroupRef.current.position.x - 0.65;
-    const tz = targetGroupRef.current.position.z + 0.65;
     const clock = state.clock.getElapsedTime();
+    const px = targetGroupRef.current.position.x;
+    const pz = targetGroupRef.current.position.z;
 
-    const dx = tx - petRef.current.position.x;
-    const dz = tz - petRef.current.position.z;
-    const dist = Math.sqrt(dx * dx + dz * dz);
+    // Pet 1 (Left Flank)
+    if (pet1Ref.current) {
+      const t1x = px - 0.65;
+      const t1z = pz + 0.65;
+      const d1x = t1x - pet1Ref.current.position.x;
+      const d1z = t1z - pet1Ref.current.position.z;
+      const dist1 = Math.sqrt(d1x * d1x + d1z * d1z);
 
-    if (dist > 0.1) {
-      petRef.current.position.x += dx * 0.08;
-      petRef.current.position.z += dz * 0.08;
-      petRef.current.rotation.y = Math.atan2(dx, dz);
-      petRef.current.position.y = Math.abs(Math.sin(clock * 16)) * 0.08;
-    } else {
-      petRef.current.position.y = Math.sin(clock * 3) * 0.015;
+      if (dist1 > 0.1) {
+        pet1Ref.current.position.x += d1x * 0.08;
+        pet1Ref.current.position.z += d1z * 0.08;
+        pet1Ref.current.rotation.y = Math.atan2(d1x, d1z);
+        pet1Ref.current.position.y = Math.abs(Math.sin(clock * 16)) * 0.08;
+      } else {
+        pet1Ref.current.position.y = Math.sin(clock * 3) * 0.015;
+      }
+    }
+
+    // Pet 2 (Right Flank - Playful Companion Pup)
+    if (pet2Ref.current) {
+      const t2x = px + 0.65;
+      const t2z = pz + 0.65;
+      const d2x = t2x - pet2Ref.current.position.x;
+      const d2z = t2z - pet2Ref.current.position.z;
+      const dist2 = Math.sqrt(d2x * d2x + d2z * d2z);
+
+      if (dist2 > 0.1) {
+        pet2Ref.current.position.x += d2x * 0.08;
+        pet2Ref.current.position.z += d2z * 0.08;
+        pet2Ref.current.rotation.y = Math.atan2(d2x, d2z);
+        pet2Ref.current.position.y = Math.abs(Math.sin(clock * 14)) * 0.07;
+      } else {
+        pet2Ref.current.position.y = Math.sin(clock * 2.5) * 0.015;
+      }
     }
   });
 
   return (
-    <group ref={petRef} position={[-14.65, 0, -11.35]} scale={0.55}>
-      <group position={[0, 0.18, 0]}>
-        <mesh castShadow>
-          <sphereGeometry args={[0.18, 16, 16]} />
-          <meshToonMaterial color="#ffffff" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
+    <group>
+      {/* Pet 1 (Customized Companion) */}
+      <group ref={pet1Ref} position={[-14.65, 0, -11.35]} scale={0.55}>
+        <group position={[0, 0.18, 0]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.18, 16, 16]} />
+            <meshToonMaterial color="#ffffff" />
+            <ToonOutline thickness={0.02} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Pet 2 (Playful Companion Pup 🐶) */}
+      <group ref={pet2Ref} position={[-13.35, 0, -11.35]} scale={0.55}>
+        <group position={[0, 0.18, 0]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.17, 16, 16]} />
+            <meshToonMaterial color="#f4a261" />
+            <ToonOutline thickness={0.02} />
+          </mesh>
+          <mesh position={[0, 0.12, 0.12]} castShadow>
+            <sphereGeometry args={[0.11, 12, 12]} />
+            <meshToonMaterial color="#f4a261" />
+          </mesh>
+        </group>
       </group>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  5. PINTO / PAINT STORYBOOK HORSE 🐴 (CHESTNUT + WHITE + BLONDE MANE)
+ *  6. PINTO / PAINT STORYBOOK HORSE 🐴 (CHESTNUT + WHITE + BLONDE MANE)
  * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
@@ -317,21 +357,18 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
 
   return (
     <group ref={horseRef} position={[-15.2, 0, -9.5]} scale={1.05}>
-      {/* Pinto Horse Body (Chestnut + Soft White Patches) */}
       <group position={[0, 0.62, 0]}>
         <mesh castShadow>
           <capsuleGeometry args={[0.32, 0.82, 8, 16]} rotation={[Math.PI / 2, 0, 0]} />
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.03} />
         </mesh>
-        {/* Soft White Pinto Patch */}
         <mesh position={[0.08, 0.05, 0.12]} castShadow>
           <sphereGeometry args={[0.24, 12, 12]} />
           <meshToonMaterial color="#ffffff" />
         </mesh>
       </group>
 
-      {/* Saddle & Stirrups */}
       <group position={[0, 0.78, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.15, 0.48]} />
@@ -344,7 +381,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
         </mesh>
       </group>
 
-      {/* Arched Neck & Blonde Mane */}
       <group position={[0, 0.82, 0.42]}>
         <mesh position={[0, 0.28, 0.14]} rotation={[0.36, 0, 0]} castShadow>
           <cylinderGeometry args={[0.18, 0.24, 0.62, 12]} />
@@ -356,7 +392,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.025} />
         </mesh>
-        {/* Blonde Mane */}
         <mesh position={[0, 0.48, 0.02]} rotation={[0.36, 0, 0]}>
           <boxGeometry args={[0.09, 0.65, 0.16]} />
           <meshToonMaterial color="#f4e2bb" />
@@ -364,7 +399,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
         </mesh>
       </group>
 
-      {/* 4 Legs & Hooves */}
       <group ref={leftFrontLegRef} position={[-0.18, 0.3, 0.28]}>
         <mesh position={[0, -0.15, 0]} castShadow>
           <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
@@ -398,7 +432,7 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
 }
 
 /** -------------------------------------------------------------
- *  6. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
+ *  7. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
  * ------------------------------------------------------------- */
 function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, resetSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const { camera } = useThree();
@@ -631,7 +665,7 @@ function SoftFlowerCluster({ position, color = '#ffb5a7' }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH TOON OUTLINE & SPEC SHEET UPGRADES
+ *  MAIN SCENE WITH DUAL PETS & SPEC SHEET UPGRADES
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -675,7 +709,9 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
 
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} horsePosRef={horsePosRef} />
-      <SmallCompanionPet petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
+      
+      {/* Dual Pet Companions (Pet 1 + Pet 2) */}
+      <DualPetCompanions petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
       <Sparkles count={100} scale={28} size={3.5} speed={0.4} color="#ffe5ec" />
       <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={28} blur={2.5} />
