@@ -5,8 +5,8 @@ import { letterService } from '../lib/supabase';
 const STAMPS = [
   { id: 'royal_snail', name: 'Royal Snail', icon: '🐌', color: 'from-amber-600 to-yellow-500' },
   { id: 'golden_snitch', name: 'Golden Snitch', icon: '🪙⚡', color: 'from-yellow-400 via-amber-300 to-amber-600' },
-  { id: 'golden_leaf', name: 'Golden Autumn', icon: '🍂', color: 'from-orange-500 to-amber-700' },
   { id: 'vintage_owl', name: 'Postmaster Owl', icon: '🦉', color: 'from-purple-600 to-indigo-800' },
+  { id: 'night_bat', name: 'Night Bat', icon: '🦇', color: 'from-purple-800 to-slate-900' },
 ];
 
 export default function Composer({ user, defaultRecipient = '', onLetterSent }) {
@@ -15,6 +15,7 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
   const [body, setBody] = useState('');
   const [senderName, setSenderName] = useState(user?.name || 'Wanderer');
   const [stampType, setStampType] = useState('royal_snail');
+  const [deliveryMethod, setDeliveryMethod] = useState('snail'); // 'snail' | 'bat'
   const [isSealing, setIsSealing] = useState(false);
 
   // Unique Share Link Modal State
@@ -41,6 +42,7 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
       subject: subject || 'A cozy letter from the village 💌',
       body,
       stamp_type: stampType,
+      delivery_method: deliveryMethod,
       share_url: shareUrl,
       deliver_at: new Date().toISOString(),
     };
@@ -54,9 +56,10 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
         letterId,
         shareUrl,
         recipientName,
+        deliveryMethod,
       });
 
-      if (onLetterSent) onLetterSent();
+      if (onLetterSent) onLetterSent(recipientName, deliveryMethod);
     }, 900);
   };
 
@@ -71,6 +74,46 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
     <div style={styles.composerContainer}>
       {!shareModalData ? (
         <form onSubmit={handleSend} style={styles.form}>
+          {/* Dual Delivery Method Selector */}
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Choose Express Delivery Method</label>
+            <div style={styles.deliveryRow}>
+              <button
+                type="button"
+                style={{
+                  ...styles.deliveryBtn,
+                  borderColor: deliveryMethod === 'snail' ? '#e07a5f' : '#e3d7bf',
+                  background: deliveryMethod === 'snail' ? '#fdf0ed' : '#fffaf1',
+                  boxShadow: deliveryMethod === 'snail' ? '0 0 0 2px #e07a5f' : 'none',
+                }}
+                onClick={() => setDeliveryMethod('snail')}
+              >
+                <span style={{ fontSize: '1.6rem' }}>🐌</span>
+                <div>
+                  <div style={styles.deliveryTitle}>Snail Express</div>
+                  <div style={styles.deliverySub}>Cozy Path Journey (~60s)</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                style={{
+                  ...styles.deliveryBtn,
+                  borderColor: deliveryMethod === 'bat' ? '#7209b7' : '#e3d7bf',
+                  background: deliveryMethod === 'bat' ? '#f3e8ff' : '#fffaf1',
+                  boxShadow: deliveryMethod === 'bat' ? '0 0 0 2px #7209b7' : 'none',
+                }}
+                onClick={() => setDeliveryMethod('bat')}
+              >
+                <span style={{ fontSize: '1.6rem' }}>🦇</span>
+                <div>
+                  <div style={styles.deliveryTitle}>Bat Air Express</div>
+                  <div style={styles.deliverySub}>Fast Air Flight (~15s)</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <div style={styles.fieldGroup}>
             <label style={styles.label}>Sender Name</label>
             <input
@@ -144,16 +187,17 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
             disabled={isSealing}
             style={{
               ...styles.submitBtn,
+              background: deliveryMethod === 'bat' ? 'linear-gradient(135deg, #7209b7 0%, #3a0ca3 100%)' : 'linear-gradient(135deg, #e07a5f 0%, #d62828 100%)',
               opacity: isSealing ? 0.7 : 1,
             }}
           >
-            {isSealing ? '🐌 Sealing with Wax…' : '💌 Send Letter & Generate Share Link'}
+            {isSealing ? (deliveryMethod === 'bat' ? '🦇 Sealing for Bat Express…' : '🐌 Sealing with Wax…') : (deliveryMethod === 'bat' ? '🦇 Send via Bat Air Express & Share Link' : '💌 Send via Snail Express & Share Link')}
           </button>
         </form>
       ) : (
         /* Share Modal Overlay */
         <div style={styles.shareCard}>
-          <div style={styles.successIcon}>🐌💌</div>
+          <div style={styles.successIcon}>{shareModalData.deliveryMethod === 'bat' ? '🦇💌' : '🐌💌'}</div>
           <h2 style={styles.shareTitle}>Your letter is ready!</h2>
           <p style={styles.shareSubtitle}>
             Copy this link and send it to your friend via WhatsApp, Instagram, or SMS.
@@ -173,12 +217,15 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
 
           <div style={styles.btnRow}>
             <button
-              style={styles.previewBtn}
+              style={{
+                ...styles.previewBtn,
+                background: shareModalData.deliveryMethod === 'bat' ? '#7209b7' : '#e07a5f',
+              }}
               onClick={() => {
                 window.location.href = shareModalData.shareUrl;
               }}
             >
-              👁️ Preview Letter Journey
+              👁️ Preview {shareModalData.deliveryMethod === 'bat' ? 'Bat Flight' : 'Snail Journey'}
             </button>
           </div>
         </div>
@@ -207,6 +254,32 @@ const styles = {
     color: '#8a7a63',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
+  },
+  deliveryRow: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 10,
+  },
+  deliveryBtn: {
+    padding: '0.6rem 0.8rem',
+    borderRadius: 14,
+    border: '1.5px solid #e3d7bf',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'all 0.15s ease',
+  },
+  deliveryTitle: {
+    fontSize: '0.88rem',
+    fontWeight: 800,
+    color: '#4a2c11',
+  },
+  deliverySub: {
+    fontSize: '0.72rem',
+    color: '#7a5c3e',
+    fontWeight: 600,
   },
   input: {
     padding: '0.65rem 0.85rem',
@@ -245,7 +318,6 @@ const styles = {
   },
   submitBtn: {
     marginTop: 6,
-    background: 'linear-gradient(135deg, #e07a5f 0%, #d62828 100%)',
     color: '#ffffff',
     border: 'none',
     padding: '0.9rem 1.5rem',
@@ -253,7 +325,7 @@ const styles = {
     fontSize: '1rem',
     fontWeight: 800,
     cursor: 'pointer',
-    boxShadow: '0 6px 18px rgba(224,122,95,0.35)',
+    boxShadow: '0 6px 18px rgba(0,0,0,0.2)',
   },
   shareCard: {
     background: '#ffffff',
@@ -317,7 +389,6 @@ const styles = {
   },
   previewBtn: {
     flex: 1,
-    background: '#e07a5f',
     color: '#ffffff',
     border: 'none',
     padding: '0.75rem 1rem',

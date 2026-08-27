@@ -48,6 +48,44 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
+ *  ANIMATED 3D BAT MESSENGER OVERHEAD 🦇
+ * ------------------------------------------------------------- */
+function AnimatedBatMessenger() {
+  const batRef = useRef();
+
+  useFrame((state) => {
+    if (!batRef.current) return;
+    const clock = state.clock.getElapsedTime();
+    batRef.current.position.x = Math.sin(clock * 0.8) * 18.0;
+    batRef.current.position.z = Math.cos(clock * 0.8) * 14.0 - 15.0;
+    batRef.current.position.y = 6.5 + Math.sin(clock * 4.0) * 0.5;
+    batRef.current.rotation.y = clock * 0.8 + Math.PI / 2;
+  });
+
+  return (
+    <group ref={batRef} position={[0, 6.5, -15.0]} scale={0.85}>
+      <mesh castShadow>
+        <sphereGeometry args={[0.3, 12, 12]} />
+        <meshToonMaterial color="#2b1e3a" />
+        <ToonOutline thickness={0.025} color="#12091f" />
+      </mesh>
+      <mesh position={[-0.45, 0, 0]} rotation={[0, 0.2, 0]}>
+        <boxGeometry args={[0.8, 0.04, 0.4]} />
+        <meshToonMaterial color="#7209b7" />
+      </mesh>
+      <mesh position={[0.45, 0, 0]} rotation={[0, -0.2, 0]}>
+        <boxGeometry args={[0.8, 0.04, 0.4]} />
+        <meshToonMaterial color="#7209b7" />
+      </mesh>
+      <mesh position={[0, -0.22, 0.1]}>
+        <boxGeometry args={[0.32, 0.2, 0.04]} />
+        <meshToonMaterial color="#f4f1de" />
+      </mesh>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
  *  DETAILED CUTE 3D ORANGE CAT PET 🐱
  * ------------------------------------------------------------- */
 function OrangeCatPet({ targetGroupRef, activePet }) {
@@ -652,6 +690,9 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
 
       {/* 🌲🌸 DENSE MULTI-COLOR FOREST BOUNDARY ENCLOSING THE 100x80 PLAYABLE VILLAGE */}
       <DenseMultiColorForestBoundary />
+
+      {/* 🦇 ANIMATED 3D BAT MESSENGER OVERHEAD */}
+      <AnimatedBatMessenger />
 
       {/* 🌽🌻 18-20% LARGE FLOWER FARM & VEGETABLE FARMS */}
       <LargeCropFarms />

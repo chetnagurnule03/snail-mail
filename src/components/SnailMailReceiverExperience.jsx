@@ -1,405 +1,572 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sparkles, ContactShadows, Outlines } from '@react-three/drei';
+import { OrbitControls, Outlines, Sparkles, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
+import { letterService } from '../lib/supabase';
+
+function ToonOutline({ thickness = 0.03, color = '#1a0b2e' }) {
+  return <Outlines thickness={thickness} color={color} screenspace={false} />;
+}
 
 /** -------------------------------------------------------------
- *  3D ANIMATED SNAIL MESSENGER CRAWLING ON PATH FOR RECEIVER 🐌💌
+ *  3D ANIMATED BAT MESSENGER MODEL 🦇
  * ------------------------------------------------------------- */
-function ReceiverSnail3D({ progress }) {
-  const snailRef = useRef();
+function ReceiverBat3D({ progress, isDelivered }) {
+  const batRef = useRef();
+  const leftWingRef = useRef();
+  const rightWingRef = useRef();
 
   useFrame((state) => {
-    if (!snailRef.current) return;
+    if (!batRef.current) return;
     const clock = state.clock.getElapsedTime();
-    const currentX = THREE.MathUtils.lerp(-8.0, 8.0, progress);
-    snailRef.current.position.x = currentX;
-    snailRef.current.position.y = Math.abs(Math.sin(clock * 6)) * 0.04;
+
+    if (!isDelivered) {
+      // Fluttering wing animation
+      const flap = Math.sin(clock * 22) * 0.5;
+      if (leftWingRef.current) leftWingRef.current.rotation.z = 0.2 + flap;
+      if (rightWingRef.current) rightWingRef.current.rotation.z = -0.2 - flap;
+
+      // Fast flying trajectory
+      batRef.current.position.x = (progress - 0.5) * 16.0;
+      batRef.current.position.y = 2.2 + Math.sin(clock * 4) * 0.35;
+      batRef.current.position.z = Math.cos(clock * 3) * 0.4;
+      batRef.current.rotation.y = Math.PI / 2;
+    } else {
+      batRef.current.position.x = 0;
+      batRef.current.position.y = 1.25;
+      batRef.current.position.z = 0;
+      batRef.current.rotation.y = 0;
+    }
   });
 
   return (
-    <group ref={snailRef} position={[-8.0, 0, 0]} scale={1.2}>
-      {/* Snail Body */}
-      <mesh position={[0, 0.22, 0]} castShadow>
-        <capsuleGeometry args={[0.2, 0.7, 8, 16]} rotation={[Math.PI / 2, 0, 0]} />
-        <meshToonMaterial color="#ffb703" />
-        <Outlines thickness={0.03} color="#2b2013" />
+    <group ref={batRef} position={[-8, 2.2, 0]} scale={1.2}>
+      {/* Bat Body */}
+      <mesh castShadow>
+        <sphereGeometry args={[0.32, 16, 16]} />
+        <meshToonMaterial color="#2b1e3a" />
+        <ToonOutline thickness={0.025} color="#12091f" />
       </mesh>
 
-      {/* Snail Eye Stalks */}
-      <group position={[0.22, 0.45, 0]}>
-        <mesh position={[0, 0.18, -0.08]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.3, 8]} />
-          <meshToonMaterial color="#ffb703" />
-        </mesh>
-        <mesh position={[0, 0.32, -0.08]}>
-          <sphereGeometry args={[0.05, 10, 10]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-
-        <mesh position={[0, 0.18, 0.08]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.3, 8]} />
-          <meshToonMaterial color="#ffb703" />
-        </mesh>
-        <mesh position={[0, 0.32, 0.08]}>
-          <sphereGeometry args={[0.05, 10, 0]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-      </group>
-
-      {/* Spiral Shell */}
-      <group position={[-0.1, 0.5, 0]}>
-        <mesh rotation={[0, 0, 0]} castShadow>
-          <torusGeometry args={[0.34, 0.18, 14, 28]} />
-          <meshToonMaterial color="#e07a5f" />
-          <Outlines thickness={0.03} color="#2b2013" />
-        </mesh>
-      </group>
-
-      {/* 💌 Envelope on Shell */}
-      <group position={[-0.1, 0.85, 0]} rotation={[0, 0, 0.1]}>
+      {/* Bat Head & Pointed Ears */}
+      <group position={[0, 0.22, 0.2]}>
         <mesh castShadow>
-          <boxGeometry args={[0.55, 0.06, 0.38]} />
-          <meshToonMaterial color="#ffffff" />
+          <sphereGeometry args={[0.22, 12, 12]} />
+          <meshToonMaterial color="#2b1e3a" />
+          <ToonOutline thickness={0.025} color="#12091f" />
         </mesh>
-        <mesh position={[0, 0.04, 0]}>
-          <cylinderGeometry args={[0.06, 0.06, 0.03, 8]} />
-          <meshToonMaterial color="#e63946" />
+        {/* Ears */}
+        <mesh position={[-0.12, 0.22, 0]} rotation={[0, 0, -0.2]}>
+          <coneGeometry args={[0.07, 0.22, 4]} />
+          <meshToonMaterial color="#7209b7" />
+        </mesh>
+        <mesh position={[0.12, 0.22, 0]} rotation={[0, 0, 0.2]}>
+          <coneGeometry args={[0.07, 0.22, 4]} />
+          <meshToonMaterial color="#7209b7" />
+        </mesh>
+        {/* Glowing Yellow Eyes */}
+        <mesh position={[-0.07, 0.04, 0.18]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+        </mesh>
+        <mesh position={[0.07, 0.04, 0.18]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
         </mesh>
       </group>
 
-      <Sparkles position={[0, 0.8, 0]} count={10} scale={1.2} size={3.5} speed={0.6} color="#ffd23f" />
+      {/* Flapping Wings */}
+      <group ref={leftWingRef} position={[-0.25, 0.05, 0]}>
+        <mesh position={[-0.45, 0, 0]} rotation={[0, 0.2, 0]}>
+          <boxGeometry args={[0.9, 0.04, 0.45]} />
+          <meshToonMaterial color="#4a1259" />
+        </mesh>
+      </group>
+      <group ref={rightWingRef} position={[0.25, 0.05, 0]}>
+        <mesh position={[0.45, 0, 0]} rotation={[0, -0.2, 0]}>
+          <boxGeometry args={[0.9, 0.04, 0.45]} />
+          <meshToonMaterial color="#4a1259" />
+        </mesh>
+      </group>
+
+      {/* Envelope Held in Claws ✉️ */}
+      {!isDelivered && (
+        <group position={[0, -0.25, 0.15]} rotation={[0.4, 0, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.42, 0.28, 0.05]} />
+            <meshToonMaterial color="#f4f1de" />
+          </mesh>
+          <mesh position={[0, 0, 0.03]}>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshToonMaterial color="#7209b7" />
+          </mesh>
+        </group>
+      )}
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  RECEIVER EXPERIENCE COMPONENT (NO LOGIN REQUIRED)
+ *  3D ANIMATED SNAIL MESSENGER MODEL 🐌
  * ------------------------------------------------------------- */
-export default function SnailMailReceiverExperience({ letter, onBackToGame }) {
-  const [timeLeft, setTimeLeft] = useState(60); // 60s journey
-  const [isRevealed, setIsRevealed] = useState(false);
+function ReceiverSnail3D({ progress, isDelivered }) {
+  const snailRef = useRef();
+
+  useFrame((state) => {
+    if (!snailRef.current) return;
+    const clock = state.clock.getElapsedTime();
+
+    if (!isDelivered) {
+      snailRef.current.position.x = (progress - 0.5) * 14.0;
+      snailRef.current.position.y = Math.sin(clock * 6) * 0.04;
+      snailRef.current.rotation.y = Math.PI / 2;
+    } else {
+      snailRef.current.position.x = 0;
+      snailRef.current.position.y = 0;
+      snailRef.current.rotation.y = 0;
+    }
+  });
+
+  return (
+    <group ref={snailRef} position={[-7, 0, 0]} scale={1.4}>
+      <mesh position={[-0.15, 0.62, 0.05]} rotation={[0, 0, -0.2]} castShadow>
+        <sphereGeometry args={[0.52, 16, 16]} />
+        <meshToonMaterial color="#d4a373" />
+        <ToonOutline thickness={0.03} color="#5c381e" />
+      </mesh>
+      <mesh position={[0.3, 0.28, 0]} castShadow>
+        <capsuleGeometry args={[0.22, 0.9, 10, 16]} />
+        <meshToonMaterial color="#faedcd" />
+        <ToonOutline thickness={0.03} color="#5c381e" />
+      </mesh>
+      <group position={[0.62, 0.5, 0]}>
+        <mesh position={[-0.08, 0.18, 0.1]} rotation={[0, 0, -0.2]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.3, 8]} />
+          <meshToonMaterial color="#faedcd" />
+        </mesh>
+        <mesh position={[-0.08, 0.32, 0.1]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshToonMaterial color="#2b2013" />
+        </mesh>
+        <mesh position={[-0.08, 0.18, -0.1]} rotation={[0, 0, -0.2]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.3, 8]} />
+          <meshToonMaterial color="#faedcd" />
+        </mesh>
+        <mesh position={[-0.08, 0.32, -0.1]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshToonMaterial color="#2b2013" />
+        </mesh>
+      </group>
+      {!isDelivered && (
+        <group position={[-0.15, 1.05, 0.05]} rotation={[0, 0.3, 0.2]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.48, 0.34, 0.06]} />
+            <meshToonMaterial color="#f4f1de" />
+          </mesh>
+          <mesh position={[0, 0, 0.04]}>
+            <sphereGeometry args={[0.06, 8, 8]} />
+            <meshToonMaterial color="#e63946" />
+          </mesh>
+        </group>
+      )}
+    </group>
+  );
+}
+
+const SNAIL_QUOTES = [
+  "I'm on my way! 🐌",
+  "Slow and steady wins the letter race...",
+  "Almost there! Carrying your letter with care 💌",
+  "Just a little further! 🐌💨",
+];
+
+const BAT_QUOTES = [
+  "Flying your letter over! 🦇",
+  "Fast air delivery! ⚡",
+  "Almost there... 💌",
+  "Delivery incoming! 🦇💨",
+];
+
+export default function SnailMailReceiverExperience({ letterId }) {
+  const [letter, setLetter] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0); // 0 to 1
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [isDelivered, setIsDelivered] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
 
-  const SNAIL_QUOTES = [
-    "I'm on my way! 🐌",
-    "This letter is important! 💌",
-    "Almost there...",
-    "Just a little further! 🐌💨",
-    "Delivering special mail to your doorstep! ✨",
-  ];
+  useEffect(() => {
+    async function fetchLetter() {
+      if (!letterId) return;
+      const data = await letterService.getLetterById(letterId);
+      if (data) {
+        setLetter(data);
+        const duration = data.delivery_method === 'bat' ? 15 : 60;
+        setTimeLeft(duration);
+      }
+      setLoading(false);
+    }
+    fetchLetter();
+  }, [letterId]);
 
   useEffect(() => {
-    if (timeLeft <= 0) {
-      setIsRevealed(true);
-      return;
-    }
+    if (!letter || isDelivered) return;
 
-    const timer = setInterval(() => {
+    const totalTime = letter.delivery_method === 'bat' ? 15 : 60;
+    const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
-          setIsRevealed(true);
+          clearInterval(interval);
+          setIsDelivered(true);
+          setProgress(1.0);
           return 0;
         }
-        return prev - 1;
+        const newTime = prev - 1;
+        setProgress((totalTime - newTime) / totalTime);
+        return newTime;
       });
     }, 1000);
 
-    const quoteTimer = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % SNAIL_QUOTES.length);
-    }, 12000);
+    const quotes = letter.delivery_method === 'bat' ? BAT_QUOTES : SNAIL_QUOTES;
+    const quoteInterval = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % quotes.length);
+    }, totalTime === 15 ? 3500 : 8000);
 
     return () => {
-      clearInterval(timer);
-      clearInterval(quoteTimer);
+      clearInterval(interval);
+      clearInterval(quoteInterval);
     };
-  }, [timeLeft]);
+  }, [letter, isDelivered]);
 
-  const progress = Math.min(1.0, (60 - timeLeft) / 60);
-
-  const handleSkipTimer = () => {
-    setTimeLeft(0);
-    setIsRevealed(true);
+  const handleSpeedUp = () => {
+    setTimeLeft(1);
   };
+
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}>🐌</div>
+        <p style={{ color: '#5c381e', fontWeight: 700 }}>Finding your Snail Mail letter...</p>
+      </div>
+    );
+  }
+
+  if (!letter) {
+    return (
+      <div style={styles.loadingContainer}>
+        <h2>Letter Not Found 📭</h2>
+        <p>This letter link may have expired or is invalid.</p>
+        <button style={styles.homeBtn} onClick={() => (window.location.href = window.location.origin)}>
+          🏡 Go to Village
+        </button>
+      </div>
+    );
+  }
+
+  const isBat = letter.delivery_method === 'bat';
+  const quotes = isBat ? BAT_QUOTES : SNAIL_QUOTES;
 
   return (
     <div style={styles.container}>
-      {/* 3D Canvas Background */}
-      <div style={styles.canvasWrapper}>
-        <Canvas camera={{ position: [0, 2.5, 6.0], fov: 45 }}>
-          <color attach="background" args={['#bfe8f7']} />
-          <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={1.1} />
-          <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow />
-
-          {/* Path */}
-          <mesh position={[0, -0.02, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-            <planeGeometry args={[60, 4]} />
-            <meshToonMaterial color="#cbb994" />
-          </mesh>
-          <mesh position={[0, -0.04, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-            <planeGeometry args={[60, 60]} />
-            <meshToonMaterial color="#94c77d" />
-          </mesh>
-
-          <ReceiverSnail3D progress={progress} />
-          <OrbitControls enableZoom={false} maxPolarAngle={Math.PI * 0.45} />
-          <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={20} blur={2.0} />
-        </Canvas>
+      {/* Top Header Bar */}
+      <div style={styles.header}>
+        <div style={styles.headerTitle}>
+          {isBat ? '🦇 Bat Air Express Messenger' : '🐌 Snail Mail Messenger'}
+        </div>
+        <button style={styles.exploreBtn} onClick={() => (window.location.href = window.location.origin)}>
+          🎮 Play Snail Mail Game
+        </button>
       </div>
 
-      {/* Transit Journey Overlay Card */}
-      {!isRevealed ? (
-        <div style={styles.journeyCard}>
-          <div style={styles.badge}>🐌 Snail Express Messenger in Transit</div>
-          <h2 style={styles.quoteText}>{SNAIL_QUOTES[quoteIndex]}</h2>
+      {/* 3D Scene Viewport */}
+      <div style={styles.canvasWrapper}>
+        <Canvas camera={{ position: [0, 2.5, 6.5], fov: 45 }}>
+          <color attach="background" args={isBat ? ['#1a0b2e'] : ['#bfe8f7']} />
+          <ambientLight intensity={isBat ? 0.6 : 0.9} />
+          <directionalLight position={[5, 8, 5]} intensity={1.2} />
 
-          {/* Progress Bar */}
-          <div style={styles.progressTrack}>
-            <div style={{ ...styles.progressBar, width: `${progress * 100}%` }} />
+          {isBat ? (
+            <ReceiverBat3D progress={progress} isDelivered={isDelivered} />
+          ) : (
+            <ReceiverSnail3D progress={progress} isDelivered={isDelivered} />
+          )}
+
+          {/* Grass Floor */}
+          <mesh position={[0, -0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[30, 30]} />
+            <meshToonMaterial color={isBat ? '#2d1b4e' : '#94c77d'} />
+          </mesh>
+          <Sparkles count={50} scale={15} color={isBat ? '#f72585' : '#ffe5ec'} />
+          <OrbitControls enableZoom={false} maxPolarAngle={Math.PI * 0.48} />
+        </Canvas>
+
+        {/* Reaction Bubble during journey */}
+        {!isDelivered && (
+          <div style={styles.reactionBubble}>
+            {quotes[quoteIndex]}
           </div>
+        )}
+      </div>
 
-          <div style={styles.timerRow}>
-            <span style={styles.timerText}>
-              ⏱️ Delivery ETA: 00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
-            </span>
-            <button style={styles.skipBtn} onClick={handleSkipTimer}>
-              ⚡ Speed Up Snail
+      {/* Controls & Letter Display Card */}
+      <div style={styles.cardContainer}>
+        {!isDelivered ? (
+          <div style={styles.journeyCard}>
+            <div style={styles.timerBadge}>
+              ⏳ {isBat ? 'Bat Air Transit' : 'Snail Transit'}: {timeLeft}s remaining
+            </div>
+            <p style={styles.journeyText}>
+              A letter from <strong>{letter.sender_name}</strong> is traveling to you!
+            </p>
+            <div style={styles.progressBarBg}>
+              <div
+                style={{
+                  ...styles.progressBarFill,
+                  width: `${progress * 100}%`,
+                  background: isBat ? '#7209b7' : '#e07a5f',
+                }}
+              />
+            </div>
+            <button
+              style={{
+                ...styles.speedBtn,
+                background: isBat ? '#7209b7' : '#2a9d8f',
+              }}
+              onClick={handleSpeedUp}
+            >
+              {isBat ? '⚡ Speed Up Bat Flight' : '⚡ Speed Up Snail'}
             </button>
           </div>
-        </div>
-      ) : (
-        /* Revealed Letter Parchment Modal */
-        <div style={styles.letterOverlay}>
-          <div style={styles.letterCard}>
+        ) : (
+          /* Opened Letter View */
+          <div style={styles.openedLetterCard}>
+            <div style={styles.letterStamp}>
+              {isBat ? '🦇' : '🐌'}
+            </div>
             <div style={styles.letterHeader}>
-              <div style={styles.stampBadge}>
-                <span style={{ fontSize: '1.8rem' }}>🐌</span>
+              <div>
+                <span style={styles.letterFromLabel}>From: </span>
+                <span style={styles.letterFromName}>{letter.sender_name}</span>
               </div>
               <div>
-                <p style={styles.letterMeta}>Snail Express Delivery</p>
-                <h1 style={styles.letterTitle}>💌 A Letter For You!</h1>
+                <span style={styles.letterFromLabel}>To: </span>
+                <span style={styles.letterFromName}>{letter.recipient_name}</span>
               </div>
             </div>
 
-            <div style={styles.letterBody}>
-              <div style={styles.recipientRow}>
-                <span><strong>To:</strong> {letter?.recipient_name || 'Friend'}</span>
-                <span><strong>From:</strong> {letter?.sender_name || 'A Neighbor'}</span>
-              </div>
-
-              {letter?.subject && (
-                <h3 style={styles.subjectText}>Subject: {letter.subject}</h3>
-              )}
-
-              <div style={styles.messageBox}>
-                <p style={styles.messageText}>
-                  {letter?.body || 'Wishing you a magical and peaceful day in the village!'}
-                </p>
-              </div>
-            </div>
+            <h3 style={styles.letterSubject}>{letter.subject}</h3>
+            <div style={styles.letterBody}>{letter.body}</div>
 
             <div style={styles.letterFooter}>
-              <button style={styles.actionBtn} onClick={onBackToGame}>
-                🏡 Enter 3D Village World
+              <span>Delivered via {isBat ? 'Bat Air Express 🦇' : 'Snail Express 🐌'}</span>
+              <button
+                style={{
+                  ...styles.replyBtn,
+                  background: isBat ? '#7209b7' : '#e07a5f',
+                }}
+                onClick={() => (window.location.href = window.location.origin)}
+              >
+                💌 Send Letter Back
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
 const styles = {
   container: {
-    position: 'fixed',
-    inset: 0,
-    zIndex: 100,
-    background: '#bfe8f7',
+    width: '100vw',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    background: '#faf6ee',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    overflow: 'hidden',
+  },
+  loadingContainer: {
+    width: '100vw',
+    height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  canvasWrapper: {
-    position: 'absolute',
-    inset: 0,
-    zIndex: 1,
-  },
-  journeyCard: {
-    position: 'absolute',
-    bottom: 40,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: 'rgba(255, 250, 241, 0.94)',
-    backdropFilter: 'blur(10px)',
-    padding: '24px 32px',
-    borderRadius: 24,
-    border: '3px solid #e3d7bf',
-    boxShadow: '0 16px 40px rgba(70,50,30,0.25)',
-    zIndex: 10,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    background: '#faf6ee',
     gap: 12,
-    maxWidth: 480,
-    width: '90%',
-    textAlign: 'center',
   },
-  badge: {
-    background: '#e07a5f',
-    color: '#ffffff',
-    padding: '6px 16px',
-    borderRadius: 999,
-    fontSize: '0.82rem',
-    fontWeight: 800,
+  spinner: {
+    fontSize: '3rem',
+    animation: 'pulse 1.5s infinite',
   },
-  quoteText: {
-    margin: '4px 0',
-    fontSize: '1.4rem',
-    color: '#4a2c11',
-    fontWeight: 800,
-  },
-  progressTrack: {
-    width: '100%',
-    height: 12,
-    background: '#e8dfce',
-    borderRadius: 999,
-    overflow: 'hidden',
-    border: '1px solid #d4c7b0',
-  },
-  progressBar: {
-    height: '100%',
-    background: 'linear-gradient(90deg, #ffb703, #e07a5f)',
-    borderRadius: 999,
-    transition: 'width 1s linear',
-  },
-  timerRow: {
+  header: {
+    height: 54,
+    background: '#ffffff',
+    borderBottom: '2px solid #e3d7bf',
     display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%',
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'space-between',
+    padding: '0 1.25rem',
+    zIndex: 10,
   },
-  timerText: {
-    fontSize: '0.9rem',
-    color: '#7a5c3e',
-    fontWeight: 700,
+  headerTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 800,
+    color: '#4a2c11',
   },
-  skipBtn: {
+  exploreBtn: {
     background: '#2a9d8f',
     color: '#ffffff',
     border: 'none',
-    padding: '6px 14px',
+    padding: '0.45rem 1rem',
     borderRadius: 12,
     fontWeight: 700,
     cursor: 'pointer',
-    fontSize: '0.8rem',
+    fontSize: '0.85rem',
   },
-  letterOverlay: {
+  canvasWrapper: {
+    flex: 1,
+    position: 'relative',
+    background: '#bfe8f7',
+  },
+  reactionBubble: {
     position: 'absolute',
-    inset: 0,
-    background: 'rgba(40, 30, 20, 0.55)',
-    backdropFilter: 'blur(6px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 20,
-    padding: 16,
+    top: 24,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: '#ffffff',
+    padding: '0.6rem 1.25rem',
+    borderRadius: 20,
+    fontWeight: 800,
+    color: '#4a2c11',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+    border: '2px solid #e3d7bf',
+    fontSize: '0.95rem',
   },
-  letterCard: {
-    background: '#fffaf1',
-    borderRadius: 24,
+  cardContainer: {
+    padding: '1rem',
+    display: 'flex',
+    justifyContent: 'center',
+    background: '#ffffff',
+    borderTop: '2px solid #e3d7bf',
+  },
+  journeyCard: {
+    maxWidth: 460,
     width: '100%',
-    maxWidth: 520,
-    boxShadow: '0 24px 60px rgba(50,35,20,0.35)',
-    border: '3px solid #e3d7bf',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 8,
+    textAlign: 'center',
+  },
+  timerBadge: {
+    background: '#fdf0d5',
+    color: '#c68a4c',
+    fontWeight: 800,
+    padding: '0.35rem 0.9rem',
+    borderRadius: 12,
+    fontSize: '0.88rem',
+  },
+  journeyText: {
+    margin: 0,
+    color: '#4a2c11',
+    fontSize: '0.95rem',
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 10,
+    background: '#e3d7bf',
+    borderRadius: 5,
     overflow: 'hidden',
-    animation: 'popIn 0.4s ease-out',
+  },
+  progressBarFill: {
+    height: '100%',
+    transition: 'width 0.3s ease',
+  },
+  speedBtn: {
+    color: '#ffffff',
+    border: 'none',
+    padding: '0.55rem 1.2rem',
+    borderRadius: 12,
+    fontWeight: 800,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    marginTop: 4,
+  },
+  openedLetterCard: {
+    maxWidth: 520,
+    width: '100%',
+    background: '#fffef9',
+    border: '2px solid #e3d7bf',
+    borderRadius: 16,
+    padding: '1.25rem 1.5rem',
+    position: 'relative',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+  },
+  letterStamp: {
+    position: 'absolute',
+    top: 14,
+    right: 16,
+    fontSize: '2rem',
   },
   letterHeader: {
-    padding: '1.5rem',
-    background: 'linear-gradient(135deg, #fae1c5 0%, #f4f1de 100%)',
-    borderBottom: '2px solid #e8dfce',
     display: 'flex',
-    alignItems: 'center',
-    gap: 16,
+    flexDirection: 'column',
+    gap: 2,
+    marginBottom: 10,
   },
-  stampBadge: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
-    background: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '2.5px dashed #e07a5f',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-  },
-  letterMeta: {
-    margin: 0,
-    fontSize: '0.8rem',
-    color: '#8c5a3c',
+  letterFromLabel: {
+    color: '#8a7a63',
     fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    fontSize: '0.85rem',
   },
-  letterTitle: {
-    margin: '2px 0 0 0',
-    fontSize: '1.4rem',
+  letterFromName: {
     color: '#4a2c11',
+    fontWeight: 800,
+    fontSize: '0.95rem',
+  },
+  letterSubject: {
+    margin: '0 0 10px 0',
+    color: '#e07a5f',
+    fontSize: '1.15rem',
     fontWeight: 800,
   },
   letterBody: {
-    padding: '1.5rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 14,
-  },
-  recipientRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
     fontSize: '0.95rem',
-    color: '#5c381e',
-    paddingBottom: 10,
-    borderBottom: '1px dashed #e3d7bf',
-  },
-  subjectText: {
-    margin: 0,
-    fontSize: '1.1rem',
-    color: '#4a2c11',
-    fontWeight: 700,
-  },
-  messageBox: {
-    background: '#ffffff',
-    padding: '1.25rem',
-    borderRadius: 16,
-    border: '1.5px solid #e3d7bf',
-    minHeight: 120,
-  },
-  messageText: {
-    margin: 0,
-    fontSize: '1.05rem',
-    color: '#3d2616',
-    lineHeight: 1.6,
+    lineHeight: 1.55,
+    color: '#332211',
     whiteSpace: 'pre-wrap',
+    background: '#fdfbfa',
+    padding: '0.85rem',
+    borderRadius: 10,
+    border: '1.5px solid #f3e9dc',
   },
   letterFooter: {
-    padding: '1.25rem 1.5rem',
-    borderTop: '1px solid #e8dfce',
+    marginTop: 14,
     display: 'flex',
-    justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    fontSize: '0.8rem',
+    color: '#8a7a63',
+    fontWeight: 600,
   },
-  actionBtn: {
-    background: '#e07a5f',
+  replyBtn: {
     color: '#ffffff',
     border: 'none',
-    padding: '0.85rem 2rem',
-    borderRadius: 999,
-    fontSize: '1rem',
+    padding: '0.5rem 1rem',
+    borderRadius: 10,
     fontWeight: 800,
     cursor: 'pointer',
-    boxShadow: '0 6px 18px rgba(224,122,95,0.35)',
+    fontSize: '0.85rem',
+  },
+  homeBtn: {
+    background: '#2a9d8f',
+    color: '#ffffff',
+    border: 'none',
+    padding: '0.6rem 1.2rem',
+    borderRadius: 12,
+    fontWeight: 800,
+    cursor: 'pointer',
   },
 };

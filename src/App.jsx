@@ -57,9 +57,10 @@ export default function App() {
     setIsMailComposerOpen(true);
   };
 
-  const handleLetterSent = (recipientName = 'Villager') => {
+  const handleLetterSent = (recipientName = 'Villager', deliveryMethod = 'snail') => {
     setIsMailComposerOpen(false);
-    setMailToast(`Letter sent to ${recipientName}! 🐌💌`);
+    const icon = deliveryMethod === 'bat' ? '🦇' : '🐌';
+    setMailToast(`Letter sent to ${recipientName} via ${deliveryMethod === 'bat' ? 'Bat Air Express' : 'Snail Express'}! ${icon}💌`);
     setTimeout(() => setMailToast(null), 4000);
   };
 
