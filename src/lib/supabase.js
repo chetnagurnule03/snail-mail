@@ -1,165 +1,82 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Retrieve environment variables from Vite
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Fallback / Default Supabase Credentials
+const SUPABASE_URL_KEY = 'SNAIL_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'SNAIL_SUPABASE_ANON_KEY';
+const MOCK_LETTERS_KEY = 'SNAIL_MOCK_LETTERS_VAULT';
 
-// Check if credentials are properly set up
-export const isSupabaseConfigured = () => {
-  return (
-    Boolean(supabaseUrl) &&
-    Boolean(supabaseAnonKey) &&
-    supabaseUrl !== 'https://your-project-id.supabase.co' &&
-    supabaseAnonKey !== 'your-actual-anon-key-here'
-  );
-};
+const defaultUrl = 'https://xyzcompany.supabase.co';
+const defaultAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5emNvbXBhbnkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.dummy_key';
 
-// Create Supabase Client instance (fallback to dummy client if unconfigured)
-export const supabase = isSupabaseConfigured()
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+export function getSupabaseUrl() {
+  return localStorage.getItem(SUPABASE_URL_KEY) || import.meta.env.VITE_SUPABASE_URL || defaultUrl;
+}
 
-// Initial Mock Seed Data for Demonstration Mode
-const MOCK_LETTERS_KEY = 'snail_email_mock_letters';
+export function getSupabaseAnonKey() {
+  return localStorage.getItem(SUPABASE_ANON_KEY) || import.meta.env.VITE_SUPABASE_ANON_KEY || defaultAnonKey;
+}
 
-const getInitialMockLetters = () => {
+export function isSupabaseConfigured() {
+  const url = getSupabaseUrl();
+  const key = getSupabaseAnonKey();
+  return url && key && url !== defaultUrl && !url.includes('xyzcompany');
+}
+
+export let supabase = null;
+
+try {
+  const url = getSupabaseUrl();
+  const key = getSupabaseAnonKey();
+  if (url && key) {
+    supabase = createClient(url, key);
+  }
+} catch (e) {
+  console.warn('Failed to initialize Supabase client:', e);
+}
+
+export function updateSupabaseConfig(url, anonKey) {
+  if (url) localStorage.setItem(SUPABASE_URL_KEY, url);
+  if (anonKey) localStorage.setItem(SUPABASE_ANON_KEY, anonKey);
+  window.location.reload();
+}
+
+function getInitialMockLetters() {
   const stored = localStorage.getItem(MOCK_LETTERS_KEY);
   if (stored) {
-    try { return JSON.parse(stored); } catch (e) { /* ignore error */ }
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      console.warn('Failed to parse mock letters:', e);
+    }
   }
-  
-  const now = new Date();
-  const future3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
-  const past2Days = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
 
-  const defaultSeed = [
+  const sample = [
     {
-      id: 'letter-snitch-1',
-      sender_name: 'Golden Snitch Dispatch',
-      sender_email: 'snitch@snailmail.local',
-      recipient_name: 'Seeker',
-      recipient_email: 'seeker@hogwarts.edu',
-      subject: '⚡ Golden Snitch Express Delivery',
-      body: 'Congratulations!\n\nThis letter was delivered via the Golden Snitch Express Webhook Notifier. Your scheduled message has officially landed in your mailbox.\n\nCatch the Snitch!',
-      deliver_at: past2Days,
-      status: 'delivered',
-      stamp_type: 'golden_snitch',
-      stationery_theme: 'classic_parchment',
-      wax_color: '#d4af37',
-      webhook_url: 'https://httpbin.org/post',
-      created_at: past2Days
-    },
-    {
-      id: 'letter-1',
-      sender_name: 'Lady Eleanor',
-      sender_email: 'eleanor@victorianpost.io',
-      recipient_name: 'Arthur Pendelton',
-      recipient_email: 'arthur@example.com',
-      subject: 'A Time Capsule for Next Year',
-      body: 'Dearest Arthur,\n\nI am writing to you from the past using Snail Express. Ensure you do not open this until the appointed hour. May time be gentle with you.\n\nWarmest regards,\nLady Eleanor',
-      deliver_at: future3Days,
-      status: 'in_transit',
+      id: 'demo-letter-1',
+      sender_name: 'Luna',
+      sender_email: 'luna@storybook.local',
+      recipient_name: 'Wanderer',
+      recipient_email: 'player@village.local',
+      subject: 'Welcome to Snail Mail Village! 🐌',
+      body: 'Dear friend,\n\nWelcome to our cozy 3D village! Take your time exploring the gardens, visiting the market stalls, and riding your horse.\n\nWarmly,\nLuna',
+      deliver_at: new Date(Date.now() - 3600 * 1000).toISOString(),
       stamp_type: 'royal_snail',
       stationery_theme: 'classic_parchment',
       wax_color: '#9b111e',
-      webhook_url: '',
-      created_at: new Date(now.getTime() - 1000000).toISOString()
+      status: 'delivered',
+      created_at: new Date(Date.now() - 7200 * 1000).toISOString()
     }
   ];
 
-  localStorage.setItem(MOCK_LETTERS_KEY, JSON.stringify(defaultSeed));
-  return defaultSeed;
-};
+  localStorage.setItem(MOCK_LETTERS_KEY, JSON.stringify(sample));
+  return sample;
+}
 
-// Dispatch Snitch Webhook Alert
-export const triggerSnitchWebhook = async (letter) => {
-  if (!letter.webhook_url) return { success: false, message: 'No Webhook URL configured for this letter.' };
-
-  try {
-    const payload = {
-      event: 'snail_email.letter_delivered',
-      timestamp: new Date().toISOString(),
-      letter: {
-        id: letter.id,
-        sender_name: letter.sender_name,
-        recipient_name: letter.recipient_name,
-        recipient_email: letter.recipient_email,
-        subject: letter.subject,
-        stamp_type: letter.stamp_type,
-        deliver_at: letter.deliver_at,
-        status: 'delivered'
-      }
-    };
-
-    const res = await fetch(letter.webhook_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    return {
-      success: res.ok,
-      status: res.status,
-      message: res.ok ? 'Golden Snitch webhook dispatched successfully!' : `Webhook responded with HTTP ${res.status}`
-    };
-  } catch (err) {
-    return { success: false, message: `Webhook delivery error: ${err.message}` };
-  }
-};
-
-// Supabase API Wrappers with Fallback
-export const authService = {
-  async signInWithGitHub() {
-    if (!isSupabaseConfigured() || !supabase) {
-      const mockUser = {
-        id: 'user-demo-123',
-        email: 'developer@github.com',
-        user_metadata: { full_name: 'GitHub Explorer', avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png' }
-      };
-      localStorage.setItem('snail_demo_user', JSON.stringify(mockUser));
-      return { data: { user: mockUser }, error: null };
-    }
-
-    return await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: window.location.origin }
-    });
-  },
-
-  async signOut() {
-    if (!isSupabaseConfigured() || !supabase) {
-      localStorage.removeItem('snail_demo_user');
-      return { error: null };
-    }
-    return await supabase.auth.signOut();
-  },
-
-  async getCurrentUser() {
-    if (!isSupabaseConfigured() || !supabase) {
-      const demoUser = localStorage.getItem('snail_demo_user');
-      return demoUser ? JSON.parse(demoUser) : null;
-    }
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-  }
-};
-
-// Database Operations
 export const letterService = {
   async getLetters() {
     if (!isSupabaseConfigured() || !supabase) {
       const mockData = getInitialMockLetters();
-      const now = new Date();
-      const updated = mockData.map(l => {
-        if (new Date(l.deliver_at) <= now && l.status === 'in_transit') {
-          // Trigger webhook on status transition
-          if (l.webhook_url) triggerSnitchWebhook(l);
-          return { ...l, status: 'delivered' };
-        }
-        return l;
-      });
-      localStorage.setItem(MOCK_LETTERS_KEY, JSON.stringify(updated));
-      return { data: updated, error: null };
+      return { data: mockData, error: null };
     }
 
     const { data, error } = await supabase
@@ -170,20 +87,41 @@ export const letterService = {
     return { data, error };
   },
 
+  async getLetterById(id) {
+    if (!id) return { data: null, error: 'No ID provided' };
+
+    // Check localStorage first
+    try {
+      const mockLetters = getInitialMockLetters();
+      const match = mockLetters.find(l => l.id === id || l.id === `letter-${id}` || l.id === `snl_${id}`);
+      if (match) return { data: match, error: null };
+    } catch (err) {
+      console.warn('localStorage letter read error:', err);
+    }
+
+    // Check Supabase if configured
+    if (isSupabaseConfigured() && supabase) {
+      const { data, error } = await supabase
+        .from('letters')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (data) return { data, error: null };
+    }
+
+    return { data: null, error: 'Letter not found' };
+  },
+
   async createLetter(letterData) {
     if (!isSupabaseConfigured() || !supabase) {
       const mockLetters = getInitialMockLetters();
-      const isDelivered = new Date(letterData.deliver_at) <= new Date();
       const newLetter = {
-        id: `letter-${Date.now()}`,
+        id: letterData.id || `snl_${Math.random().toString(36).substring(2, 9)}_${Date.now().toString(36)}`,
         ...letterData,
-        status: isDelivered ? 'delivered' : 'in_transit',
+        status: 'delivered',
         created_at: new Date().toISOString()
       };
-
-      if (isDelivered && newLetter.webhook_url) {
-        triggerSnitchWebhook(newLetter);
-      }
 
       const updatedList = [newLetter, ...mockLetters];
       localStorage.setItem(MOCK_LETTERS_KEY, JSON.stringify(updatedList));
@@ -194,10 +132,6 @@ export const letterService = {
       .from('letters')
       .insert([letterData])
       .select();
-
-    if (data && data[0] && data[0].status === 'delivered' && data[0].webhook_url) {
-      triggerSnitchWebhook(data[0]);
-    }
 
     return { data, error };
   }

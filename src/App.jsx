@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCharacter } from './hooks/useCharacter';
+import { letterService } from './lib/supabase';
 import GardenScene from './components/GardenScene';
 import VillagerDialogueModal from './components/VillagerDialogueModal';
 import Composer from './components/Composer';
+import SnailMailReceiverExperience from './components/SnailMailReceiverExperience';
 
 const OUTFIT_COLORS = ['#c9a7e0', '#e07a5f', '#84b574', '#76c8e3', '#ffb5a7', '#f4a261'];
 const HAIR_COLORS = ['#7a4a2b', '#3d2616', '#e6c594', '#b55239', '#c9a7e0'];
@@ -46,6 +48,10 @@ export default function App() {
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
+  // Shared Letter Receiver Experience State
+  const [sharedLetter, setSharedLetter] = useState(null);
+  const [isReceiverMode, setIsReceiverMode] = useState(false);
+
   // Snail Mail Toast & 3D Deliveries State
   const [mailToast, setMailToast] = useState(null);
   const [activeSnailDeliveries, setActiveSnailDeliveries] = useState([]);
@@ -53,6 +59,23 @@ export default function App() {
   // Villager Interaction State
   const [nearVillager, setNearVillager] = useState(null);
   const [activeDialogueVillager, setActiveDialogueVillager] = useState(null);
+
+  // Check URL for Shared Letter Link on startup
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pathMatch = window.location.pathname.match(/\/mail\/(.+)/)?.[1];
+    const hashMatch = window.location.hash.match(/mail\/(.+)/)?.[1];
+    const letterId = params.get('letter') || pathMatch || hashMatch;
+
+    if (letterId) {
+      letterService.getLetterById(letterId).then(({ data }) => {
+        if (data) {
+          setSharedLetter(data);
+          setIsReceiverMode(true);
+        }
+      });
+    }
+  }, []);
 
   const toggleMount = () => {
     setIsMounted((prev) => !prev);
@@ -88,13 +111,26 @@ export default function App() {
     setActiveSnailDeliveries((prev) => prev.filter((d) => d.id !== deliveryId));
   };
 
+  // Render Receiver Experience if opening a shared link
+  if (isReceiverMode && sharedLetter) {
+    return (
+      <SnailMailReceiverExperience
+        letter={sharedLetter}
+        onBackToGame={() => {
+          setIsReceiverMode(false);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }}
+      />
+    );
+  }
+
   if (charLoading || !character) {
     return <Centered>Waking up your village world…</Centered>;
   }
 
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
-      {/* 3D Storybook World Canvas (Loads Directly) */}
+      {/* 3D Storybook World Canvas */}
       <GardenScene
         character={character}
         resetCameraSignal={resetCameraSignal}
@@ -180,7 +216,7 @@ export default function App() {
             </div>
             <div style={styles.modalBody}>
               <Composer
-                user={{ id: 'local_player', email: 'player@village.local' }}
+                user={{ id: 'local_player', name: character?.name || 'Wanderer' }}
                 defaultRecipient={preselectedVillager?.name || ''}
                 onLetterSent={() => handleLetterSent(preselectedVillager?.name || 'Oliver')}
               />

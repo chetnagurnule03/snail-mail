@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Clock, Sparkles, Shield, Check, Calendar, Lock, Zap, Bell, Share2 } from 'lucide-react';
+import { Send, Clock, Sparkles, Shield, Check, Copy, Eye, Bell } from 'lucide-react';
 import { letterService } from '../lib/supabase';
 
 const STAMPS = [
@@ -7,368 +7,323 @@ const STAMPS = [
   { id: 'golden_snitch', name: 'Golden Snitch', icon: '🪙⚡', color: 'from-yellow-400 via-amber-300 to-amber-600' },
   { id: 'golden_leaf', name: 'Golden Autumn', icon: '🍂', color: 'from-orange-500 to-amber-700' },
   { id: 'vintage_owl', name: 'Postmaster Owl', icon: '🦉', color: 'from-purple-600 to-indigo-800' },
-  { id: 'time_capsule', name: 'Time Capsule', icon: '⏳', color: 'from-blue-600 to-cyan-800' },
 ];
 
-const WAX_COLORS = [
-  { name: 'Crimson Red', hex: '#9b111e' },
-  { name: 'Royal Gold', hex: '#d4af37' },
-  { name: 'Imperial Navy', hex: '#1e3a8a' },
-  { name: 'Forest Emerald', hex: '#065f46' },
-];
-
-const STATIONERY_THEMES = [
-  { id: 'classic_parchment', name: 'Classic Parchment', bgClass: 'parchment-sheet', textClass: 'text-stone-900' },
-  { id: 'midnight_star', name: 'Midnight Starlight', bgClass: 'bg-slate-900 text-amber-100 border border-amber-500/30', textClass: 'text-amber-100' },
-  { id: 'rose_velvet', name: 'Rose Velvet', bgClass: 'bg-pink-950/80 text-rose-100 border border-rose-500/30', textClass: 'text-rose-100' },
-];
-
-export default function Composer({ user, onLetterSent }) {
-  const [recipientName, setRecipientName] = useState('');
-  const [recipientEmail, setRecipientEmail] = useState('');
+export default function Composer({ user, defaultRecipient = '', onLetterSent }) {
+  const [recipientName, setRecipientName] = useState(defaultRecipient);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
-  const [stampType, setStampType] = useState('golden_snitch');
-  const [waxColor, setWaxColor] = useState('#d4af37');
-  const [theme, setTheme] = useState('classic_parchment');
-  const [webhookUrl, setWebhookUrl] = useState('');
-  const [deliveryPreset, setDeliveryPreset] = useState('1_min');
-  const [customDate, setCustomDate] = useState('');
+  const [senderName, setSenderName] = useState(user?.name || 'Wanderer');
+  const [stampType, setStampType] = useState('royal_snail');
   const [isSealing, setIsSealing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
-  const calculateDeliveryDate = () => {
-    const now = new Date();
-    if (deliveryPreset === 'now') return now.toISOString();
-    if (deliveryPreset === '1_min') return new Date(now.getTime() + 60 * 1000).toISOString();
-    if (deliveryPreset === '1_day') return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-    if (deliveryPreset === '1_year') return new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
-    if (deliveryPreset === 'custom' && customDate) return new Date(customDate).toISOString();
-    return new Date(now.getTime() + 60 * 1000).toISOString();
-  };
+  // Unique Share Link Modal State
+  const [shareModalData, setShareModalData] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!recipientEmail || !subject || !body) return;
+    if (!recipientName || !body) return;
 
     setIsSealing(true);
-    const deliverAt = calculateDeliveryDate();
+
+    const letterId = `snl_${Math.random().toString(36).substring(2, 9)}_${Date.now().toString(36)}`;
+    const origin = window.location.origin + window.location.pathname;
+    const shareUrl = `${origin}?letter=${letterId}`;
 
     const letterData = {
-      sender_id: user?.id || null,
-      sender_name: user?.user_metadata?.full_name || 'Anonymous Mailer',
-      sender_email: user?.email || 'guest@snailmail.local',
-      recipient_name: recipientName || recipientEmail,
-      recipient_email: recipientEmail,
-      subject,
+      id: letterId,
+      sender_id: user?.id || 'local_player',
+      sender_name: senderName || 'Anonymous Wanderer',
+      sender_email: 'player@village.local',
+      recipient_name: recipientName,
+      recipient_email: 'friend@village.local',
+      subject: subject || 'A cozy letter from the village 💌',
       body,
-      deliver_at: deliverAt,
       stamp_type: stampType,
-      stationery_theme: theme,
-      wax_color: waxColor,
-      webhook_url: webhookUrl,
+      share_url: shareUrl,
+      deliver_at: new Date().toISOString(),
     };
 
     setTimeout(async () => {
-      const { error } = await letterService.createLetter(letterData);
+      await letterService.createLetter(letterData);
       setIsSealing(false);
-      
-      if (!error) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          setIsSuccess(false);
-          setRecipientName('');
-          setRecipientEmail('');
-          setSubject('');
-          setBody('');
-          setWebhookUrl('');
-          if (onLetterSent) onLetterSent();
-        }, 1800);
-      }
-    }, 1200);
+
+      // Open Share Modal with Unique Shareable Link
+      setShareModalData({
+        letterId,
+        shareUrl,
+        recipientName,
+      });
+
+      if (onLetterSent) onLetterSent();
+    }, 900);
   };
 
-  const activeThemeObj = STATIONERY_THEMES.find(t => t.id === theme) || STATIONERY_THEMES[0];
-  const activeStampObj = STAMPS.find(s => s.id === stampType) || STAMPS[0];
+  const handleCopyLink = () => {
+    if (!shareModalData?.shareUrl) return;
+    navigator.clipboard.writeText(shareModalData.shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      
-      {/* Header Banner */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono mb-3">
-          <Zap className="w-3.5 h-3.5" /> Golden Snitch Express Notifier Enabled
-        </div>
-        <h1 className="font-heading text-3xl sm:text-4xl font-bold gradient-text mb-2">
-          Compose Delayed Snail Letter
-        </h1>
-        <p className="text-gray-400 font-serif italic max-w-xl mx-auto text-sm sm:text-base">
-          Craft a thoughtful message, affix the Golden Snitch stamp, seal it with wax, and send webhook pings automatically upon delivery.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Controls Panel (Left side) */}
-        <div className="lg:col-span-5 space-y-6">
-          
-          <div className="glass-panel p-6 space-y-5">
-            <h3 className="font-heading font-semibold text-amber-400 text-sm tracking-wider uppercase flex items-center gap-2">
-              <Clock className="w-4 h-4" /> 1. Delivery Timer & Speed
-            </h3>
-
-            <div>
-              <label className="input-label">Select Delivery Transit Delay</label>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: '1_min', label: '⚡ 1 Minute (Test)' },
-                  { id: '1_day', label: '🐌 1 Day (Slow)' },
-                  { id: '1_year', label: '⏳ 1 Year (Capsule)' },
-                  { id: 'custom', label: '📅 Custom Date' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setDeliveryPreset(item.id)}
-                    className={`btn text-xs py-2 px-3 justify-start ${
-                      deliveryPreset === item.id 
-                        ? 'btn-gold' 
-                        : 'bg-slate-900/60 border border-white/10 hover:border-amber-500/40 text-gray-300'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-
-              {deliveryPreset === 'custom' && (
-                <div className="mt-3">
-                  <input
-                    type="datetime-local"
-                    value={customDate}
-                    onChange={(e) => setCustomDate(e.target.value)}
-                    className="input-field text-xs font-mono"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Stamp & Wax Selection */}
-            <div className="pt-2 border-t border-white/10">
-              <label className="input-label mb-2">2. Postal Stamp</label>
-              <div className="grid grid-cols-2 gap-2">
-                {STAMPS.map((stamp) => (
-                  <div
-                    key={stamp.id}
-                    onClick={() => setStampType(stamp.id)}
-                    className={`p-2.5 rounded-lg border cursor-pointer flex items-center gap-2 transition-all ${
-                      stampType === stamp.id
-                        ? 'bg-amber-500/10 border-amber-500 text-amber-200 shadow-md ring-1 ring-amber-400'
-                        : 'bg-slate-900/40 border-white/5 hover:border-white/20 text-gray-400'
-                    }`}
-                  >
-                    <span className="text-xl">{stamp.icon}</span>
-                    <span className="text-xs font-medium">{stamp.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Snitch Webhook Notifier Input */}
-            <div className="pt-2 border-t border-white/10">
-              <label className="input-label mb-1 flex items-center gap-1.5 text-amber-300">
-                <Bell className="w-3.5 h-3.5 text-amber-400" /> Golden Snitch Webhook URL (Optional)
-              </label>
-              <input
-                type="url"
-                placeholder="https://discord.com/api/webhooks/... or https://httpbin.org/post"
-                value={webhookUrl}
-                onChange={(e) => setWebhookUrl(e.target.value)}
-                className="input-field text-xs font-mono"
-              />
-              <p className="text-[11px] text-gray-400 mt-1 italic">
-                Snitch will send an instant HTTP POST JSON payload to this endpoint upon delivery.
-              </p>
-            </div>
-
-            {/* Wax Seal Color Picker */}
-            <div className="pt-2 border-t border-white/10">
-              <label className="input-label mb-2">3. Wax Seal Color</label>
-              <div className="flex items-center gap-3">
-                {WAX_COLORS.map((wax) => (
-                  <button
-                    key={wax.hex}
-                    type="button"
-                    onClick={() => setWaxColor(wax.hex)}
-                    style={{ backgroundColor: wax.hex }}
-                    className={`w-9 h-9 rounded-full transition-transform flex items-center justify-center ${
-                      waxColor === wax.hex ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900 scale-110' : 'hover:scale-105 opacity-80'
-                    }`}
-                    title={wax.name}
-                  >
-                    {waxColor === wax.hex && <Check className="w-4 h-4 text-white drop-shadow" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Parchment Theme */}
-            <div className="pt-2 border-t border-white/10">
-              <label className="input-label mb-2">4. Stationery Paper</label>
-              <div className="flex gap-2">
-                {STATIONERY_THEMES.map((th) => (
-                  <button
-                    key={th.id}
-                    type="button"
-                    onClick={() => setTheme(th.id)}
-                    className={`btn text-xs flex-1 py-1.5 ${
-                      theme === th.id ? 'btn-gold' : 'btn-outline'
-                    }`}
-                  >
-                    {th.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
+    <div style={styles.composerContainer}>
+      {!shareModalData ? (
+        <form onSubmit={handleSend} style={styles.form}>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Sender Name</label>
+            <input
+              type="text"
+              placeholder="Your name..."
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              style={styles.input}
+              required
+            />
           </div>
 
-        </div>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Recipient Name (Friend or Villager)</label>
+            <input
+              type="text"
+              placeholder="Friend's name..."
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
 
-        {/* Live Letter Parchment Canvas (Right side) */}
-        <div className="lg:col-span-7">
-          <form onSubmit={handleSend} className={`p-8 rounded-2xl relative transition-all duration-500 ${activeThemeObj.bgClass}`}>
-            
-            {/* Stamp & Header */}
-            <div className="flex justify-between items-start mb-6 pb-4 border-b border-amber-900/20">
-              <div className="space-y-1">
-                <p className="text-xs uppercase font-mono tracking-widest text-amber-900/60 font-semibold flex items-center gap-1">
-                  <span>Snail Express Dispatch</span>
-                  {stampType === 'golden_snitch' && <span className="text-amber-700">⚡ SNITCH ACTIVE</span>}
-                </p>
-                <div className="text-2xl font-heading font-bold text-amber-950">
-                  Letter of Delivery
-                </div>
-              </div>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Letter Subject (Optional)</label>
+            <input
+              type="text"
+              placeholder="Subject..."
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              style={styles.input}
+            />
+          </div>
 
-              {/* Selected Postage Stamp Visual */}
-              <div className={`w-20 h-24 border-2 border-dashed border-amber-800/40 rounded p-1 bg-amber-100/60 flex flex-col items-center justify-center text-center shadow-inner relative ${
-                stampType === 'golden_snitch' ? 'ring-2 ring-amber-500/80 bg-gradient-to-b from-amber-100 to-amber-200' : ''
-              }`}>
-                <span className="text-2xl mb-1">{activeStampObj.icon}</span>
-                <span className="text-[9px] font-mono uppercase font-extrabold text-amber-950">
-                  {activeStampObj.name}
-                </span>
-                {webhookUrl && (
-                  <div className="absolute -top-2 -right-2 bg-amber-600 text-white text-[9px] p-1 rounded-full shadow" title="Snitch Webhook Armed">
-                    ⚡
-                  </div>
-                )}
-              </div>
-            </div>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Message</label>
+            <textarea
+              rows={4}
+              placeholder="Write your cozy letter here..."
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              style={styles.textarea}
+              required
+            />
+          </div>
 
-            {/* Recipient Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              <div>
-                <label className="block text-xs font-serif font-bold text-amber-950 mb-1">To (Recipient Name)</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Lady Genevieve"
-                  value={recipientName}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full bg-white/60 border border-amber-900/20 rounded px-3 py-2 text-stone-900 placeholder:text-stone-400 font-serif outline-none focus:border-amber-700"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-serif font-bold text-amber-950 mb-1">Recipient Email</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="recipient@example.com"
-                  value={recipientEmail}
-                  onChange={(e) => setRecipientEmail(e.target.value)}
-                  className="w-full bg-white/60 border border-amber-900/20 rounded px-3 py-2 text-stone-900 placeholder:text-stone-400 font-mono text-sm outline-none focus:border-amber-700"
-                />
-              </div>
-            </div>
-
-            {/* Subject */}
-            <div className="mb-5">
-              <label className="block text-xs font-serif font-bold text-amber-950 mb-1">Subject Line</label>
-              <input
-                type="text"
-                required
-                placeholder="A secret message waiting for tomorrow..."
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full bg-white/60 border border-amber-900/20 rounded px-3 py-2 text-stone-900 placeholder:text-stone-400 font-serif font-semibold text-lg outline-none focus:border-amber-700"
-              />
-            </div>
-
-            {/* Letter Body */}
-            <div className="mb-6">
-              <label className="block text-xs font-serif font-bold text-amber-950 mb-1">Letter Content</label>
-              <textarea
-                required
-                rows={7}
-                placeholder="Write your timeless words here..."
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                className="w-full bg-white/70 border border-amber-900/20 rounded px-4 py-3 text-stone-900 placeholder:text-stone-400 font-serif text-base leading-relaxed outline-none focus:border-amber-700 shadow-inner resize-none"
-              />
-            </div>
-
-            {/* Bottom Seal & Submit Action */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-amber-900/20">
-              
-              {/* Wax Seal Visual Indicator */}
-              <div className="flex items-center gap-3">
-                <div 
-                  className="wax-seal" 
-                  style={{ backgroundColor: waxColor }}
-                  title="Your custom wax seal"
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Choose Postal Stamp</label>
+            <div style={styles.stampRow}>
+              {STAMPS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  style={{
+                    ...styles.stampBtn,
+                    borderColor: stampType === s.id ? '#e07a5f' : '#e3d7bf',
+                    background: stampType === s.id ? '#fdf0ed' : '#fffaf1',
+                  }}
+                  onClick={() => setStampType(s.id)}
                 >
-                  <span className="text-amber-200 font-heading font-extrabold text-sm drop-shadow">
-                    {stampType === 'golden_snitch' ? '⚡' : 'S'}
-                  </span>
-                </div>
-                <div className="text-xs font-serif text-amber-950">
-                  <p className="font-semibold">Secured by Snail Express</p>
-                  <p className="opacity-75">
-                    {webhookUrl ? '⚡ Snitch Webhook Alert Armed' : 'Encrypted with Supabase backend'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSealing || isSuccess}
-                className="btn btn-primary w-full sm:w-auto px-6 py-3 text-base shadow-xl"
-              >
-                {isSealing ? (
-                  <>
-                    <span className="animate-spin text-lg">🪙</span> Catching Golden Snitch...
-                  </>
-                ) : isSuccess ? (
-                  <>
-                    <Check className="w-5 h-5 text-emerald-300" /> Dispatched!
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" /> Seal & Dispatch Letter
-                  </>
-                )}
-              </button>
-
+                  <span style={{ fontSize: '1.4rem' }}>{s.icon}</span>
+                  <span>{s.name}</span>
+                </button>
+              ))}
             </div>
+          </div>
 
-          </form>
+          <button
+            type="submit"
+            disabled={isSealing}
+            style={{
+              ...styles.submitBtn,
+              opacity: isSealing ? 0.7 : 1,
+            }}
+          >
+            {isSealing ? '🐌 Sealing with Wax…' : '💌 Send Letter & Generate Share Link'}
+          </button>
+        </form>
+      ) : (
+        /* Share Modal Overlay */
+        <div style={styles.shareCard}>
+          <div style={styles.successIcon}>🐌💌</div>
+          <h2 style={styles.shareTitle}>Your letter is ready!</h2>
+          <p style={styles.shareSubtitle}>
+            Copy this link and send it to your friend via WhatsApp, Instagram, or SMS.
+          </p>
+
+          <div style={styles.urlBox}>
+            <input
+              type="text"
+              readOnly
+              value={shareModalData.shareUrl}
+              style={styles.urlInput}
+            />
+            <button style={styles.copyBtn} onClick={handleCopyLink}>
+              {copied ? '✓ Copied!' : '📋 Copy Link'}
+            </button>
+          </div>
+
+          <div style={styles.btnRow}>
+            <button
+              style={styles.previewBtn}
+              onClick={() => {
+                window.location.href = shareModalData.shareUrl;
+              }}
+            >
+              👁️ Preview Letter Journey
+            </button>
+          </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 }
+
+const styles = {
+  composerContainer: {
+    padding: '0.5rem 0',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 14,
+  },
+  fieldGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 5,
+  },
+  label: {
+    fontSize: '0.8rem',
+    fontWeight: 700,
+    color: '#8a7a63',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  },
+  input: {
+    padding: '0.65rem 0.85rem',
+    borderRadius: 12,
+    border: '1.5px solid #e3d7bf',
+    fontSize: '0.95rem',
+    background: '#ffffff',
+    outline: 'none',
+  },
+  textarea: {
+    padding: '0.75rem 0.85rem',
+    borderRadius: 12,
+    border: '1.5px solid #e3d7bf',
+    fontSize: '0.95rem',
+    background: '#ffffff',
+    outline: 'none',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+  },
+  stampRow: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 8,
+  },
+  stampBtn: {
+    padding: '0.55rem 0.8rem',
+    borderRadius: 12,
+    border: '1.5px solid #e3d7bf',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    color: '#5c381e',
+  },
+  submitBtn: {
+    marginTop: 6,
+    background: 'linear-gradient(135deg, #e07a5f 0%, #d62828 100%)',
+    color: '#ffffff',
+    border: 'none',
+    padding: '0.9rem 1.5rem',
+    borderRadius: 14,
+    fontSize: '1rem',
+    fontWeight: 800,
+    cursor: 'pointer',
+    boxShadow: '0 6px 18px rgba(224,122,95,0.35)',
+  },
+  shareCard: {
+    background: '#ffffff',
+    borderRadius: 20,
+    padding: '1.75rem 1.5rem',
+    border: '2px solid #e3d7bf',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    gap: 10,
+  },
+  successIcon: {
+    fontSize: '3rem',
+  },
+  shareTitle: {
+    margin: 0,
+    fontSize: '1.4rem',
+    color: '#4a2c11',
+    fontWeight: 800,
+  },
+  shareSubtitle: {
+    margin: 0,
+    fontSize: '0.9rem',
+    color: '#7a5c3e',
+    lineHeight: 1.4,
+  },
+  urlBox: {
+    display: 'flex',
+    width: '100%',
+    gap: 8,
+    marginTop: 8,
+  },
+  urlInput: {
+    flex: 1,
+    padding: '0.65rem 0.85rem',
+    borderRadius: 12,
+    border: '1.5px solid #e3d7bf',
+    fontSize: '0.82rem',
+    background: '#fdf0d5',
+    color: '#4a2c11',
+    fontWeight: 600,
+  },
+  copyBtn: {
+    background: '#2a9d8f',
+    color: '#ffffff',
+    border: 'none',
+    padding: '0.65rem 1.1rem',
+    borderRadius: 12,
+    fontWeight: 800,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    whiteSpace: 'nowrap',
+    boxShadow: '0 4px 12px rgba(42,157,143,0.3)',
+  },
+  btnRow: {
+    display: 'flex',
+    gap: 10,
+    marginTop: 6,
+    width: '100%',
+  },
+  previewBtn: {
+    flex: 1,
+    background: '#e07a5f',
+    color: '#ffffff',
+    border: 'none',
+    padding: '0.75rem 1rem',
+    borderRadius: 12,
+    fontWeight: 700,
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+  },
+};
