@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER COTTAGES WITH 5 ROOF COLOR THEMES (MATCHES REFERENCE SHEET)
+ *  12 UNIQUE VILLAGER COTTAGES WITH FLOWER GARDENS OUTSIDE EVERY HOUSE
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
   // 🔴 TYPE 1: RED/ORANGE ROOF COTTAGES
@@ -28,30 +28,55 @@ const VILLAGE_COTTAGES = [
   { id: 9, name: "Jasper's Potter House", gardenType: 'tomato', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#fae1c5', roofColor: '#e07a5f', trimColor: '#3d2616' },
 ];
 
-function UniqueFarmGarden({ type }) {
+/** -------------------------------------------------------------
+ *  FLOWER GARDEN OUTSIDE EVERY SINGLE HOUSE (SECTION 7 IN BLUEPRINT)
+ * ------------------------------------------------------------- */
+function FlowerGardenOutsideHouse({ gardenType }) {
   return (
     <group position={[0, 0, 1.4]}>
       {/* Brick Soil Bed Border */}
       <mesh position={[0, 0.08, 0.6]} castShadow receiveShadow>
-        <boxGeometry args={[1.4, 0.16, 1.0]} />
+        <boxGeometry args={[1.6, 0.16, 1.1]} />
         <meshToonMaterial color="#6b4326" />
       </mesh>
 
       {/* Wooden Fence Rails */}
-      <mesh position={[-0.75, 0.25, 0.6]} castShadow>
-        <boxGeometry args={[0.06, 0.5, 1.0]} />
+      <mesh position={[-0.85, 0.25, 0.6]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.1]} />
         <meshToonMaterial color="#8c5a3c" />
       </mesh>
-      <mesh position={[0.75, 0.25, 0.6]} castShadow>
-        <boxGeometry args={[0.06, 0.5, 1.0]} />
+      <mesh position={[0.85, 0.25, 0.6]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.1]} />
         <meshToonMaterial color="#8c5a3c" />
       </mesh>
 
-      {/* 🌻 Giant Sunflowers Garden */}
-      {type === 'sunflower' && (
+      {/* Colorful Flower Beds (Sunflowers, Daisies, Pink/Purple/Red Flowers) */}
+      <group position={[0, 0.16, 0.6]}>
+        {[-0.45, 0, 0.45].map((x, idx) => (
+          <group key={idx} position={[x, 0, 0]}>
+            <mesh position={[0, 0.22, 0]} castShadow>
+              <cylinderGeometry args={[0.025, 0.035, 0.44, 6]} />
+              <meshToonMaterial color="#6bab4f" />
+            </mesh>
+            <group position={[0, 0.44, 0]}>
+              <mesh castShadow>
+                <sphereGeometry args={[0.14, 12, 12]} />
+                <meshToonMaterial color={idx === 0 ? '#ff4d6d' : idx === 1 ? '#ffb703' : '#7209b7'} />
+              </mesh>
+              <mesh position={[0, 0, 0.06]}>
+                <sphereGeometry args={[0.06, 8, 8]} />
+                <meshToonMaterial color="#ffffff" />
+              </mesh>
+            </group>
+          </group>
+        ))}
+      </group>
+
+      {/* 🌻 Extra Sunflowers for Sunflower Gardens */}
+      {gardenType === 'sunflower' && (
         <group position={[0, 0.16, 0.6]}>
-          {[-0.35, 0.35].map((x, idx) => (
-            <group key={idx} position={[x, 0, 0]}>
+          {[-0.5, 0.5].map((x, idx) => (
+            <group key={idx} position={[x, 0, -0.3]}>
               <mesh position={[0, 0.35, 0]} castShadow>
                 <cylinderGeometry args={[0.03, 0.04, 0.7, 8]} />
                 <meshToonMaterial color="#6bab4f" />
@@ -72,7 +97,7 @@ function UniqueFarmGarden({ type }) {
       )}
 
       {/* 🍅 Tomato Crop Plot */}
-      {type === 'tomato' && (
+      {gardenType === 'tomato' && (
         <group position={[0, 0.16, 0.6]}>
           {[-0.4, 0, 0.4].map((x, idx) => (
             <group key={idx} position={[x, 0, 0]}>
@@ -90,7 +115,7 @@ function UniqueFarmGarden({ type }) {
       )}
 
       {/* 🌽 Corn Stalk Field */}
-      {type === 'corn' && (
+      {gardenType === 'corn' && (
         <group position={[0, 0.16, 0.6]}>
           {[-0.35, 0.35].map((x, idx) => (
             <group key={idx} position={[x, 0, 0]}>
@@ -108,7 +133,7 @@ function UniqueFarmGarden({ type }) {
       )}
 
       {/* 🫐 Blueberry Bushes */}
-      {type === 'berry' && (
+      {gardenType === 'berry' && (
         <group position={[0, 0.16, 0.6]}>
           <mesh position={[0, 0.25, 0]} castShadow>
             <sphereGeometry args={[0.3, 14, 14]} />
@@ -126,7 +151,7 @@ function UniqueFarmGarden({ type }) {
       )}
 
       {/* 🚿 Watering Can Accessory */}
-      <group position={[0.7, 0.12, 0.4]} rotation={[0, 0.5, 0]}>
+      <group position={[0.75, 0.12, 0.4]} rotation={[0, 0.5, 0]}>
         <mesh position={[0, 0.12, 0]} castShadow>
           <cylinderGeometry args={[0.08, 0.1, 0.24, 10]} />
           <meshToonMaterial color="#457b9d" />
@@ -245,8 +270,8 @@ export default function VillageHouses() {
             </mesh>
           </group>
 
-          {/* Individual Farm Garden Plot */}
-          <UniqueFarmGarden type={c.gardenType} />
+          {/* FLOWER GARDEN OUTSIDE EVERY SINGLE HOUSE */}
+          <FlowerGardenOutsideHouse gardenType={c.gardenType} />
         </group>
       ))}
     </group>

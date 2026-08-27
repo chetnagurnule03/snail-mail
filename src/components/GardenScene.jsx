@@ -43,12 +43,11 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. STEPPED LOW-POLY TERRACED TERRAIN & CLIFFS (MATCHES REFERENCE)
+ *  1. STEPPED LOW-POLY TERRACED TERRAIN & CLIFFS (SECTION 3 IN BLUEPRINT)
  * ------------------------------------------------------------- */
 function SteppedLowPolyTerrain({ onGroundClick }) {
   return (
     <group>
-      {/* Base Meadow Plane (600x600m) */}
       <mesh
         position={[0, -0.06, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -65,19 +64,15 @@ function SteppedLowPolyTerrain({ onGroundClick }) {
         <meshToonMaterial color="#94c77d" />
       </mesh>
 
-      {/* Stepped Grassy Terraces & Low-Poly Cliffs (North Boundary) */}
       <group position={[0, 0, -45.0]}>
-        {/* Tier 1 Terrace */}
         <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
           <boxGeometry args={[140, 0.8, 25]} />
           <meshToonMaterial color="#8ab874" />
         </mesh>
-        {/* Tier 2 Upper Cliff */}
         <mesh position={[0, 1.4, -12]} castShadow receiveShadow>
           <boxGeometry args={[160, 1.2, 28]} />
           <meshToonMaterial color="#7ca965" />
         </mesh>
-        {/* Stone Cliff Formations */}
         {[-35, -15, 15, 35].map((x, idx) => (
           <mesh key={idx} position={[x, 0.8, -2.0]} castShadow>
             <boxGeometry args={[4.5, 1.6, 4.5]} />
@@ -90,12 +85,11 @@ function SteppedLowPolyTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  2. DUAL WATERFALLS & WINDING RIVER VALLEY 🌊 (MATCHES REFERENCE)
+ *  2. DUAL WATERFALLS & WINDING RIVER VALLEY 🌊 (SECTION 4 IN BLUEPRINT)
  * ------------------------------------------------------------- */
 function DualWaterfallRiverValley() {
   return (
     <group position={[0, 0, 0]}>
-      {/* 🌊 Winding Blue River Stream */}
       <mesh position={[-2.0, 0.005, -10.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
         <planeGeometry args={[3.8, 65.0]} />
         <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
@@ -105,7 +99,6 @@ function DualWaterfallRiverValley() {
         <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
       </mesh>
 
-      {/* Decorative Lily Pads */}
       {[-8, -2, 6, 18, 28].map((z, idx) => (
         <mesh key={idx} position={[-2.0 + idx * 0.8, 0.01, -10.0 + idx * 4]}>
           <cylinderGeometry args={[0.35, 0.35, 0.02, 10]} />
@@ -113,7 +106,6 @@ function DualWaterfallRiverValley() {
         </mesh>
       ))}
 
-      {/* 🌉 Curved Wooden Arch Bridges */}
       <group position={[-2.0, 0.35, -10.0]} rotation={[0, 0.4, 0]}>
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.4, 0.45, 4.4]} />
@@ -143,7 +135,6 @@ function DualWaterfallRiverValley() {
         </mesh>
       </group>
 
-      {/* 🌊 Waterfall 1 (North-West Cliff Waterfall) */}
       <group position={[-18.0, 2.5, -42.0]} rotation={[0.15, 0.3, 0]}>
         <mesh castShadow>
           <boxGeometry args={[4.2, 5.8, 0.4]} />
@@ -152,7 +143,6 @@ function DualWaterfallRiverValley() {
         <Sparkles count={30} scale={4} size={4} speed={0.8} color="#ffffff" />
       </group>
 
-      {/* 🌊 Waterfall 2 (North-East Cliff Waterfall) */}
       <group position={[22.0, 2.8, -44.0]} rotation={[0.15, -0.4, 0]}>
         <mesh castShadow>
           <boxGeometry args={[4.5, 6.2, 0.4]} />
@@ -165,7 +155,7 @@ function DualWaterfallRiverValley() {
 }
 
 /** -------------------------------------------------------------
- *  3. CONNECTED VILLAGE PATH NETWORK (BEIGE DIRT/STONE PATHS)
+ *  3. CONNECTED VILLAGE PATH NETWORK (SECTION 14 IN BLUEPRINT)
  * ------------------------------------------------------------- */
 function VillageWindingPaths() {
   return (
@@ -187,7 +177,7 @@ function VillageWindingPaths() {
 }
 
 /** -------------------------------------------------------------
- *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES
+ *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES (SECTION 13 IN BLUEPRINT)
  * ------------------------------------------------------------- */
 function GiantSunflowerField() {
   return (
@@ -230,7 +220,6 @@ function AppleOrchardField() {
               <sphereGeometry args={[1.1, 20, 20]} />
               <meshToonMaterial color="#38b000" />
             </mesh>
-            {/* Red Apples */}
             <mesh position={[0.4, 2.2, 0.8]} castShadow>
               <sphereGeometry args={[0.14, 10, 10]} />
               <meshToonMaterial color="#e63946" />
@@ -247,7 +236,7 @@ function AppleOrchardField() {
 }
 
 /** -------------------------------------------------------------
- *  5. CHUNKY COWS, FLUFFY SHEEP, & PLAYFUL FOXES 🐄🐑🦊
+ *  5. ANIMALS: HORSES, COWS, SHEEP, CHICKENS, FOXES, RABBITS 🐴🐄🐑🐔🦊🐰 (SECTION 11)
  * ------------------------------------------------------------- */
 function ChunkyCow({ position, rotation = 0 }) {
   return (
@@ -357,6 +346,26 @@ function FluffySheep({ position, rotation = 0 }) {
   );
 }
 
+function ChunkyChicken({ position, rotation = 0 }) {
+  return (
+    <group position={position} rotation={[0, rotation, 0]} scale={0.5}>
+      <mesh position={[0, 0.28, 0]} castShadow>
+        <sphereGeometry args={[0.24, 12, 12]} />
+        <meshToonMaterial color="#ffffff" />
+      </mesh>
+      {/* Red Comb & Yellow Beak */}
+      <mesh position={[0, 0.48, 0.1]}>
+        <boxGeometry args={[0.06, 0.12, 0.1]} />
+        <meshToonMaterial color="#e63946" />
+      </mesh>
+      <mesh position={[0, 0.32, 0.26]}>
+        <coneGeometry args={[0.06, 0.12, 6]} rotation={[Math.PI / 2, 0, 0]} />
+        <meshToonMaterial color="#ffb703" />
+      </mesh>
+    </group>
+  );
+}
+
 function ChunkyFox({ position, rotation = 0 }) {
   return (
     <group position={position} rotation={[0, rotation, 0]} scale={0.75}>
@@ -396,6 +405,26 @@ function ChunkyFox({ position, rotation = 0 }) {
           <meshToonMaterial color="#ffffff" />
         </mesh>
       </group>
+    </group>
+  );
+}
+
+function ChunkyRabbit({ position, rotation = 0 }) {
+  return (
+    <group position={position} rotation={[0, rotation, 0]} scale={0.45}>
+      <mesh position={[0, 0.2, 0]} castShadow>
+        <sphereGeometry args={[0.2, 12, 12]} />
+        <meshToonMaterial color="#ffffff" />
+      </mesh>
+      {/* Long Bunny Ears */}
+      <mesh position={[-0.08, 0.42, 0.02]} rotation={[0, 0, -0.1]}>
+        <capsuleGeometry args={[0.04, 0.22, 4, 8]} />
+        <meshToonMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0.08, 0.42, 0.02]} rotation={[0, 0, 0.1]}>
+        <capsuleGeometry args={[0.04, 0.22, 4, 8]} />
+        <meshToonMaterial color="#ffffff" />
+      </mesh>
     </group>
   );
 }
@@ -980,7 +1009,7 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH STEPPED TERRAIN, DUAL WATERFALLS & FULL VILLAGE
+ *  MAIN SCENE WITH STEPPED TERRAIN, DUAL WATERFALLS, ANIMALS & FULL VILLAGE
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -1017,13 +1046,17 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <GiantSunflowerField />
       <AppleOrchardField />
 
-      {/* 🐄🐑🦊 Farm Animals Grazing in Pastures */}
+      {/* 🐴🐄🐑🐔🦊🐰 Farm Animals Grazing in Pastures (Section 11) */}
       <group>
         <ChunkyCow position={[-38.0, 0, -15.0]} rotation={0.6} />
         <ChunkyCow position={[-42.0, 0, -22.0]} rotation={-0.8} />
         <FluffySheep position={[36.0, 0, -20.0]} rotation={-0.4} />
         <FluffySheep position={[40.0, 0, -14.0]} rotation={0.8} />
+        <ChunkyChicken position={[-16.0, 0, 14.0]} rotation={0.3} />
+        <ChunkyChicken position={[-14.5, 0, 16.0]} rotation={-0.5} />
         <ChunkyFox position={[-18.0, 0, 18.0]} rotation={1.2} />
+        <ChunkyRabbit position={[16.0, 0, 18.0]} rotation={-0.8} />
+        <ChunkyRabbit position={[18.0, 0, 15.0]} rotation={0.4} />
       </group>
 
       <VillageSquare position={[0, 0, -22.0]} />
