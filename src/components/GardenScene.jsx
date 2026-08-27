@@ -43,6 +43,96 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
+ *  ANIMATED 3D SNAIL MESSENGER CRAWLING ALONG VILLAGE PATHS 🐌💌
+ * ------------------------------------------------------------- */
+function AnimatedSnailMessenger({ delivery, onReachDestination }) {
+  const snailRef = useRef();
+
+  useFrame((state, delta) => {
+    if (!snailRef.current || !delivery) return;
+
+    const clock = state.clock.getElapsedTime();
+    const startX = delivery.startX ?? -2.8;
+    const startZ = delivery.startZ ?? 4.5;
+    const targetX = delivery.targetX ?? -24.0;
+    const targetZ = delivery.targetZ ?? -26.0;
+
+    delivery.progress = (delivery.progress || 0) + delta * 0.12;
+
+    if (delivery.progress >= 1.0) {
+      if (onReachDestination) onReachDestination(delivery.id);
+      return;
+    }
+
+    const currentX = THREE.MathUtils.lerp(startX, targetX, delivery.progress);
+    const currentZ = THREE.MathUtils.lerp(startZ, targetZ, delivery.progress);
+
+    snailRef.current.position.x = currentX;
+    snailRef.current.position.z = currentZ;
+    snailRef.current.position.y = 0.06 + Math.abs(Math.sin(clock * 6)) * 0.03;
+
+    const angle = Math.atan2(targetX - startX, targetZ - startZ);
+    snailRef.current.rotation.y = angle;
+  });
+
+  return (
+    <group ref={snailRef} position={[-2.8, 0.06, 4.5]} scale={0.65}>
+      {/* Snail Body */}
+      <mesh position={[0, 0.12, 0]} castShadow>
+        <capsuleGeometry args={[0.12, 0.42, 6, 12]} rotation={[Math.PI / 2, 0, 0]} />
+        <meshToonMaterial color="#ffb703" />
+        <ToonOutline thickness={0.02} />
+      </mesh>
+
+      {/* Snail Eye Stalks */}
+      <group position={[0, 0.28, 0.22]}>
+        <mesh position={[-0.06, 0.12, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.18, 6]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+        <mesh position={[-0.06, 0.22, 0]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshToonMaterial color="#222222" />
+        </mesh>
+
+        <mesh position={[0.06, 0.12, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.18, 6]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+        <mesh position={[0.06, 0.22, 0]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshToonMaterial color="#222222" />
+        </mesh>
+      </group>
+
+      {/* Spiral Shell */}
+      <group position={[0, 0.32, -0.08]}>
+        <mesh rotation={[0, Math.PI / 2, 0]} castShadow>
+          <torusGeometry args={[0.22, 0.12, 12, 24]} />
+          <meshToonMaterial color="#e07a5f" />
+          <ToonOutline thickness={0.02} />
+        </mesh>
+      </group>
+
+      {/* 💌 Sealed Envelope Mounted on Back */}
+      <group position={[0, 0.54, -0.08]} rotation={[-0.2, 0, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.34, 0.04, 0.24]} />
+          <meshToonMaterial color="#ffffff" />
+        </mesh>
+        {/* Red Wax Seal */}
+        <mesh position={[0, 0.03, 0]}>
+          <cylinderGeometry args={[0.04, 0.04, 0.02, 8]} />
+          <meshToonMaterial color="#e63946" />
+        </mesh>
+      </group>
+
+      <Sparkles position={[0, 0.6, 0]} count={6} scale={0.5} size={2.5} speed={0.5} color="#ffd23f" />
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
  *  1. STEPPED LOW-POLY TERRACED TERRAIN & CLIFFS
  * ------------------------------------------------------------- */
 function SteppedLowPolyTerrain({ onGroundClick }) {
@@ -177,9 +267,6 @@ function VillageWindingPaths() {
   );
 }
 
-/** -------------------------------------------------------------
- *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES
- * ------------------------------------------------------------- */
 function GiantSunflowerField() {
   return (
     <group position={[45, 0, -35]}>
@@ -236,9 +323,6 @@ function AppleOrchardField() {
   );
 }
 
-/** -------------------------------------------------------------
- *  5. ANIMALS: HORSES, COWS, SHEEP, CHICKENS, DUCKS, FOXES, RABBITS 🐴🐄🐑🐔🦆🦊🐰
- * ------------------------------------------------------------- */
 function ChunkyCow({ position, rotation = 0 }) {
   return (
     <group position={position} rotation={[0, rotation, 0]} scale={0.9}>
@@ -261,18 +345,6 @@ function ChunkyCow({ position, rotation = 0 }) {
           <boxGeometry args={[0.46, 0.42, 0.44]} />
           <meshToonMaterial color="#ffffff" />
           <ToonOutline thickness={0.025} />
-        </mesh>
-        <mesh position={[0, -0.08, 0.23]} castShadow>
-          <boxGeometry args={[0.38, 0.22, 0.12]} />
-          <meshToonMaterial color="#ffb5a7" />
-        </mesh>
-        <mesh position={[-0.2, 0.24, -0.05]} rotation={[0, 0, -0.3]}>
-          <coneGeometry args={[0.04, 0.16, 6]} />
-          <meshToonMaterial color="#d4a373" />
-        </mesh>
-        <mesh position={[0.2, 0.24, -0.05]} rotation={[0, 0, 0.3]}>
-          <coneGeometry args={[0.04, 0.16, 6]} />
-          <meshToonMaterial color="#d4a373" />
         </mesh>
       </group>
 
@@ -487,9 +559,6 @@ function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  6. DUAL PET FOLLOW SYSTEM
- * ------------------------------------------------------------- */
 function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
   const pet1Ref = useRef();
   const pet2Ref = useRef();
@@ -557,9 +626,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  7. HIGH-FIDELITY CHUNKY PINTO HORSE 🐴
- * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
 
@@ -619,9 +685,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  8. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE
- * ------------------------------------------------------------- */
 function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, resetSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const { camera } = useThree();
   const orbitRef = useRef();
@@ -739,9 +802,6 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
   );
 }
 
-/** -------------------------------------------------------------
- *  9. CHUNKY CHIBI 3D CARTOON PLAYER CHARACTER
- * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
@@ -779,14 +839,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <torusGeometry args={[0.35, 0.04, 12, 24]} />
           <meshToonMaterial color="#e63946" />
         </mesh>
-        <mesh position={[-0.12, 0.02, 0.28]}>
-          <sphereGeometry args={[0.04, 10, 10]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-        <mesh position={[0.12, 0.02, 0.28]}>
-          <sphereGeometry args={[0.04, 10, 10]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
       </group>
 
       <group position={[0, 0.44, 0]}>
@@ -813,9 +865,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  10. STARTER COTTAGE MATCHING REFERENCE IMAGE ARCHITECTURE
- * ------------------------------------------------------------- */
 function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
   return (
     <group position={position} rotation={[0, rotation, 0]}>
@@ -833,27 +882,14 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
           <meshToonMaterial color="#ffffff" />
         </mesh>
       </group>
-      <group position={[-0.55, 1.7, -0.25]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.32, 1.1, 0.32]} />
-          <meshToonMaterial color="#a89f91" />
-        </mesh>
-        <Sparkles position={[0, 0.75, 0]} count={8} scale={0.4} size={3} speed={0.4} color="#ffffff" />
-      </group>
-      <group position={[0.2, 0.54, 0.76]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.48, 0.82, 0.04]} />
-          <meshToonMaterial color="#4a2c11" />
-        </mesh>
-      </group>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH DUCKS 🦆 & FULL VILLAGE BIOMES
+ *  MAIN SCENE WITH ANIMATED SNAIL MESSENGERS & DUAL PETS
  * ------------------------------------------------------------- */
-export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
+export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue, activeSnailDeliveries, onRemoveSnailDelivery }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
   const playerGroupRef = useRef();
   const horsePosRef = useRef([-15.2, -9.5]);
@@ -902,6 +938,15 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <ChunkyRabbit position={[16.0, 0, 18.0]} rotation={-0.8} />
         <ChunkyRabbit position={[18.0, 0, 15.0]} rotation={0.4} />
       </group>
+
+      {/* 🐌💌 ANIMATED 3D SNAIL MESSENGERS CRAWLING ALONG VILLAGE PATHS */}
+      {activeSnailDeliveries && activeSnailDeliveries.map((delivery) => (
+        <AnimatedSnailMessenger
+          key={delivery.id}
+          delivery={delivery}
+          onReachDestination={onRemoveSnailDelivery}
+        />
+      ))}
 
       <VillageSquare position={[0, 0, -22.0]} />
       <VillageHouses />

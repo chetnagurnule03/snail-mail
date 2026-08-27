@@ -4,6 +4,7 @@ import { useCharacter } from './hooks/useCharacter';
 import AuthGate from './components/AuthGate';
 import GardenScene from './components/GardenScene';
 import VillagerDialogueModal from './components/VillagerDialogueModal';
+import Composer from './components/Composer';
 
 const OUTFIT_COLORS = ['#c9a7e0', '#e07a5f', '#84b574', '#76c8e3', '#ffb5a7', '#f4a261'];
 const HAIR_COLORS = ['#7a4a2b', '#3d2616', '#e6c594', '#b55239', '#c9a7e0'];
@@ -43,8 +44,14 @@ export default function App() {
   const { user, loading: authLoading, signInWithEmail, signInAsGuest, signOut } = useAuth();
   const { character, loading: charLoading, saving, save } = useCharacter(user?.id);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [isMailComposerOpen, setIsMailComposerOpen] = useState(false);
+  const [preselectedVillager, setPreselectedVillager] = useState(null);
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
+
+  // Snail Mail Toast & 3D Deliveries State
+  const [mailToast, setMailToast] = useState(null);
+  const [activeSnailDeliveries, setActiveSnailDeliveries] = useState([]);
 
   // Villager Interaction State
   const [nearVillager, setNearVillager] = useState(null);
@@ -52,6 +59,36 @@ export default function App() {
 
   const toggleMount = () => {
     setIsMounted((prev) => !prev);
+  };
+
+  const handleOpenMailComposer = (villager = null) => {
+    setPreselectedVillager(villager);
+    setIsMailComposerOpen(true);
+  };
+
+  const handleLetterSent = (recipientName = 'Villager') => {
+    setIsMailComposerOpen(false);
+    setMailToast(`Letter sent to ${recipientName}! 🐌💌`);
+
+    // Add 3D Snail Messenger Delivery
+    const newDelivery = {
+      id: Date.now(),
+      recipient: recipientName,
+      progress: 0,
+      startX: -2.8,
+      startZ: 4.5,
+      targetX: -24.0,
+      targetZ: -26.0,
+    };
+    setActiveSnailDeliveries((prev) => [...prev, newDelivery]);
+
+    setTimeout(() => {
+      setMailToast(null);
+    }, 4000);
+  };
+
+  const handleRemoveSnailDelivery = (deliveryId) => {
+    setActiveSnailDeliveries((prev) => prev.filter((d) => d.id !== deliveryId));
   };
 
   if (authLoading) {
@@ -76,6 +113,8 @@ export default function App() {
         toggleMount={toggleMount}
         setNearVillager={setNearVillager}
         onOpenDialogue={setActiveDialogueVillager}
+        activeSnailDeliveries={activeSnailDeliveries}
+        onRemoveSnailDelivery={handleRemoveSnailDelivery}
       />
 
       {/* Top HUD Bar */}
@@ -88,6 +127,9 @@ export default function App() {
           onClick={toggleMount}
         >
           {isMounted ? '🚶 Dismount [E]' : '🐴 Ride Horse [E]'}
+        </button>
+        <button style={styles.pillSecondary} onClick={() => handleOpenMailComposer()}>
+          📮 Send Snail Mail
         </button>
         <button style={styles.pillSecondary} onClick={() => setIsCustomizerOpen(true)}>
           🎨 Customize
@@ -110,13 +152,20 @@ export default function App() {
         </div>
       )}
 
+      {/* Snail Mail Dispatch Toast Notification */}
+      {mailToast && (
+        <div style={styles.mailToast}>
+          {mailToast}
+        </div>
+      )}
+
       {/* Bottom Features Summary Bar */}
       <div style={styles.featuresBar}>
         <div style={styles.featureItem}>🧭 Explore</div>
         <div style={styles.featureItem} onClick={toggleMount}>🐴 Ride Horse</div>
-        <div style={styles.featureItem}>💬 Talk to Villagers</div>
+        <div style={styles.featureItem} onClick={() => setActiveDialogueVillager(nearVillager || { name: 'Oliver', job: 'Gardener', id: 1 })}>💬 Talk to Villagers</div>
         <div style={styles.featureItem}>❤️ Make Friends</div>
-        <div style={styles.featureItem}>📮 Send Snail Mail</div>
+        <div style={styles.featureItem} onClick={() => handleOpenMailComposer()}>📮 Send Snail Mail</div>
       </div>
 
       {/* Villager Dialogue Modal */}
@@ -124,7 +173,34 @@ export default function App() {
         <VillagerDialogueModal
           villager={activeDialogueVillager}
           onClose={() => setActiveDialogueVillager(null)}
+          onSendMail={(v) => handleOpenMailComposer(v)}
         />
+      )}
+
+      {/* Snail Mail Composer Modal */}
+      {isMailComposerOpen && (
+        <div style={styles.modalOverlay}>
+          <div style={{ ...styles.modalCard, maxWidth: 640 }}>
+            <div style={styles.modalHeader}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#5b4a34' }}>
+                📮 Compose Snail Mail Letter 🐌💌
+              </h2>
+              <button
+                style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#8a7a63' }}
+                onClick={() => setIsMailComposerOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={styles.modalBody}>
+              <Composer
+                user={user}
+                defaultRecipient={preselectedVillager?.name || ''}
+                onLetterSent={() => handleLetterSent(preselectedVillager?.name || 'Oliver')}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Controls Hint Overlay */}
@@ -149,7 +225,6 @@ export default function App() {
             </div>
 
             <div style={styles.modalBody}>
-              {/* Character Name */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Name</label>
                 <input
@@ -160,7 +235,6 @@ export default function App() {
                 />
               </div>
 
-              {/* Small Pet Companion (PET 1) */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Companion Pet 1</label>
                 <div style={styles.grid2}>
@@ -180,7 +254,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Hairstyle */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Hairstyle</label>
                 <div style={styles.grid2}>
@@ -200,7 +273,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Hair Color Picker */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Hair Color</label>
                 <div style={styles.swatchRow}>
@@ -218,7 +290,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Skin Tone */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Skin Tone</label>
                 <div style={styles.swatchRow}>
@@ -232,64 +303,6 @@ export default function App() {
                       }}
                       onClick={() => save({ skin_tone: s })}
                     />
-                  ))}
-                </div>
-              </div>
-
-              {/* Outfit Style */}
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Outfit Style</label>
-                <div style={styles.grid2}>
-                  {OUTFIT_STYLES.map((o) => (
-                    <button
-                      key={o.id}
-                      style={{
-                        ...styles.choiceBtn,
-                        borderColor: character.outfit_style === o.id ? '#e07a5f' : '#e3d7bf',
-                        background: character.outfit_style === o.id ? '#fdf0ed' : '#fffaf1',
-                      }}
-                      onClick={() => save({ outfit_style: o.id })}
-                    >
-                      {o.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Outfit Color Picker */}
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Outfit Color</label>
-                <div style={styles.swatchRow}>
-                  {OUTFIT_COLORS.map((c) => (
-                    <button
-                      key={c}
-                      style={{
-                        ...styles.swatch,
-                        backgroundColor: c,
-                        boxShadow: character.outfit_color === c ? '0 0 0 3px #e07a5f' : 'none',
-                      }}
-                      onClick={() => save({ outfit_color: c })}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Accessory */}
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Accessory</label>
-                <div style={styles.grid2}>
-                  {ACCESSORIES.map((a) => (
-                    <button
-                      key={a.id}
-                      style={{
-                        ...styles.choiceBtn,
-                        borderColor: character.accessory === a.id ? '#e07a5f' : '#e3d7bf',
-                        background: character.accessory === a.id ? '#fdf0ed' : '#fffaf1',
-                      }}
-                      onClick={() => save({ accessory: a.id })}
-                    >
-                      {a.name}
-                    </button>
                   ))}
                 </div>
               </div>
@@ -390,6 +403,21 @@ const styles = {
     cursor: 'pointer',
     zIndex: 20,
     animation: 'bounce 1.5s infinite',
+  },
+  mailToast: {
+    position: 'absolute',
+    top: '80px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: '#2a9d8f',
+    color: '#ffffff',
+    padding: '12px 28px',
+    borderRadius: '999px',
+    fontSize: '16px',
+    fontWeight: 800,
+    border: '3px solid #ffffff',
+    boxShadow: '0 8px 24px rgba(42,157,143,0.4)',
+    zIndex: 50,
   },
   featuresBar: {
     position: 'absolute',
