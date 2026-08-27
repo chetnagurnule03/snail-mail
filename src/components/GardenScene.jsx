@@ -14,7 +14,7 @@ function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
 }
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER (PLAYABLE RADIUS = 45m)
+ *  COLLISION & BOUNDARY HELPER (VARSITY OPEN-WORLD RADIUS = 120m)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -14.0, z: -12.0, radius: 1.8 },
@@ -29,7 +29,7 @@ function sanitizePlayableTarget(x, z) {
   let targetZ = z;
 
   const distFromCenter = Math.sqrt(targetX * targetX + targetZ * targetZ);
-  const maxRadius = 45.0;
+  const maxRadius = 120.0; // Open-world exploration freedom (120 meters)
   if (distFromCenter > maxRadius) {
     const angle = Math.atan2(targetZ, targetX);
     targetX = Math.cos(angle) * maxRadius;
@@ -51,12 +51,23 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. EXPANSIVE 360° MEADOW GROUND PLANE (180x180m)
+ *  1. CONTINUOUS OPEN-WORLD MEADOW TERRAIN (300x300m)
  * ------------------------------------------------------------- */
-function ExtendedMeadowTerrain() {
+function ExtendedMeadowTerrain({ onGroundClick }) {
   return (
-    <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[180, 180]} />
+    <mesh
+      position={[0, -0.06, 0]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      receiveShadow
+      onClick={(e) => {
+        e.stopPropagation();
+        const pointX = e.point.x;
+        const pointZ = e.point.z;
+        const sanitized = sanitizePlayableTarget(pointX, pointZ);
+        onGroundClick(sanitized);
+      }}
+    >
+      <planeGeometry args={[300, 300]} />
       <meshToonMaterial color="#94c77d" />
     </mesh>
   );
@@ -69,7 +80,7 @@ function StoneRiverBridge() {
   return (
     <group position={[-2.0, 0, -10.0]}>
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[3.2, 34.0]} />
+        <planeGeometry args={[3.2, 54.0]} />
         <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
       </mesh>
 
@@ -79,6 +90,7 @@ function StoneRiverBridge() {
           <meshToonMaterial color="#8a7e70" />
           <ToonOutline thickness={0.03} />
         </mesh>
+
         <mesh position={[-1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
           <meshToonMaterial color="#6b4c35" />
@@ -101,23 +113,23 @@ function VillageWindingPaths() {
   return (
     <group position={[0, 0.015, 0]}>
       <mesh position={[-7.0, 0, -17.0]} rotation={[-Math.PI / 2, 0, -0.6]}>
-        <planeGeometry args={[1.5, 18.0]} />
+        <planeGeometry args={[1.5, 24.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
-      <mesh position={[-16.0, 0, -23.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[1.4, 20.0]} />
+      <mesh position={[-26.0, 0, -35.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
+        <planeGeometry args={[1.4, 40.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
-      <mesh position={[14.0, 0, -24.0]} rotation={[-Math.PI / 2, 0, -0.3]}>
-        <planeGeometry args={[1.4, 22.0]} />
+      <mesh position={[24.0, 0, -34.0]} rotation={[-Math.PI / 2, 0, -0.3]}>
+        <planeGeometry args={[1.4, 42.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
-      <mesh position={[-16.0, 0, 0.0]} rotation={[-Math.PI / 2, 0, -0.9]}>
-        <planeGeometry args={[1.4, 24.0]} />
+      <mesh position={[-26.0, 0, 15.0]} rotation={[-Math.PI / 2, 0, -0.9]}>
+        <planeGeometry args={[1.4, 44.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
-      <mesh position={[16.0, 0, 0.0]} rotation={[-Math.PI / 2, 0, 0.8]}>
-        <planeGeometry args={[1.4, 25.0]} />
+      <mesh position={[26.0, 0, 16.0]} rotation={[-Math.PI / 2, 0, 0.8]}>
+        <planeGeometry args={[1.4, 45.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
     </group>
@@ -125,21 +137,65 @@ function VillageWindingPaths() {
 }
 
 /** -------------------------------------------------------------
- *  4. NATURAL FILLERS BETWEEN HOUSES
+ *  4. EXPLORABLE BIOMES (WOODLAND, BLOSSOM, WINDMILL KNOLL)
  * ------------------------------------------------------------- */
-function CountrysideNaturalFillers() {
+function WoodlandForestBiome() {
   return (
-    <group>
-      <group position={[-18, 0, -18]}>
-        <StorybookTree position={[0, 0, 0]} scale={1.4} colorScale={0} />
-        <StorybookTree position={[-3, 0, 2]} scale={1.6} colorScale={1} />
-        <MushroomGroup position={[-1, 0.08, 3]} scale={1.4} />
-      </group>
+    <group position={[-55, 0, -45]}>
+      {/* Dense Woodland Canopy */}
+      {[-12, -4, 4, 12].map((x, i) =>
+        [-10, 0, 10].map((z, j) => (
+          <group key={`${i}-${j}`} position={[x + Math.sin(i) * 2, 0, z + Math.cos(j) * 2]}>
+            <StorybookTree position={[0, 0, 0]} scale={1.6 + (i % 3) * 0.2} colorScale={i % 3} />
+          </group>
+        ))
+      )}
+      <MushroomGroup position={[0, 0.08, 0]} scale={1.8} />
+      <MushroomGroup position={[-5, 0.08, 6]} scale={1.5} />
+    </group>
+  );
+}
 
-      <group position={[18, 0, -16]}>
-        <StorybookTree position={[0, 0, 0]} scale={1.5} colorScale={2} />
-        <StorybookTree position={[3, 0, -2]} scale={1.3} colorScale={0} />
-        <SoftFlowerCluster position={[1, 0.04, 2]} color="#ffb5a7" />
+function BlossomMeadowBiome() {
+  return (
+    <group position={[55, 0, -45]}>
+      {/* Cherry Blossom Trees & Wildflower Fields */}
+      {[-10, 0, 10].map((x, i) =>
+        [-8, 2, 12].map((z, j) => (
+          <group key={`${i}-${j}`} position={[x, 0, z]}>
+            <StorybookTree position={[0, 0, 0]} scale={1.5} colorScale={2} />
+            <SoftFlowerCluster position={[1.2, 0.04, 1]} color="#ffb5a7" />
+            <SoftFlowerCluster position={[-1.2, 0.04, -1]} color="#c77dff" />
+          </group>
+        ))
+      )}
+    </group>
+  );
+}
+
+function WindmillKnollLandmark() {
+  return (
+    <group position={[0, 0, -85]}>
+      {/* Rustic 3D Windmill */}
+      <mesh position={[0, 2.5, 0]} castShadow>
+        <cylinderGeometry args={[1.2, 1.8, 5.0, 16]} />
+        <meshToonMaterial color="#fbead0" />
+        <ToonOutline thickness={0.03} />
+      </mesh>
+      <mesh position={[0, 5.2, 0]} castShadow>
+        <coneGeometry args={[1.5, 1.2, 16]} />
+        <meshToonMaterial color="#c96850" />
+        <ToonOutline thickness={0.03} />
+      </mesh>
+      {/* Windmill Blades */}
+      <group position={[0, 4.2, 1.3]} rotation={[0, 0, 0.4]}>
+        {[-1.8, 1.8].map((offset, idx) => (
+          <mesh key={idx} position={[offset, 0, 0]}>
+            <boxGeometry args={[3.2, 0.25, 0.04]} />
+            <meshToonMaterial color="#ffffff" />
+            <ToonOutline thickness={0.02} />
+          </mesh>
+        ))}
       </group>
     </group>
   );
@@ -148,15 +204,15 @@ function CountrysideNaturalFillers() {
 function DistantCountrysideHills() {
   return (
     <group position={[0, -1.8, 0]}>
-      <mesh position={[-42, 1.2, -50]} scale={[32, 5.5, 32]}>
+      <mesh position={[-75, 1.2, -90]} scale={[52, 8.5, 52]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshToonMaterial color="#8ab874" />
       </mesh>
-      <mesh position={[42, 1.0, -52]} scale={[34, 5.8, 34]}>
+      <mesh position={[75, 1.0, -92]} scale={[54, 8.8, 54]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshToonMaterial color="#9ec891" />
       </mesh>
-      <mesh position={[0, 0.8, -55]} scale={[38, 6.2, 38]}>
+      <mesh position={[0, 0.8, -100]} scale={[68, 9.2, 68]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshToonMaterial color="#7cb268" />
       </mesh>
@@ -169,16 +225,17 @@ function FluffyClouds() {
 
   useFrame((state) => {
     if (cloudsRef.current) {
-      cloudsRef.current.position.x = (state.clock.getElapsedTime() * 0.15) % 36 - 18;
+      cloudsRef.current.position.x = (state.clock.getElapsedTime() * 0.15) % 60 - 30;
     }
   });
 
   return (
     <group ref={cloudsRef}>
       {[
-        { pos: [-24, 9.5, -28], scale: 2.2 },
-        { pos: [-4, 10.2, -32], scale: 2.8 },
-        { pos: [16, 9.8, -26], scale: 2.0 },
+        { pos: [-40, 12.5, -48], scale: 3.2 },
+        { pos: [-10, 13.2, -52], scale: 3.8 },
+        { pos: [26, 12.8, -46], scale: 3.0 },
+        { pos: [55, 13.5, -60], scale: 3.5 },
       ].map((c, idx) => (
         <group key={idx} position={c.pos} scale={c.scale}>
           <mesh position={[0, 0, 0]}>
@@ -197,15 +254,15 @@ function DistantBirds() {
   useFrame((state) => {
     if (birdsGroupRef.current) {
       const t = state.clock.getElapsedTime() * 0.4;
-      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 12;
-      birdsGroupRef.current.position.y = 8.5 + Math.cos(t * 0.3) * 0.5;
+      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 18;
+      birdsGroupRef.current.position.y = 10.5 + Math.cos(t * 0.3) * 0.5;
       birdsGroupRef.current.rotation.y = Math.cos(t * 0.5) * 0.3;
     }
   });
 
   return (
-    <group ref={birdsGroupRef} position={[0, 8.5, -18]}>
-      {[-1.2, 0, 1.2].map((offset, idx) => (
+    <group ref={birdsGroupRef} position={[0, 10.5, -28]}>
+      {[-1.8, 0, 1.8].map((offset, idx) => (
         <group key={idx} position={[offset * 0.8, idx * 0.2, offset * 0.5]}>
           <mesh position={[-0.1, 0, 0]} rotation={[0, 0, 0.3]}>
             <boxGeometry args={[0.2, 0.02, 0.08]} />
@@ -252,7 +309,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
     const px = targetGroupRef.current.position.x;
     const pz = targetGroupRef.current.position.z;
 
-    // Pet 1 (Left Flank)
     if (pet1Ref.current) {
       const t1x = px - 0.65;
       const t1z = pz + 0.65;
@@ -270,7 +326,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
       }
     }
 
-    // Pet 2 (Right Flank - Playful Companion Pup)
     if (pet2Ref.current) {
       const t2x = px + 0.65;
       const t2z = pz + 0.65;
@@ -291,7 +346,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
 
   return (
     <group>
-      {/* Pet 1 (Customized Companion) */}
       <group ref={pet1Ref} position={[-14.65, 0, -11.35]} scale={0.55}>
         <group position={[0, 0.18, 0]}>
           <mesh castShadow>
@@ -302,7 +356,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
         </group>
       </group>
 
-      {/* Pet 2 (Playful Companion Pup 🐶) */}
       <group ref={pet2Ref} position={[-13.35, 0, -11.35]} scale={0.55}>
         <group position={[0, 0.18, 0]}>
           <mesh castShadow>
@@ -321,7 +374,7 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
 }
 
 /** -------------------------------------------------------------
- *  6. PINTO / PAINT STORYBOOK HORSE 🐴 (CHESTNUT + WHITE + BLONDE MANE)
+ *  6. PINTO STORYBOOK HORSE 🐴
  * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
@@ -517,7 +570,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
 
       if (moveVec.lengthSq() > 0) {
         moveVec.normalize();
-        const speedMultiplier = isMounted ? 5.2 : 3.8;
+        const speedMultiplier = isMounted ? 5.8 : 4.2;
         const moveSpeed = speedMultiplier * delta;
 
         let nextX = playerGroupRef.current.position.x + moveVec.x * moveSpeed;
@@ -542,7 +595,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
       enablePan={false}
       enableZoom={true}
       minDistance={3.0}
-      maxDistance={15.0}
+      maxDistance={18.0}
       minPolarAngle={Math.PI * 0.12}
       maxPolarAngle={Math.PI * 0.46}
       rotateSpeed={0.6}
@@ -609,20 +662,6 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
   );
 }
 
-function NaturalDioramaTerrain({ position = [-14.0, 0, -12.0], onGroundClick }) {
-  return (
-    <group position={position}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow onClick={(e) => {
-        e.stopPropagation();
-        onGroundClick(sanitizePlayableTarget(e.point.x, e.point.z));
-      }}>
-        <circleGeometry args={[7, 32]} />
-        <meshToonMaterial color="#a7c957" />
-      </mesh>
-    </group>
-  );
-}
-
 function StorybookTree({ position, scale = 1, rotation = 0 }) {
   return (
     <group position={position} scale={scale} rotation={[0, rotation, 0]}>
@@ -665,7 +704,7 @@ function SoftFlowerCluster({ position, color = '#ffb5a7' }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH DUAL PETS & SPEC SHEET UPGRADES
+ *  MAIN SCENE WITH OPEN-WORLD EXPLORATION & MULTI-BIOMES (120m RADIUS)
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -675,7 +714,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   return (
     <Canvas shadows camera={{ position: [-14.0, 4.5, -5.0], fov: 42 }}>
       <color attach="background" args={['#bfe8f7']} />
-      <fog attach="fog" args={['#bfe8f7', 12, 35]} />
+      <fog attach="fog" args={['#bfe8f7', 15, 60]} />
       
       <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.9} />
       <directionalLight position={[6, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
@@ -691,19 +730,25 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         onOpenDialogue={onOpenDialogue}
       />
 
-      <ExtendedMeadowTerrain />
+      {/* 300m x 300m Continuous Open-World Meadow Ground */}
+      <ExtendedMeadowTerrain onGroundClick={setTargetPos} />
+      
       <StoneRiverBridge />
       <FluffyClouds />
       <DistantBirds />
       <DistantCountrysideHills />
       <VillageWindingPaths />
-      <CountrysideNaturalFillers />
+      
+      {/* 4 Explorable Biomes & Landmarks */}
+      <WoodlandForestBiome />
+      <BlossomMeadowBiome />
+      <WindmillKnollLandmark />
 
       <VillageSquare position={[0, 0, -22.0]} />
       <VillageHouses />
       <Villagers />
 
-      <NaturalDioramaTerrain position={[-14.0, 0, -12.0]} onGroundClick={setTargetPos} />
+      {/* Player Cottage & Yard */}
       <CozyCottage position={[-16.6, 0.1, -14.4]} rotation={0.45} />
       <HomeHorseStable position={[-17.5, 0, -11.2]} />
 
@@ -713,8 +758,8 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {/* Dual Pet Companions (Pet 1 + Pet 2) */}
       <DualPetCompanions petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
-      <Sparkles count={100} scale={28} size={3.5} speed={0.4} color="#ffe5ec" />
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={28} blur={2.5} />
+      <Sparkles count={120} scale={45} size={3.5} speed={0.4} color="#ffe5ec" />
+      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={45} blur={2.5} />
     </Canvas>
   );
 }
