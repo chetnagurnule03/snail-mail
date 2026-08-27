@@ -1,8 +1,13 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Outlines } from '@react-three/drei';
+
+function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
+  return <Outlines thickness={thickness} color={color} screenspace={false} />;
+}
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER NPCS (STYLIZED 3D CARTOON HUMANS)
+ *  12 UNIQUE VILLAGER NPCS (CHUNKY CHIBI 3D CARTOON HUMANS)
  * ------------------------------------------------------------- */
 export const VILLAGERS_DATA = [
   { id: 1, name: 'Mia', job: 'Florist', pos: [20.5, 0.18, -26.5], outfitColor: '#ffb5a7', hairColor: '#e6c594', pet: 'bunny' },
@@ -32,69 +37,101 @@ function VillagerNPC({ npc }) {
 
   return (
     <group ref={npcRef} position={npc.pos}>
-      {/* Head, Hair, Eyes, Blush */}
-      <group position={[0, 0.95, 0]}>
+      {/* 35-40% Oversized Chunky Chibi Head */}
+      <group position={[0, 0.88, 0]}>
         <mesh castShadow>
-          <sphereGeometry args={[0.24, 20, 20]} />
+          <sphereGeometry args={[0.34, 24, 24]} />
           <meshToonMaterial color="#f2c9a0" />
+          <ToonOutline thickness={0.03} />
         </mesh>
-        <mesh position={[0, 0.08, -0.02]}>
-          <sphereGeometry args={[0.26, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
+
+        {/* Hair Cap */}
+        <mesh position={[0, 0.1, -0.02]}>
+          <sphereGeometry args={[0.36, 24, 24, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
           <meshToonMaterial color={npc.hairColor} />
         </mesh>
-        <mesh position={[-0.08, 0.02, 0.2]}>
-          <sphereGeometry args={[0.03, 8, 8]} />
+
+        {/* Expressive Eyes */}
+        <mesh position={[-0.12, 0.02, 0.28]}>
+          <sphereGeometry args={[0.04, 10, 10]} />
           <meshToonMaterial color="#222222" />
         </mesh>
-        <mesh position={[0.08, 0.02, 0.2]}>
-          <sphereGeometry args={[0.03, 8, 8]} />
+        <mesh position={[0.12, 0.02, 0.28]}>
+          <sphereGeometry args={[0.04, 10, 10]} />
           <meshToonMaterial color="#222222" />
         </mesh>
-        <mesh position={[-0.12, -0.04, 0.18]}>
-          <sphereGeometry args={[0.04, 8, 8]} />
-          <meshToonMaterial color="#ffb5a7" transparent opacity={0.6} />
+
+        {/* Small Nose */}
+        <mesh position={[0, -0.04, 0.32]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshToonMaterial color="#f2c9a0" />
         </mesh>
-        <mesh position={[0.12, -0.04, 0.18]}>
-          <sphereGeometry args={[0.04, 8, 8]} />
-          <meshToonMaterial color="#ffb5a7" transparent opacity={0.6} />
+
+        {/* Rosy Blush Cheeks */}
+        <mesh position={[-0.18, -0.06, 0.26]}>
+          <sphereGeometry args={[0.05, 10, 10]} />
+          <meshToonMaterial color="#ffb5a7" transparent opacity={0.65} />
+        </mesh>
+        <mesh position={[0.18, -0.06, 0.26]}>
+          <sphereGeometry args={[0.05, 10, 10]} />
+          <meshToonMaterial color="#ffb5a7" transparent opacity={0.65} />
         </mesh>
       </group>
 
-      {/* Torso & Outfit */}
-      <mesh position={[0, 0.48, 0]} castShadow>
-        <capsuleGeometry args={[0.24, 0.36, 8, 16]} />
-        <meshToonMaterial color={npc.outfitColor} />
-      </mesh>
+      {/* Chunky Rounded Torso & Outfit */}
+      <group position={[0, 0.44, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.5, 0.44, 0.36]} />
+          <meshToonMaterial color={npc.outfitColor} />
+          <ToonOutline thickness={0.03} />
+        </mesh>
+      </group>
 
-      {/* Arms & Sleeves */}
-      <mesh position={[-0.26, 0.48, 0]} rotation={[0, 0, 0.2]} castShadow>
-        <capsuleGeometry args={[0.06, 0.28, 6, 10]} />
-        <meshToonMaterial color={npc.outfitColor} />
-      </mesh>
-      <mesh position={[0.26, 0.48, 0]} rotation={[0, 0, -0.2]} castShadow>
-        <capsuleGeometry args={[0.06, 0.28, 6, 10]} />
-        <meshToonMaterial color={npc.outfitColor} />
-      </mesh>
+      {/* Short Chunky Arms & Oversized Hands */}
+      <group position={[-0.32, 0.42, 0]} rotation={[0, 0, 0.25]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.32, 10]} />
+          <meshToonMaterial color={npc.outfitColor} />
+        </mesh>
+        <mesh position={[0, -0.18, 0]} castShadow>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshToonMaterial color="#f2c9a0" />
+        </mesh>
+      </group>
+      <group position={[0.32, 0.42, 0]} rotation={[0, 0, -0.25]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.32, 10]} />
+          <meshToonMaterial color={npc.outfitColor} />
+        </mesh>
+        <mesh position={[0, -0.18, 0]} castShadow>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshToonMaterial color="#f2c9a0" />
+        </mesh>
+      </group>
 
-      {/* Legs & Shoes */}
-      <mesh position={[-0.11, 0.14, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, 0.28, 8]} />
-        <meshToonMaterial color="#457b9d" />
-      </mesh>
-      <mesh position={[0.11, 0.14, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, 0.28, 8]} />
-        <meshToonMaterial color="#457b9d" />
-      </mesh>
-      <mesh position={[-0.11, 0.02, 0.04]} castShadow>
-        <boxGeometry args={[0.1, 0.06, 0.16]} />
-        <meshToonMaterial color="#6b4c35" />
-      </mesh>
-      <mesh position={[0.11, 0.02, 0.04]} castShadow>
-        <boxGeometry args={[0.1, 0.06, 0.16]} />
-        <meshToonMaterial color="#6b4c35" />
-      </mesh>
+      {/* Short Chunky Legs & Oversized Boots */}
+      <group position={[-0.14, 0.12, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.24, 10]} />
+          <meshToonMaterial color="#457b9d" />
+        </mesh>
+        <mesh position={[0, -0.1, 0.05]} castShadow>
+          <boxGeometry args={[0.16, 0.1, 0.24]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+      </group>
+      <group position={[0.14, 0.12, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.24, 10]} />
+          <meshToonMaterial color="#457b9d" />
+        </mesh>
+        <mesh position={[0, -0.1, 0.05]} castShadow>
+          <boxGeometry args={[0.16, 0.1, 0.24]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+      </group>
 
-      {/* Companion Pet */}
+      {/* Villager Companion Pet */}
       <group position={[0.5, 0.12, 0.3]} scale={0.6}>
         <mesh castShadow>
           <sphereGeometry args={[0.18, 12, 12]} />

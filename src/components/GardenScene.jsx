@@ -28,7 +28,6 @@ function sanitizePlayableTarget(x, z) {
   let targetX = x;
   let targetZ = z;
 
-  // Enforce obstacle collisions only (ZERO circular boundary clamping!)
   for (const obs of OBSTACLES) {
     const dx = targetX - obs.x;
     const dz = targetZ - obs.z;
@@ -523,6 +522,9 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
   );
 }
 
+/** -------------------------------------------------------------
+ *  8. CHUNKY CHIBI 3D CARTOON PLAYER CHARACTER (35-40% HEAD RATIO)
+ * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
@@ -546,18 +548,124 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 
   return (
     <group ref={groupRef} position={[-14.0, 0, -12.0]}>
-      <group position={[0, 0.94, 0]}>
+      {/* 35-40% Oversized Chunky Chibi Head */}
+      <group position={[0, 0.88, 0]}>
+        {/* Head Base */}
         <mesh castShadow>
-          <sphereGeometry args={[0.26, 24, 24]} />
+          <sphereGeometry args={[0.34, 24, 24]} />
           <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
           <ToonOutline thickness={0.03} />
         </mesh>
+
+        {/* Headband / Hair Cap */}
+        <mesh position={[0, 0.12, -0.02]}>
+          <sphereGeometry args={[0.36, 24, 24, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
+          <meshToonMaterial color={character?.hair_color || '#7a4a2b'} />
+        </mesh>
+
+        {/* Headband Tie / Bandana */}
+        <mesh position={[0, 0.18, 0.12]} rotation={[0.2, 0, 0]}>
+          <torusGeometry args={[0.35, 0.04, 12, 24]} />
+          <meshToonMaterial color="#e63946" />
+        </mesh>
+
+        {/* Expressive Eyes */}
+        <mesh position={[-0.12, 0.02, 0.28]}>
+          <sphereGeometry args={[0.04, 10, 10]} />
+          <meshToonMaterial color="#222222" />
+        </mesh>
+        <mesh position={[0.12, 0.02, 0.28]}>
+          <sphereGeometry args={[0.04, 10, 10]} />
+          <meshToonMaterial color="#222222" />
+        </mesh>
+
+        {/* Small Nose & Cute Smile */}
+        <mesh position={[0, -0.04, 0.32]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshToonMaterial color="#f2c9a0" />
+        </mesh>
+        <mesh position={[0, -0.1, 0.31]}>
+          <boxGeometry args={[0.08, 0.02, 0.02]} />
+          <meshToonMaterial color="#e07a5f" />
+        </mesh>
+
+        {/* Rosy Blush Cheeks */}
+        <mesh position={[-0.18, -0.06, 0.26]}>
+          <sphereGeometry args={[0.05, 10, 10]} />
+          <meshToonMaterial color="#ffb5a7" transparent opacity={0.65} />
+        </mesh>
+        <mesh position={[0.18, -0.06, 0.26]}>
+          <sphereGeometry args={[0.05, 10, 10]} />
+          <meshToonMaterial color="#ffb5a7" transparent opacity={0.65} />
+        </mesh>
       </group>
-      <mesh position={[0, 0.48, 0]} castShadow>
-        <capsuleGeometry args={[0.25, 0.38, 8, 16]} />
-        <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
-        <ToonOutline thickness={0.03} />
-      </mesh>
+
+      {/* Chunky Rounded Torso & Outfit */}
+      <group position={[0, 0.44, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.5, 0.44, 0.36]} />
+          <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
+          <ToonOutline thickness={0.03} />
+        </mesh>
+        {/* Shirt Collar */}
+        <mesh position={[0, 0.2, 0.18]}>
+          <boxGeometry args={[0.22, 0.08, 0.04]} />
+          <meshToonMaterial color="#ffffff" />
+        </mesh>
+        {/* Overalls / Suspenders Buttons */}
+        <mesh position={[-0.12, 0.08, 0.19]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+        <mesh position={[0.12, 0.08, 0.19]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+      </group>
+
+      {/* Short Chunky Arms & Oversized Hands */}
+      <group position={[-0.32, 0.42, 0]} rotation={[0, 0, 0.25]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.32, 10]} />
+          <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
+        </mesh>
+        <mesh position={[0, -0.18, 0]} castShadow>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
+        </mesh>
+      </group>
+      <group position={[0.32, 0.42, 0]} rotation={[0, 0, -0.25]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.32, 10]} />
+          <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
+        </mesh>
+        <mesh position={[0, -0.18, 0]} castShadow>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
+        </mesh>
+      </group>
+
+      {/* Short Chunky Legs & Oversized Boots */}
+      <group position={[-0.14, 0.12, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.24, 10]} />
+          <meshToonMaterial color="#457b9d" />
+        </mesh>
+        <mesh position={[0, -0.1, 0.05]} castShadow>
+          <boxGeometry args={[0.16, 0.1, 0.24]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+      </group>
+      <group position={[0.14, 0.12, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.24, 10]} />
+          <meshToonMaterial color="#457b9d" />
+        </mesh>
+        <mesh position={[0, -0.1, 0.05]} castShadow>
+          <boxGeometry args={[0.16, 0.1, 0.24]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -580,7 +688,7 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH UNRESTRICTED 600x600m OPEN-WORLD MEADOW TERRAIN
+ *  MAIN SCENE WITH CHUNKY CHIBI PLAYER & UNRESTRICTED OPEN WORLD
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
