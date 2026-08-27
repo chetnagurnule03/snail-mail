@@ -2,28 +2,28 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER COTTAGES WITH VIBRANT FARM GARDENS
+ *  12 UNIQUE VILLAGER COTTAGES WITH DETAILED CARTOON ARCHITECTURE & GARDENS
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
   // Hamlet 1: North-West Woodland Hamlet
-  { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'tomato', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#94c480', roofColor: '#c96850' },
-  { id: 2, name: "Sophie's Artist Studio", gardenType: 'flower', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#c9a7e0', roofColor: '#2a9d8f' },
-  { id: 3, name: "Clara's Weaver House", gardenType: 'corn', pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a' },
+  { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'tomato', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#94c480', roofColor: '#c96850', trimColor: '#6b4c35' },
+  { id: 2, name: "Sophie's Artist Studio", gardenType: 'flower', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#c9a7e0', roofColor: '#2a9d8f', trimColor: '#5c381e' },
+  { id: 3, name: "Clara's Weaver House", gardenType: 'corn', pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a', trimColor: '#8c5a3c' },
 
   // Hamlet 2: North-East Blossom Knoll
-  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'sunflower', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#e9c46a', roofColor: '#2a9d8f' },
-  { id: 5, name: "Noah's Herbalist Haven", gardenType: 'berry', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#f4a261', roofColor: '#e76f51' },
-  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'apple', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#c7f9cc', roofColor: '#2d6a4f' },
+  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'sunflower', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#e9c46a', roofColor: '#2a9d8f', trimColor: '#7a4a2b' },
+  { id: 5, name: "Noah's Herbalist Haven", gardenType: 'berry', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#f4a261', roofColor: '#e76f51', trimColor: '#5c381e' },
+  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'apple', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#c7f9cc', roofColor: '#2d6a4f', trimColor: '#6b4c35' },
 
   // Hamlet 3: South-West Craftsman Creek
-  { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'flower', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f1faee', roofColor: '#e63946' },
-  { id: 8, name: "Milo's Timber Workshop", gardenType: 'corn', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#d4a373', roofColor: '#7a4a2b' },
-  { id: 9, name: "Jasper's Potter House", gardenType: 'tomato', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#e07a5f', roofColor: '#6b4c35' },
+  { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'flower', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f1faee', roofColor: '#e63946', trimColor: '#8c5a3c' },
+  { id: 8, name: "Milo's Timber Workshop", gardenType: 'corn', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#d4a373', roofColor: '#7a4a2b', trimColor: '#4a2c11' },
+  { id: 9, name: "Jasper's Potter House", gardenType: 'tomato', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#e07a5f', roofColor: '#6b4c35', trimColor: '#3d2616' },
 
   // Hamlet 4: South-East Quiet Meadow
-  { id: 10, name: "Luna's Storybook Library", gardenType: 'sunflower', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#a8dadc', roofColor: '#1d3557' },
-  { id: 11, name: "Felix's Astronomer Tower", gardenType: 'berry', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#a8dadc', roofColor: '#1d3557' },
-  { id: 12, name: "Daisy's Honey Cottage", gardenType: 'sunflower', pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703' },
+  { id: 10, name: "Luna's Storybook Library", gardenType: 'sunflower', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#a8dadc', roofColor: '#1d3557', trimColor: '#7a4a2b' },
+  { id: 11, name: "Felix's Astronomer Tower", gardenType: 'berry', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#a8dadc', roofColor: '#1d3557', trimColor: '#5c381e' },
+  { id: 12, name: "Daisy's Honey Cottage", gardenType: 'sunflower', pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703', trimColor: '#8c5a3c' },
 ];
 
 function UniqueFarmGarden({ type }) {
@@ -33,6 +33,16 @@ function UniqueFarmGarden({ type }) {
       <mesh position={[0, 0.08, 0.6]} castShadow receiveShadow>
         <boxGeometry args={[1.4, 0.16, 1.0]} />
         <meshToonMaterial color="#6b4326" />
+      </mesh>
+
+      {/* Wooden Fence Rails */}
+      <mesh position={[-0.75, 0.25, 0.6]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.0]} />
+        <meshToonMaterial color="#8c5a3c" />
+      </mesh>
+      <mesh position={[0.75, 0.25, 0.6]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.0]} />
+        <meshToonMaterial color="#8c5a3c" />
       </mesh>
 
       {/* 🌻 Giant Sunflowers Garden */}
@@ -129,42 +139,81 @@ export default function VillageHouses() {
     <group>
       {VILLAGE_COTTAGES.map((c) => (
         <group key={c.id} position={c.pos} rotation={[0, c.rot, 0]}>
-          {/* Main Cottage Architecture */}
+          {/* Main Cottage Wall Body */}
           <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.85, 1.8, 1.65]} />
             <meshToonMaterial color={c.wallColor} />
           </mesh>
 
-          {/* Sloped Roof */}
+          {/* Timber Beam Accents */}
+          <mesh position={[0, 1.76, 0]} castShadow>
+            <boxGeometry args={[1.92, 0.08, 1.72]} />
+            <meshToonMaterial color={c.trimColor} />
+          </mesh>
+          <mesh position={[-0.9, 0.9, 0]} castShadow>
+            <boxGeometry args={[0.08, 1.8, 1.68]} />
+            <meshToonMaterial color={c.trimColor} />
+          </mesh>
+          <mesh position={[0.9, 0.9, 0]} castShadow>
+            <boxGeometry args={[0.08, 1.8, 1.68]} />
+            <meshToonMaterial color={c.trimColor} />
+          </mesh>
+
+          {/* Sloped Roof with Thickness & Overhang */}
           <group position={[0, 2.1, 0]}>
             <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
               <coneGeometry args={[1.7, 1.35, 4]} />
               <meshToonMaterial color={c.roofColor} />
             </mesh>
             <mesh position={[0, -0.65, 0]}>
-              <boxGeometry args={[1.92, 0.08, 1.72]} />
-              <meshToonMaterial color="#6b4c35" />
+              <boxGeometry args={[1.98, 0.1, 1.78]} />
+              <meshToonMaterial color={c.trimColor} />
             </mesh>
           </group>
 
-          {/* Door */}
+          {/* Front Porch & Steps */}
+          <mesh position={[0.2, 0.08, 0.96]} castShadow receiveShadow>
+            <boxGeometry args={[0.7, 0.16, 0.35]} />
+            <meshToonMaterial color="#8a7e70" />
+          </mesh>
+
+          {/* Wooden Door & Knob */}
           <group position={[0.2, 0.65, 0.84]}>
             <mesh castShadow>
               <boxGeometry args={[0.5, 0.92, 0.05]} />
               <meshToonMaterial color="#7a4a2b" />
             </mesh>
+            <mesh position={[0.18, 0, 0.04]}>
+              <sphereGeometry args={[0.04, 8, 8]} />
+              <meshToonMaterial color="#ffb703" />
+            </mesh>
           </group>
 
-          {/* Windows with Warm Glow */}
-          <mesh position={[-0.45, 1.0, 0.84]}>
-            <boxGeometry args={[0.45, 0.45, 0.05]} />
-            <meshToonMaterial color="#ffdda1" emissive="#ffb703" emissiveIntensity={0.6} />
-          </mesh>
+          {/* Windows with Shutters & Warm Interior Glow */}
+          <group position={[-0.45, 1.0, 0.84]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.45, 0.45, 0.05]} />
+              <meshToonMaterial color="#ffdda1" emissive="#ffb703" emissiveIntensity={0.6} />
+            </mesh>
+            <mesh position={[-0.28, 0, 0]} castShadow>
+              <boxGeometry args={[0.1, 0.45, 0.04]} />
+              <meshToonMaterial color={c.trimColor} />
+            </mesh>
+            <mesh position={[0.28, 0, 0]} castShadow>
+              <boxGeometry args={[0.1, 0.45, 0.04]} />
+              <meshToonMaterial color={c.trimColor} />
+            </mesh>
+            {/* Window Flower Box */}
+            <mesh position={[0, -0.28, 0.06]} castShadow>
+              <boxGeometry args={[0.52, 0.12, 0.14]} />
+              <meshToonMaterial color="#6b4c35" />
+            </mesh>
+          </group>
 
           {/* Individual Farm Garden Plot */}
           <UniqueFarmGarden type={c.gardenType} />
 
-          {/* Chimney & Smoke Sparkles */}
+          {/* Stone Chimney & Smoke Sparkles */}
           <group position={[-0.65, 2.0, -0.3]}>
             <mesh castShadow>
               <boxGeometry args={[0.36, 1.25, 0.36]} />
