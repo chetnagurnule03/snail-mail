@@ -41,7 +41,7 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  DETAILED CUTE 3D ORANGE CAT PET (NO PLACEHOLDER SPHERES) 🐱
+ *  DETAILED CUTE 3D ORANGE CAT PET 🐱
  * ------------------------------------------------------------- */
 function OrangeCatPet({ targetGroupRef, activePet }) {
   const catRef = useRef();
@@ -74,7 +74,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
 
   return (
     <group ref={catRef} position={[-14.75, 0, -11.25]} scale={0.7}>
-      {/* Orange Cat Main Body */}
       <mesh position={[0, 0.28, 0]} castShadow>
         <boxGeometry args={[0.34, 0.28, 0.65]} />
         <meshToonMaterial color="#f4a261" />
@@ -97,19 +96,16 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
           <ToonOutline thickness={0.025} />
         </mesh>
 
-        {/* Muzzle & White Patch */}
         <mesh position={[0, -0.06, 0.19]}>
           <boxGeometry args={[0.22, 0.14, 0.04]} />
           <meshToonMaterial color="#ffffff" />
         </mesh>
 
-        {/* Pink Nose */}
         <mesh position={[0, -0.02, 0.21]}>
           <sphereGeometry args={[0.035, 8, 8]} />
           <meshToonMaterial color="#ffb5a7" />
         </mesh>
 
-        {/* Cute Green Eyes */}
         <mesh position={[-0.1, 0.06, 0.19]}>
           <sphereGeometry args={[0.045, 8, 8]} />
           <meshToonMaterial color="#2a9d8f" />
@@ -119,7 +115,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
           <meshToonMaterial color="#2a9d8f" />
         </mesh>
 
-        {/* Pointed Ears */}
         <mesh position={[-0.14, 0.22, 0]} rotation={[0, 0, -0.2]}>
           <coneGeometry args={[0.08, 0.18, 4]} />
           <meshToonMaterial color="#e76f51" />
@@ -143,7 +138,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
         </mesh>
       ))}
 
-      {/* Curved Wagging Tail */}
       <group position={[0, 0.35, -0.34]} rotation={[0.6, 0, 0]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.04, 0.03, 0.45, 8]} />
@@ -218,9 +212,6 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  STEPPED LOW-POLY TERRACED TERRAIN
- * ------------------------------------------------------------- */
 function SteppedLowPolyTerrain({ onGroundClick }) {
   return (
     <group>
@@ -389,6 +380,12 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
   );
 }
 
+/** -------------------------------------------------------------
+ *  CHIBI DARK KNIGHT / BLACK CAT MASKED ADVENTURER PLAYER 🦇🖤
+ *  - 40-45% Head Ratio with Pointed Ears & Beige Chin
+ *  - 30-35% Torso Ratio with Dark Grey Armor & Gold Utility Belt
+ *  - 20-25% Leg Ratio with Black Gauntlets & Heavy Boots
+ * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
@@ -412,23 +409,116 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 
   return (
     <group ref={groupRef} position={[-14.0, 0, -12.0]}>
-      <group position={[0, 0.88, 0]}>
+      {/* 1. OVERSIZED BLACK COWL HEAD (40-45% TOTAL HEIGHT) */}
+      <group position={[0, 0.96, 0]}>
+        {/* Main Black Cowl Sphere */}
         <mesh castShadow>
-          <sphereGeometry args={[0.34, 24, 24]} />
-          <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
-          <ToonOutline thickness={0.03} />
+          <sphereGeometry args={[0.38, 24, 24]} />
+          <meshToonMaterial color="#1c1c1e" />
+          <ToonOutline thickness={0.03} color="#0a0a0c" />
         </mesh>
-        <mesh position={[0, 0.12, -0.02]}>
-          <sphereGeometry args={[0.36, 24, 24, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
-          <meshToonMaterial color={character?.hair_color || '#7a4a2b'} />
+
+        {/* 2 Pointed Black Ears */}
+        <mesh position={[-0.18, 0.38, -0.05]} rotation={[-0.1, 0, -0.15]}>
+          <coneGeometry args={[0.09, 0.32, 4]} />
+          <meshToonMaterial color="#1c1c1e" />
+          <ToonOutline thickness={0.025} color="#0a0a0c" />
+        </mesh>
+        <mesh position={[0.18, 0.38, -0.05]} rotation={[-0.1, 0, 0.15]}>
+          <coneGeometry args={[0.09, 0.32, 4]} />
+          <meshToonMaterial color="#1c1c1e" />
+          <ToonOutline thickness={0.025} color="#0a0a0c" />
+        </mesh>
+
+        {/* Pale Beige Face / Chin Cutout */}
+        <mesh position={[0, -0.1, 0.22]}>
+          <boxGeometry args={[0.32, 0.2, 0.12]} />
+          <meshToonMaterial color="#fae1c5" />
+        </mesh>
+
+        {/* Sharp Minimalist White Eye Slits */}
+        <mesh position={[-0.12, 0.06, 0.34]} rotation={[0, 0, -0.18]}>
+          <boxGeometry args={[0.14, 0.035, 0.04]} />
+          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+        </mesh>
+        <mesh position={[0.12, 0.06, 0.34]} rotation={[0, 0, 0.18]}>
+          <boxGeometry args={[0.14, 0.035, 0.04]} />
+          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
         </mesh>
       </group>
 
-      <group position={[0, 0.44, 0]}>
+      {/* 2. CHUNKY GREY ARMOR & GOLD UTILITY BELT (30-35% TOTAL HEIGHT) */}
+      <group position={[0, 0.46, 0]}>
+        {/* Dark Textured Grey Chest Armor */}
         <mesh castShadow>
-          <boxGeometry args={[0.5, 0.44, 0.36]} />
-          <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
-          <ToonOutline thickness={0.03} />
+          <boxGeometry args={[0.46, 0.38, 0.32]} />
+          <meshToonMaterial color="#4a4e69" />
+          <ToonOutline thickness={0.03} color="#0a0a0c" />
+        </mesh>
+
+        {/* Wide Gold/Brown Utility Belt */}
+        <mesh position={[0, -0.14, 0]} castShadow>
+          <boxGeometry args={[0.49, 0.1, 0.35]} />
+          <meshToonMaterial color="#c68a4c" />
+        </mesh>
+
+        {/* Belt Pouches */}
+        {[-0.18, 0, 0.18].map((x, i) => (
+          <mesh key={i} position={[x, -0.14, 0.19]} castShadow>
+            <boxGeometry args={[0.1, 0.11, 0.06]} />
+            <meshToonMaterial color="#e0a96d" />
+          </mesh>
+        ))}
+
+        {/* Black Flowing Back Cape */}
+        <group position={[0, 0.04, -0.18]} rotation={[0.2, 0, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.52, 0.58, 0.04]} />
+            <meshToonMaterial color="#1c1c1e" />
+          </mesh>
+          {/* Pointed Cape Trim */}
+          {[-0.2, 0, 0.2].map((x, i) => (
+            <mesh key={i} position={[x, -0.32, 0]} rotation={[0, 0, Math.PI]}>
+              <coneGeometry args={[0.08, 0.14, 3]} />
+              <meshToonMaterial color="#1c1c1e" />
+            </mesh>
+          ))}
+        </group>
+      </group>
+
+      {/* 3. SHORT BLACK ARMS WITH GAUNTLETS */}
+      <group position={[-0.28, 0.44, 0]} rotation={[0, 0, 0.25]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
+          <meshToonMaterial color="#1c1c1e" />
+        </mesh>
+        <mesh position={[0, -0.16, 0]} castShadow>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshToonMaterial color="#1c1c1e" />
+        </mesh>
+      </group>
+      <group position={[0.28, 0.44, 0]} rotation={[0, 0, -0.25]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
+          <meshToonMaterial color="#1c1c1e" />
+        </mesh>
+        <mesh position={[0, -0.16, 0]} castShadow>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshToonMaterial color="#1c1c1e" />
+        </mesh>
+      </group>
+
+      {/* 4. LEGS + HEAVY BOOTS (20-25% TOTAL HEIGHT) */}
+      <group position={[-0.14, 0.12, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.16, 0.24, 0.2]} />
+          <meshToonMaterial color="#111113" />
+        </mesh>
+      </group>
+      <group position={[0.14, 0.12, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.16, 0.24, 0.2]} />
+          <meshToonMaterial color="#111113" />
         </mesh>
       </group>
     </group>
@@ -436,7 +526,7 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN GARDEN SCENE WITH 3D ORANGE CAT & HORSE PET SYSTEM
+ *  MAIN GARDEN SCENE
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue, activePet = 'none' }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -468,12 +558,13 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <VillageHouses />
       <Villagers />
 
+      {/* 🦇🖤 CHIBI DARK KNIGHT / BLACK CAT MASKED ADVENTURER MAIN PLAYER */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
-      
+
       {/* 🐴 HORSE PET COMPANION & MOUNT */}
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} activePet={activePet} />
 
-      {/* 🐱 3D ORANGE CAT PET COMPANION (NO PLACEHOLDER SPHERES) */}
+      {/* 🐱 3D ORANGE CAT PET COMPANION */}
       <OrangeCatPet targetGroupRef={playerGroupRef} activePet={activePet} />
 
       <Sparkles count={120} scale={60} size={3.5} speed={0.4} color="#ffe5ec" />
