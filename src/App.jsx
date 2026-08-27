@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from './hooks/useAuth';
 import { useCharacter } from './hooks/useCharacter';
-import AuthGate from './components/AuthGate';
 import GardenScene from './components/GardenScene';
 import VillagerDialogueModal from './components/VillagerDialogueModal';
 import Composer from './components/Composer';
@@ -41,8 +39,7 @@ const SMALL_PETS = [
 ];
 
 export default function App() {
-  const { user, loading: authLoading, signInWithEmail, signInAsGuest, signOut } = useAuth();
-  const { character, loading: charLoading, saving, save } = useCharacter(user?.id);
+  const { character, loading: charLoading, saving, save } = useCharacter();
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [isMailComposerOpen, setIsMailComposerOpen] = useState(false);
   const [preselectedVillager, setPreselectedVillager] = useState(null);
@@ -91,21 +88,13 @@ export default function App() {
     setActiveSnailDeliveries((prev) => prev.filter((d) => d.id !== deliveryId));
   };
 
-  if (authLoading) {
-    return <Centered>Loading your little world…</Centered>;
-  }
-
-  if (!user) {
-    return <AuthGate onSignInWithEmail={signInWithEmail} onSignInAsGuest={signInAsGuest} />;
-  }
-
   if (charLoading || !character) {
-    return <Centered>Waking up your garden…</Centered>;
+    return <Centered>Waking up your village world…</Centered>;
   }
 
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
-      {/* 3D Storybook World Canvas */}
+      {/* 3D Storybook World Canvas (Loads Directly) */}
       <GardenScene
         character={character}
         resetCameraSignal={resetCameraSignal}
@@ -120,7 +109,7 @@ export default function App() {
       {/* Top HUD Bar */}
       <div style={styles.hud}>
         <div style={styles.badge}>
-          🐌 {character.name} {saving ? '(saving…)' : ''}
+          🐌 {character.name || 'Little Wanderer'} {saving ? '(saving…)' : ''}
         </div>
         <button
           style={{ ...styles.pill, background: isMounted ? '#e76f51' : '#e07a5f' }}
@@ -136,9 +125,6 @@ export default function App() {
         </button>
         <button style={styles.pillGhost} onClick={() => setResetCameraSignal(Date.now())}>
           🎥 Reset View [R]
-        </button>
-        <button style={styles.pillGhost} onClick={signOut}>
-          Sign out
         </button>
       </div>
 
@@ -194,7 +180,7 @@ export default function App() {
             </div>
             <div style={styles.modalBody}>
               <Composer
-                user={user}
+                user={{ id: 'local_player', email: 'player@village.local' }}
                 defaultRecipient={preselectedVillager?.name || ''}
                 onLetterSent={() => handleLetterSent(preselectedVillager?.name || 'Oliver')}
               />

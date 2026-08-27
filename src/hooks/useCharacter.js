@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
 
 const DEFAULT_CHARACTER = {
   name: 'Little Wanderer',
@@ -14,69 +13,49 @@ const DEFAULT_CHARACTER = {
   position: { x: 0, y: 0, z: 0 },
 };
 
-export function useCharacter(userId) {
-  const [character, setCharacter] = useState(null);
+const STORAGE_KEY = 'snail_mail_character';
+
+export function useCharacter() {
+  const [character, setCharacter] = useState(DEFAULT_CHARACTER);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) {
-      setCharacter(null);
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setCharacter({ ...DEFAULT_CHARACTER, ...parsed });
+      }
+    } catch (err) {
+      console.warn('Failed to parse local character data:', err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    let cancelled = false;
-    setLoading(true);
-
-    supabase
-      .from('characters')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle()
-      .then(({ data, error: fetchError }) => {
-        if (cancelled) return;
-        if (fetchError || !data) {
-          setCharacter({ user_id: userId, ...DEFAULT_CHARACTER });
-        } else {
-          setCharacter({ ...DEFAULT_CHARACTER, ...data });
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setCharacter({ user_id: userId, ...DEFAULT_CHARACTER });
-        setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+  }, []);
 
   const save = useCallback(
     async (patch) => {
-      if (!userId) return;
-      const next = { ...character, ...patch, user_id: userId };
-      setCharacter(next);
       setSaving(true);
       setError(null);
 
-      const { data, error: saveError } = await supabase
-        .from('characters')
-        .upsert(next, { onConflict: 'user_id' })
-        .select()
-        .single();
+      setCharacter((prev) => {
+        const next = { ...prev, ...patch };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch (err) {
+          console.warn('Failed to save character to localStorage:', err);
+          setError(err);
+        }
+        return next;
+      });
 
-      setSaving(false);
-      if (saveError) {
-        setError(saveError);
-      } else if (data) {
-        setCharacter({ ...DEFAULT_CHARACTER, ...data });
-      }
+      setTimeout(() => {
+        setSaving(false);
+      }, 300);
     },
-    [character, userId]
+    []
   );
 
   return { character, loading, saving, error, save };
