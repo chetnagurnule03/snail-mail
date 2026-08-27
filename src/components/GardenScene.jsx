@@ -1,10 +1,17 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, ContactShadows, Sky, Sparkles } from '@react-three/drei';
+import { OrbitControls, ContactShadows, Sky, Sparkles, Outlines } from '@react-three/drei';
 import * as THREE from 'three';
 import VillageSquare from './VillageSquare';
 import VillageHouses from './VillageHouses';
 import Villagers, { VILLAGERS_DATA } from './Villagers';
+
+/** -------------------------------------------------------------
+ *  TOON OUTLINE HELPER FOR CHIBI STORYBOOK AESTHETIC
+ * ------------------------------------------------------------- */
+function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
+  return <Outlines thickness={thickness} color={color} screenspace={false} />;
+}
 
 /** -------------------------------------------------------------
  *  COLLISION & BOUNDARY HELPER (PLAYABLE RADIUS = 45m)
@@ -50,7 +57,7 @@ function ExtendedMeadowTerrain() {
   return (
     <mesh position={[0, -0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[180, 180]} />
-      <meshStandardMaterial color="#94c77d" roughness={0.8} />
+      <meshToonMaterial color="#94c77d" />
     </mesh>
   );
 }
@@ -64,7 +71,7 @@ function StoneRiverBridge() {
       {/* Blue Winding Stream Water */}
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0.4]}>
         <planeGeometry args={[3.2, 34.0]} />
-        <meshStandardMaterial color="#3a86c8" roughness={0.1} metalness={0.2} transparent opacity={0.88} />
+        <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
       </mesh>
 
       {/* 🌉 Stone Arch Bridge */}
@@ -72,17 +79,20 @@ function StoneRiverBridge() {
         {/* Arch Walkway */}
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.2, 0.45, 4.2]} />
-          <meshStandardMaterial color="#8a7e70" roughness={0.8} />
+          <meshToonMaterial color="#8a7e70" />
+          <ToonOutline thickness={0.03} />
         </mesh>
 
         {/* Wooden Railings */}
         <mesh position={[-1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
-          <meshStandardMaterial color="#6b4c35" roughness={0.7} />
+          <meshToonMaterial color="#6b4c35" />
+          <ToonOutline thickness={0.025} />
         </mesh>
         <mesh position={[1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
-          <meshStandardMaterial color="#6b4c35" roughness={0.7} />
+          <meshToonMaterial color="#6b4c35" />
+          <ToonOutline thickness={0.025} />
         </mesh>
       </group>
     </group>
@@ -97,23 +107,23 @@ function VillageWindingPaths() {
     <group position={[0, 0.015, 0]}>
       <mesh position={[-7.0, 0, -17.0]} rotation={[-Math.PI / 2, 0, -0.6]}>
         <planeGeometry args={[1.5, 18.0]} />
-        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+        <meshToonMaterial color="#cbb994" />
       </mesh>
       <mesh position={[-16.0, 0, -23.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
         <planeGeometry args={[1.4, 20.0]} />
-        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+        <meshToonMaterial color="#cbb994" />
       </mesh>
       <mesh position={[14.0, 0, -24.0]} rotation={[-Math.PI / 2, 0, -0.3]}>
         <planeGeometry args={[1.4, 22.0]} />
-        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+        <meshToonMaterial color="#cbb994" />
       </mesh>
       <mesh position={[-16.0, 0, 0.0]} rotation={[-Math.PI / 2, 0, -0.9]}>
         <planeGeometry args={[1.4, 24.0]} />
-        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+        <meshToonMaterial color="#cbb994" />
       </mesh>
       <mesh position={[16.0, 0, 0.0]} rotation={[-Math.PI / 2, 0, 0.8]}>
         <planeGeometry args={[1.4, 25.0]} />
-        <meshStandardMaterial color="#cbb994" roughness={0.8} />
+        <meshToonMaterial color="#cbb994" />
       </mesh>
     </group>
   );
@@ -145,15 +155,15 @@ function DistantCountrysideHills() {
     <group position={[0, -1.8, 0]}>
       <mesh position={[-42, 1.2, -50]} scale={[32, 5.5, 32]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#8ab874" roughness={0.85} />
+        <meshToonMaterial color="#8ab874" />
       </mesh>
       <mesh position={[42, 1.0, -52]} scale={[34, 5.8, 34]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#9ec891" roughness={0.85} />
+        <meshToonMaterial color="#9ec891" />
       </mesh>
       <mesh position={[0, 0.8, -55]} scale={[38, 6.2, 38]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshStandardMaterial color="#7cb268" roughness={0.85} />
+        <meshToonMaterial color="#7cb268" />
       </mesh>
     </group>
   );
@@ -178,7 +188,7 @@ function FluffyClouds() {
         <group key={idx} position={c.pos} scale={c.scale}>
           <mesh position={[0, 0, 0]}>
             <sphereGeometry args={[1.0, 16, 16]} />
-            <meshStandardMaterial color="#ffffff" roughness={0.2} transparent opacity={0.92} />
+            <meshToonMaterial color="#ffffff" transparent opacity={0.92} />
           </mesh>
         </group>
       ))}
@@ -204,11 +214,11 @@ function DistantBirds() {
         <group key={idx} position={[offset * 0.8, idx * 0.2, offset * 0.5]}>
           <mesh position={[-0.1, 0, 0]} rotation={[0, 0, 0.3]}>
             <boxGeometry args={[0.2, 0.02, 0.08]} />
-            <meshStandardMaterial color="#556b2f" />
+            <meshToonMaterial color="#556b2f" />
           </mesh>
           <mesh position={[0.1, 0, 0]} rotation={[0, 0, -0.3]}>
             <boxGeometry args={[0.2, 0.02, 0.08]} />
-            <meshStandardMaterial color="#556b2f" />
+            <meshToonMaterial color="#556b2f" />
           </mesh>
         </group>
       ))}
@@ -221,11 +231,13 @@ function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
     <group position={position} rotation={[0, 0.3, 0]}>
       <mesh position={[-0.6, 0.35, 0]} castShadow>
         <boxGeometry args={[0.08, 0.7, 1.4]} />
-        <meshStandardMaterial color="#8c5a3c" roughness={0.8} />
+        <meshToonMaterial color="#8c5a3c" />
+        <ToonOutline thickness={0.02} />
       </mesh>
       <mesh position={[0, 0.35, -0.6]} castShadow>
         <boxGeometry args={[1.2, 0.7, 0.08]} />
-        <meshStandardMaterial color="#8c5a3c" roughness={0.8} />
+        <meshToonMaterial color="#8c5a3c" />
+        <ToonOutline thickness={0.02} />
       </mesh>
     </group>
   );
@@ -260,7 +272,8 @@ function SmallCompanionPet({ petType = 'bunny', targetGroupRef }) {
       <group position={[0, 0.18, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.18, 16, 16]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.5} />
+          <meshToonMaterial color="#ffffff" />
+          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
     </group>
@@ -308,12 +321,13 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
       <group position={[0, 0.62, 0]}>
         <mesh castShadow>
           <capsuleGeometry args={[0.32, 0.82, 8, 16]} rotation={[Math.PI / 2, 0, 0]} />
-          <meshStandardMaterial color="#c68a4c" roughness={0.55} />
+          <meshToonMaterial color="#c68a4c" />
+          <ToonOutline thickness={0.03} />
         </mesh>
         {/* Soft White Pinto Patch */}
         <mesh position={[0.08, 0.05, 0.12]} castShadow>
           <sphereGeometry args={[0.24, 12, 12]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.5} />
+          <meshToonMaterial color="#ffffff" />
         </mesh>
       </group>
 
@@ -321,11 +335,12 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
       <group position={[0, 0.78, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.15, 0.48]} />
-          <meshStandardMaterial color="#6a3b1d" roughness={0.7} />
+          <meshToonMaterial color="#6a3b1d" />
+          <ToonOutline thickness={0.02} />
         </mesh>
         <mesh position={[0, 0.08, 0]}>
           <boxGeometry args={[0.44, 0.04, 0.44]} />
-          <meshStandardMaterial color="#e9c46a" />
+          <meshToonMaterial color="#e9c46a" />
         </mesh>
       </group>
 
@@ -333,16 +348,19 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
       <group position={[0, 0.82, 0.42]}>
         <mesh position={[0, 0.28, 0.14]} rotation={[0.36, 0, 0]} castShadow>
           <cylinderGeometry args={[0.18, 0.24, 0.62, 12]} />
-          <meshStandardMaterial color="#c68a4c" roughness={0.55} />
+          <meshToonMaterial color="#c68a4c" />
+          <ToonOutline thickness={0.025} />
         </mesh>
         <mesh position={[0, 0.58, 0.3]} rotation={[-0.18, 0, 0]} castShadow>
           <boxGeometry args={[0.26, 0.26, 0.46]} />
-          <meshStandardMaterial color="#c68a4c" roughness={0.55} />
+          <meshToonMaterial color="#c68a4c" />
+          <ToonOutline thickness={0.025} />
         </mesh>
         {/* Blonde Mane */}
         <mesh position={[0, 0.48, 0.02]} rotation={[0.36, 0, 0]}>
           <boxGeometry args={[0.09, 0.65, 0.16]} />
-          <meshStandardMaterial color="#f4e2bb" roughness={0.8} />
+          <meshToonMaterial color="#f4e2bb" />
+          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
 
@@ -350,25 +368,29 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
       <group ref={leftFrontLegRef} position={[-0.18, 0.3, 0.28]}>
         <mesh position={[0, -0.15, 0]} castShadow>
           <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshToonMaterial color="#ffffff" />
+          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
       <group ref={rightFrontLegRef} position={[0.18, 0.3, 0.28]}>
         <mesh position={[0, -0.15, 0]} castShadow>
           <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshStandardMaterial color="#c68a4c" />
+          <meshToonMaterial color="#c68a4c" />
+          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
       <group ref={leftBackLegRef} position={[-0.18, 0.3, -0.28]}>
         <mesh position={[0, -0.15, 0]} castShadow>
           <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshStandardMaterial color="#c68a4c" />
+          <meshToonMaterial color="#c68a4c" />
+          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
       <group ref={rightBackLegRef} position={[0.18, 0.3, -0.28]}>
         <mesh position={[0, -0.15, 0]} castShadow>
           <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshToonMaterial color="#ffffff" />
+          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
     </group>
@@ -392,7 +414,6 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
       }
       if (k === 'e') {
         if (!isMounted && onOpenDialogue) {
-          // Check if near villager to talk
           const px = playerGroupRef.current?.position.x || 0;
           const pz = playerGroupRef.current?.position.z || 0;
           for (const v of VILLAGERS_DATA) {
@@ -426,7 +447,6 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
     const px = playerGroupRef.current.position.x;
     const pz = playerGroupRef.current.position.z;
 
-    // Check Villager Proximity for "💬 Press E to Talk" Prompt
     let foundVillager = null;
     for (const v of VILLAGERS_DATA) {
       const dx = px - v.pos[0];
@@ -498,9 +518,6 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
 }
 
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
-  const leftLegRef = useRef();
-  const rightLegRef = useRef();
-
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
     const dx = targetPos[0] - groupRef.current.position.x;
@@ -526,12 +543,14 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
       <group position={[0, 0.94, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.26, 24, 24]} />
-          <meshStandardMaterial color={character?.skin_tone || '#f2c9a0'} />
+          <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
+          <ToonOutline thickness={0.03} />
         </mesh>
       </group>
       <mesh position={[0, 0.48, 0]} castShadow>
         <capsuleGeometry args={[0.25, 0.38, 8, 16]} />
-        <meshStandardMaterial color={character?.outfit_color || '#c9a7e0'} />
+        <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
+        <ToonOutline thickness={0.03} />
       </mesh>
     </group>
   );
@@ -542,12 +561,14 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
     <group position={position} rotation={[0, rotation, 0]}>
       <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.85, 1.8, 1.65]} />
-        <meshStandardMaterial color="#faf0ca" roughness={0.7} />
+        <meshToonMaterial color="#faf0ca" />
+        <ToonOutline thickness={0.03} />
       </mesh>
       <group position={[0, 2.1, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[1.7, 1.35, 4]} />
-          <meshStandardMaterial color="#c96850" roughness={0.55} />
+          <meshToonMaterial color="#c96850" />
+          <ToonOutline thickness={0.03} />
         </mesh>
       </group>
     </group>
@@ -562,22 +583,24 @@ function NaturalDioramaTerrain({ position = [-14.0, 0, -12.0], onGroundClick }) 
         onGroundClick(sanitizePlayableTarget(e.point.x, e.point.z));
       }}>
         <circleGeometry args={[7, 32]} />
-        <meshStandardMaterial color="#a7c957" roughness={0.75} />
+        <meshToonMaterial color="#a7c957" />
       </mesh>
     </group>
   );
 }
 
-function StorybookTree({ position, scale = 1, rotation = 0, colorScale = 0 }) {
+function StorybookTree({ position, scale = 1, rotation = 0 }) {
   return (
     <group position={position} scale={scale} rotation={[0, rotation, 0]}>
       <mesh position={[0, 0.7, 0]} castShadow>
         <cylinderGeometry args={[0.16, 0.28, 1.4, 16]} />
-        <meshStandardMaterial color="#6b4c35" />
+        <meshToonMaterial color="#6b4c35" />
+        <ToonOutline thickness={0.025} />
       </mesh>
       <mesh position={[0, 1.6, 0]} castShadow>
         <sphereGeometry args={[0.85, 24, 24]} />
-        <meshStandardMaterial color="#84b574" />
+        <meshToonMaterial color="#84b574" />
+        <ToonOutline thickness={0.03} />
       </mesh>
     </group>
   );
@@ -588,7 +611,8 @@ function MushroomGroup({ position, scale = 1 }) {
     <group position={position} scale={scale}>
       <mesh position={[0, 0.18, 0]}>
         <cylinderGeometry args={[0.04, 0.07, 0.36, 12]} />
-        <meshStandardMaterial color="#fdf0d5" />
+        <meshToonMaterial color="#fdf0d5" />
+        <ToonOutline thickness={0.015} />
       </mesh>
     </group>
   );
@@ -599,14 +623,15 @@ function SoftFlowerCluster({ position, color = '#ffb5a7' }) {
     <group position={position}>
       <mesh position={[0, 0.2, 0]}>
         <sphereGeometry args={[0.09, 12, 12]} />
-        <meshStandardMaterial color={color} />
+        <meshToonMaterial color={color} />
+        <ToonOutline thickness={0.012} />
       </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH SPEC SHEET UPGRADES
+ *  MAIN SCENE WITH TOON OUTLINE & SPEC SHEET UPGRADES
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -615,12 +640,11 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
 
   return (
     <Canvas shadows camera={{ position: [-14.0, 4.5, -5.0], fov: 42 }}>
-      <color attach="background" args={['#e6f2ee']} />
-      <fogExp2 attach="fog" color="#dbebe6" density={0.006} />
+      <color attach="background" args={['#bfe8f7']} />
+      <fog attach="fog" args={['#bfe8f7', 12, 35]} />
       
-      <Sky sunPosition={[8, 5, 4]} turbidity={0.8} rayleigh={0.5} mieCoefficient={0.005} mieDirectionalG={0.8} />
-      <ambientLight intensity={0.85} color="#fff7ed" />
-      <directionalLight position={[6, 8, 4]} intensity={1.4} castShadow shadow-mapSize={[1024, 1024]} />
+      <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.9} />
+      <directionalLight position={[6, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
 
       <CharacterCameraController
         playerGroupRef={playerGroupRef}
