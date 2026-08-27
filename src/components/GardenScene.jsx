@@ -7,14 +7,16 @@ import VillageHouses from './VillageHouses';
 import Villagers, { VILLAGERS_DATA } from './Villagers';
 
 /** -------------------------------------------------------------
- *  TOON OUTLINE FOR HERO MODELS (HUMAN, HORSE, CAT)
+ *  TOON OUTLINE FOR HERO MODELS
  * ------------------------------------------------------------- */
 function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
   return <Outlines thickness={thickness} color={color} screenspace={false} />;
 }
 
 /** -------------------------------------------------------------
- *  COLLISION & OBSTACLE SANITIZER (UNRESTRICTED OPEN-WORLD)
+ *  STRICT MATHEMATICAL PLAYABLE BOUNDARY SANITIZER
+ *  VILLAGE WIDTH = 100 (X: -50 to +50)
+ *  VILLAGE DEPTH = 80  (Z: -40 to +40)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -14.0, z: -12.0, radius: 1.8 },
@@ -23,8 +25,9 @@ const OBSTACLES = [
 ];
 
 function sanitizePlayableTarget(x, z) {
-  let targetX = x;
-  let targetZ = z;
+  // STRICT MATHEMATICAL CLAMPING: X: [-48.5, 48.5], Z: [-38.5, 38.5]
+  let targetX = THREE.MathUtils.clamp(x, -48.5, 48.5);
+  let targetZ = THREE.MathUtils.clamp(z, -38.5, 38.5);
 
   for (const obs of OBSTACLES) {
     const dx = targetX - obs.x;
@@ -36,6 +39,10 @@ function sanitizePlayableTarget(x, z) {
       targetZ = obs.z + Math.sin(angle) * (obs.radius + 0.05);
     }
   }
+
+  // Re-clamp after obstacle avoidance to ensure boundary is NEVER breached
+  targetX = THREE.MathUtils.clamp(targetX, -48.5, 48.5);
+  targetZ = THREE.MathUtils.clamp(targetZ, -38.5, 38.5);
 
   return [targetX, targetZ];
 }
@@ -53,8 +60,12 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
     const px = targetGroupRef.current.position.x;
     const pz = targetGroupRef.current.position.z;
 
-    const targetX = px - 0.75;
-    const targetZ = pz + 0.75;
+    const rawTargetX = px - 0.75;
+    const rawTargetZ = pz + 0.75;
+
+    // Strict boundary clamping for Cat
+    const targetX = THREE.MathUtils.clamp(rawTargetX, -48.5, 48.5);
+    const targetZ = THREE.MathUtils.clamp(rawTargetZ, -38.5, 38.5);
 
     const dx = targetX - catRef.current.position.x;
     const dz = targetZ - catRef.current.position.z;
@@ -215,6 +226,7 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
 function SteppedLowPolyTerrain({ onGroundClick }) {
   return (
     <group>
+      {/* 100 x 80 Playable Village Floor (X: [-50, 50], Z: [-40, 40]) */}
       <mesh
         position={[0, -0.06, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -227,7 +239,7 @@ function SteppedLowPolyTerrain({ onGroundClick }) {
           onGroundClick(sanitized);
         }}
       >
-        <planeGeometry args={[600, 600]} />
+        <planeGeometry args={[100, 80]} />
         <meshToonMaterial color="#94c77d" />
       </mesh>
     </group>
@@ -259,6 +271,111 @@ function VillageWindingPaths() {
         <planeGeometry args={[1.8, 26.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  100+ DENSE FOREST BOUNDARY ENCLOSING THE 100x80 VILLAGE AREA
+ * ------------------------------------------------------------- */
+function DenseMultiColorForestBoundary() {
+  const FOREST_TREES = [];
+
+  // Outer non-playable forest boundary surrounding X: [-50, 50], Z: [-40, 40]
+  for (let angle = 0; angle < Math.PI * 2; angle += 0.06) {
+    const rx = 52 + (Math.sin(angle * 6) * 3);
+    const rz = 42 + (Math.cos(angle * 6) * 3);
+    const x = Math.cos(angle) * rx;
+    const z = Math.sin(angle) * rz;
+    const type = Math.floor((Math.sin(x + z) + 1) * 2) % 4;
+    FOREST_TREES.push({ x, z, type });
+  }
+
+  return (
+    <group>
+      {FOREST_TREES.map((t, idx) => (
+        <group key={idx} position={[t.x, 0, t.z]}>
+          <mesh position={[0, 1.1, 0]} castShadow>
+            <cylinderGeometry args={[0.2, 0.32, 2.2, 8]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+
+          {t.type === 0 && (
+            <mesh position={[0, 2.6, 0]} castShadow>
+              <sphereGeometry args={[1.4, 16, 16]} />
+              <meshToonMaterial color="#2d6a4f" />
+            </mesh>
+          )}
+
+          {t.type === 1 && (
+            <mesh position={[0, 2.6, 0]} castShadow>
+              <sphereGeometry args={[1.35, 16, 16]} />
+              <meshToonMaterial color="#ffb5a7" />
+            </mesh>
+          )}
+
+          {t.type === 2 && (
+            <mesh position={[0, 2.6, 0]} castShadow>
+              <sphereGeometry args={[1.3, 16, 16]} />
+              <meshToonMaterial color="#7209b7" />
+            </mesh>
+          )}
+
+          {t.type === 3 && (
+            <mesh position={[0, 2.5, 0]} castShadow>
+              <coneGeometry args={[1.2, 2.8, 8]} />
+              <meshToonMaterial color="#1b4332" />
+            </mesh>
+          )}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  18-20% LARGE FLOWER FARM & VEGETABLE FARMS 🌽🌻
+ * ------------------------------------------------------------- */
+function LargeCropFarms() {
+  return (
+    <group>
+      {/* 18-20% Large Flower Farm Plot */}
+      <group position={[28, 0, 22]}>
+        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[18, 14]} />
+          <meshToonMaterial color="#8a7e70" />
+        </mesh>
+        {[-6, 0, 6].map((x, i) =>
+          [-4, 0, 4].map((z, j) => (
+            <group key={`${i}-${j}`} position={[x, 0, z]}>
+              <mesh position={[0, 0.5, 0]}>
+                <cylinderGeometry args={[0.04, 0.06, 1.0, 6]} />
+                <meshToonMaterial color="#38b000" />
+              </mesh>
+              <mesh position={[0, 1.0, 0]}>
+                <sphereGeometry args={[0.35, 12, 12]} />
+                <meshToonMaterial color={i === 0 ? '#ff4d6d' : i === 1 ? '#ffb703' : '#7209b7'} />
+              </mesh>
+            </group>
+          ))
+        )}
+      </group>
+
+      {/* Vegetable Farm Plot */}
+      <group position={[-28, 0, 22]}>
+        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[18, 14]} />
+          <meshToonMaterial color="#8a7e70" />
+        </mesh>
+        {[-6, 0, 6].map((x, i) =>
+          [-4, 0, 4].map((z, j) => (
+            <mesh key={`${i}-${j}`} position={[x, 0.2, z]} castShadow>
+              <sphereGeometry args={[0.42, 12, 12]} />
+              <meshToonMaterial color="#fb8500" />
+            </mesh>
+          ))
+        )}
+      </group>
     </group>
   );
 }
@@ -380,17 +497,16 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
   );
 }
 
-/** -------------------------------------------------------------
- *  CHIBI DARK KNIGHT / BLACK CAT MASKED ADVENTURER PLAYER 🦇🖤
- *  - 40-45% Head Ratio with Pointed Ears & Beige Chin
- *  - 30-35% Torso Ratio with Dark Grey Armor & Gold Utility Belt
- *  - 20-25% Leg Ratio with Black Gauntlets & Heavy Boots
- * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
-    const dx = targetPos[0] - groupRef.current.position.x;
-    const dz = targetPos[1] - groupRef.current.position.z;
+
+    // Strict boundary enforcement on player position
+    const clampedX = THREE.MathUtils.clamp(targetPos[0], -48.5, 48.5);
+    const clampedZ = THREE.MathUtils.clamp(targetPos[1], -38.5, 38.5);
+
+    const dx = clampedX - groupRef.current.position.x;
+    const dz = clampedZ - groupRef.current.position.z;
     const dist = Math.sqrt(dx * dx + dz * dz);
     const clock = state.clock.getElapsedTime();
 
@@ -405,20 +521,22 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         groupRef.current.position.y = Math.abs(Math.sin(clock * 14)) * 0.06;
       }
     }
+
+    // Re-clamp
+    groupRef.current.position.x = THREE.MathUtils.clamp(groupRef.current.position.x, -48.5, 48.5);
+    groupRef.current.position.z = THREE.MathUtils.clamp(groupRef.current.position.z, -38.5, 38.5);
   });
 
   return (
     <group ref={groupRef} position={[-14.0, 0, -12.0]}>
       {/* 1. OVERSIZED BLACK COWL HEAD (40-45% TOTAL HEIGHT) */}
       <group position={[0, 0.96, 0]}>
-        {/* Main Black Cowl Sphere */}
         <mesh castShadow>
           <sphereGeometry args={[0.38, 24, 24]} />
           <meshToonMaterial color="#1c1c1e" />
           <ToonOutline thickness={0.03} color="#0a0a0c" />
         </mesh>
 
-        {/* 2 Pointed Black Ears */}
         <mesh position={[-0.18, 0.38, -0.05]} rotation={[-0.1, 0, -0.15]}>
           <coneGeometry args={[0.09, 0.32, 4]} />
           <meshToonMaterial color="#1c1c1e" />
@@ -430,13 +548,11 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <ToonOutline thickness={0.025} color="#0a0a0c" />
         </mesh>
 
-        {/* Pale Beige Face / Chin Cutout */}
         <mesh position={[0, -0.1, 0.22]}>
           <boxGeometry args={[0.32, 0.2, 0.12]} />
           <meshToonMaterial color="#fae1c5" />
         </mesh>
 
-        {/* Sharp Minimalist White Eye Slits */}
         <mesh position={[-0.12, 0.06, 0.34]} rotation={[0, 0, -0.18]}>
           <boxGeometry args={[0.14, 0.035, 0.04]} />
           <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
@@ -447,22 +563,19 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      {/* 2. CHUNKY GREY ARMOR & GOLD UTILITY BELT (30-35% TOTAL HEIGHT) */}
+      {/* 2. CHUNKY GREY ARMOR & GOLD UTILITY BELT */}
       <group position={[0, 0.46, 0]}>
-        {/* Dark Textured Grey Chest Armor */}
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.38, 0.32]} />
           <meshToonMaterial color="#4a4e69" />
           <ToonOutline thickness={0.03} color="#0a0a0c" />
         </mesh>
 
-        {/* Wide Gold/Brown Utility Belt */}
         <mesh position={[0, -0.14, 0]} castShadow>
           <boxGeometry args={[0.49, 0.1, 0.35]} />
           <meshToonMaterial color="#c68a4c" />
         </mesh>
 
-        {/* Belt Pouches */}
         {[-0.18, 0, 0.18].map((x, i) => (
           <mesh key={i} position={[x, -0.14, 0.19]} castShadow>
             <boxGeometry args={[0.1, 0.11, 0.06]} />
@@ -470,30 +583,18 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           </mesh>
         ))}
 
-        {/* Black Flowing Back Cape */}
         <group position={[0, 0.04, -0.18]} rotation={[0.2, 0, 0]}>
           <mesh castShadow>
             <boxGeometry args={[0.52, 0.58, 0.04]} />
             <meshToonMaterial color="#1c1c1e" />
           </mesh>
-          {/* Pointed Cape Trim */}
-          {[-0.2, 0, 0.2].map((x, i) => (
-            <mesh key={i} position={[x, -0.32, 0]} rotation={[0, 0, Math.PI]}>
-              <coneGeometry args={[0.08, 0.14, 3]} />
-              <meshToonMaterial color="#1c1c1e" />
-            </mesh>
-          ))}
         </group>
       </group>
 
-      {/* 3. SHORT BLACK ARMS WITH GAUNTLETS */}
+      {/* 3. ARMS & LEGS */}
       <group position={[-0.28, 0.44, 0]} rotation={[0, 0, 0.25]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
-          <meshToonMaterial color="#1c1c1e" />
-        </mesh>
-        <mesh position={[0, -0.16, 0]} castShadow>
-          <sphereGeometry args={[0.09, 12, 12]} />
           <meshToonMaterial color="#1c1c1e" />
         </mesh>
       </group>
@@ -502,13 +603,8 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
           <meshToonMaterial color="#1c1c1e" />
         </mesh>
-        <mesh position={[0, -0.16, 0]} castShadow>
-          <sphereGeometry args={[0.09, 12, 12]} />
-          <meshToonMaterial color="#1c1c1e" />
-        </mesh>
       </group>
 
-      {/* 4. LEGS + HEAVY BOOTS (20-25% TOTAL HEIGHT) */}
       <group position={[-0.14, 0.12, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.16, 0.24, 0.2]} />
@@ -554,11 +650,17 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <DualWaterfallRiverValley />
       <VillageWindingPaths />
 
+      {/* 🌲🌸 DENSE MULTI-COLOR FOREST BOUNDARY ENCLOSING THE 100x80 PLAYABLE VILLAGE */}
+      <DenseMultiColorForestBoundary />
+
+      {/* 🌽🌻 18-20% LARGE FLOWER FARM & VEGETABLE FARMS */}
+      <LargeCropFarms />
+
       <VillageSquare position={[0, 0, -22.0]} />
       <VillageHouses />
       <Villagers />
 
-      {/* 🦇🖤 CHIBI DARK KNIGHT / BLACK CAT MASKED ADVENTURER MAIN PLAYER */}
+      {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
 
       {/* 🐴 HORSE PET COMPANION & MOUNT */}

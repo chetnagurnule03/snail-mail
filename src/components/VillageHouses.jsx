@@ -96,9 +96,13 @@ export default function VillageHouses() {
     { pos: [16.0, 0, -18.0], rot: -0.3, roof: '#ffb703', wall: '#f4f1de' }, // Yellow Roof
     { pos: [24.0, 0, -22.0], rot: -0.5, roof: '#2a9d8f', wall: '#f4f1de' }, // Sage Roof
     { pos: [28.0, 0, -32.0], rot: -0.2, roof: '#e76f51', wall: '#f4f1de' }, // Orange Roof
-    { pos: [0.0, 0, -38.0], rot: 0.0, roof: '#e63946', wall: '#f4f1de' }, // North Red Roof
-    { pos: [-14.0, 0, -38.0], rot: 0.1, roof: '#457b9d', wall: '#f4f1de' }, // North West Blue Roof
-    { pos: [14.0, 0, -38.0], rot: -0.1, roof: '#7209b7', wall: '#f4f1de' }, // North East Purple Roof
+    { pos: [0.0, 0, -36.0], rot: 0.0, roof: '#e63946', wall: '#f4f1de' }, // North Red Roof
+    { pos: [-14.0, 0, -36.0], rot: 0.1, roof: '#457b9d', wall: '#f4f1de' }, // North West Blue Roof
+    { pos: [14.0, 0, -36.0], rot: -0.1, roof: '#7209b7', wall: '#f4f1de' }, // North East Purple Roof
+    { pos: [-36.0, 0, -10.0], rot: 0.8, roof: '#e76f51', wall: '#f4f1de' }, // West Orange Roof
+    { pos: [36.0, 0, -10.0], rot: -0.8, roof: '#2a9d8f', wall: '#f4f1de' }, // East Teal Roof
+    { pos: [-36.0, 0, 10.0], rot: 1.0, roof: '#ffb703', wall: '#f4f1de' }, // South West Yellow Roof
+    { pos: [36.0, 0, 10.0], rot: -1.0, roof: '#457b9d', wall: '#f4f1de' }, // South East Blue Roof
     { pos: [0.0, 0, -12.0], rot: 0.0, roof: '#8c5a3c', wall: '#f4f1de' }, // Center Brown Roof
   ];
 
