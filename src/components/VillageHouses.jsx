@@ -2,28 +2,30 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER COTTAGES MATCHING REFERENCE IMAGE ARCHITECTURE
+ *  12 UNIQUE VILLAGER COTTAGES WITH 5 ROOF COLOR THEMES (MATCHES REFERENCE SHEET)
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
-  // Hamlet 1: North-West Woodland Hamlet
+  // 🔴 TYPE 1: RED/ORANGE ROOF COTTAGES
   { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'tomato', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#f4f1de', roofColor: '#e63946', trimColor: '#6b4c35' },
-  { id: 2, name: "Sophie's Artist Studio", gardenType: 'flower', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#fdf0d5', roofColor: '#9c89b8', trimColor: '#5c381e' },
-  { id: 3, name: "Clara's Weaver House", gardenType: 'corn', pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a', trimColor: '#8c5a3c' },
-
-  // Hamlet 2: North-East Blossom Knoll
-  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'sunflower', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#f4f1de', roofColor: '#2a9d8f', trimColor: '#7a4a2b' },
-  { id: 5, name: "Noah's Herbalist Haven", gardenType: 'berry', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#fdf0d5', roofColor: '#f4a261', trimColor: '#5c381e' },
-  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'apple', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#e8e8e4', roofColor: '#2d6a4f', trimColor: '#6b4c35' },
-
-  // Hamlet 3: South-West Craftsman Creek
   { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'flower', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f4f1de', roofColor: '#d62828', trimColor: '#8c5a3c' },
+
+  // 🔵 TYPE 2: BRIGHT BLUE ROOF COTTAGES
+  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'sunflower', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#f4f1de', roofColor: '#2a9d8f', trimColor: '#7a4a2b' },
+  { id: 11, name: "Felix's Astronomer Tower", gardenType: 'berry', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#fdf0d5', roofColor: '#457b9d', trimColor: '#5c381e' },
+
+  // 🟣 TYPE 3: PURPLE ROOF COTTAGES
+  { id: 2, name: "Sophie's Artist Studio", gardenType: 'flower', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#fdf0d5', roofColor: '#9c89b8', trimColor: '#5c381e' },
+  { id: 10, name: "Luna's Storybook Library", gardenType: 'sunflower', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#f4f1de', roofColor: '#7b2cbf', trimColor: '#7a4a2b' },
+
+  // 🟡 TYPE 4: GOLDEN YELLOW/ORANGE ROOF COTTAGES
+  { id: 3, name: "Clara's Weaver House", gardenType: 'corn', pos: [-28.0, 0.22, -34.0], rot: 1.45, wallColor: '#fae1c5', roofColor: '#e9c46a', trimColor: '#8c5a3c' },
+  { id: 12, name: "Daisy's Honey Cottage", gardenType: 'sunflower', pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703', trimColor: '#8c5a3c' },
+
+  // 🟤 TYPE 5: WARM BROWN ROOF COTTAGES
+  { id: 5, name: "Noah's Herbalist Haven", gardenType: 'berry', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#fdf0d5', roofColor: '#f4a261', trimColor: '#5c381e' },
+  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'apple', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#e8e8e4', roofColor: '#6b4c35', trimColor: '#3d2616' },
   { id: 8, name: "Milo's Timber Workshop", gardenType: 'corn', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#fdf0d5', roofColor: '#7a4a2b', trimColor: '#4a2c11' },
   { id: 9, name: "Jasper's Potter House", gardenType: 'tomato', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#fae1c5', roofColor: '#e07a5f', trimColor: '#3d2616' },
-
-  // Hamlet 4: South-East Quiet Meadow
-  { id: 10, name: "Luna's Storybook Library", gardenType: 'sunflower', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#f4f1de', roofColor: '#1d3557', trimColor: '#7a4a2b' },
-  { id: 11, name: "Felix's Astronomer Tower", gardenType: 'berry', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#fdf0d5', roofColor: '#457b9d', trimColor: '#5c381e' },
-  { id: 12, name: "Daisy's Honey Cottage", gardenType: 'sunflower', pos: [28.0, 0.16, 32.0], rot: -2.85, wallColor: '#ffe0bd', roofColor: '#ffb703', trimColor: '#8c5a3c' },
 ];
 
 function UniqueFarmGarden({ type }) {

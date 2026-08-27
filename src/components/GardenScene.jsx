@@ -43,60 +43,119 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. EXPANSIVE CONTINUOUS OPEN-WORLD MEADOW TERRAIN (600x600m)
+ *  1. STEPPED LOW-POLY TERRACED TERRAIN & CLIFFS (MATCHES REFERENCE)
  * ------------------------------------------------------------- */
-function ExtendedMeadowTerrain({ onGroundClick }) {
+function SteppedLowPolyTerrain({ onGroundClick }) {
   return (
-    <mesh
-      position={[0, -0.06, 0]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      receiveShadow
-      onClick={(e) => {
-        e.stopPropagation();
-        const pointX = e.point.x;
-        const pointZ = e.point.z;
-        const sanitized = sanitizePlayableTarget(pointX, pointZ);
-        onGroundClick(sanitized);
-      }}
-    >
-      <planeGeometry args={[600, 600]} />
-      <meshToonMaterial color="#94c77d" />
-    </mesh>
+    <group>
+      {/* Base Meadow Plane (600x600m) */}
+      <mesh
+        position={[0, -0.06, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+        onClick={(e) => {
+          e.stopPropagation();
+          const pointX = e.point.x;
+          const pointZ = e.point.z;
+          const sanitized = sanitizePlayableTarget(pointX, pointZ);
+          onGroundClick(sanitized);
+        }}
+      >
+        <planeGeometry args={[600, 600]} />
+        <meshToonMaterial color="#94c77d" />
+      </mesh>
+
+      {/* Stepped Grassy Terraces & Low-Poly Cliffs (North Boundary) */}
+      <group position={[0, 0, -45.0]}>
+        {/* Tier 1 Terrace */}
+        <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
+          <boxGeometry args={[140, 0.8, 25]} />
+          <meshToonMaterial color="#8ab874" />
+        </mesh>
+        {/* Tier 2 Upper Cliff */}
+        <mesh position={[0, 1.4, -12]} castShadow receiveShadow>
+          <boxGeometry args={[160, 1.2, 28]} />
+          <meshToonMaterial color="#7ca965" />
+        </mesh>
+        {/* Stone Cliff Formations */}
+        {[-35, -15, 15, 35].map((x, idx) => (
+          <mesh key={idx} position={[x, 0.8, -2.0]} castShadow>
+            <boxGeometry args={[4.5, 1.6, 4.5]} />
+            <meshToonMaterial color="#a89f91" />
+          </mesh>
+        ))}
+      </group>
+    </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  2. CASCADING 3D WATERFALL & RIVER VALLEY 🌊
+ *  2. DUAL WATERFALLS & WINDING RIVER VALLEY 🌊 (MATCHES REFERENCE)
  * ------------------------------------------------------------- */
-function WaterfallRiverValley() {
+function DualWaterfallRiverValley() {
   return (
-    <group position={[-2.0, 0, -10.0]}>
-      {/* 🌊 Winding Blue Stream Water */}
-      <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[3.5, 60.0]} />
+    <group position={[0, 0, 0]}>
+      {/* 🌊 Winding Blue River Stream */}
+      <mesh position={[-2.0, 0.005, -10.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
+        <planeGeometry args={[3.8, 65.0]} />
+        <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
+      </mesh>
+      <mesh position={[24.0, 0.005, -28.0]} rotation={[-Math.PI / 2, 0, -0.5]}>
+        <planeGeometry args={[3.4, 45.0]} />
         <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
       </mesh>
 
-      {/* 🌉 Stone Arch Bridge */}
-      <group position={[0, 0.35, 0]} rotation={[0, 0.4, 0]}>
+      {/* Decorative Lily Pads */}
+      {[-8, -2, 6, 18, 28].map((z, idx) => (
+        <mesh key={idx} position={[-2.0 + idx * 0.8, 0.01, -10.0 + idx * 4]}>
+          <cylinderGeometry args={[0.35, 0.35, 0.02, 10]} />
+          <meshToonMaterial color="#38b000" />
+        </mesh>
+      ))}
+
+      {/* 🌉 Curved Wooden Arch Bridges */}
+      <group position={[-2.0, 0.35, -10.0]} rotation={[0, 0.4, 0]}>
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[2.2, 0.45, 4.2]} />
+          <boxGeometry args={[2.4, 0.45, 4.4]} />
           <meshToonMaterial color="#8a7e70" />
         </mesh>
-        <mesh position={[-1.0, 0.55, 0]} castShadow>
-          <boxGeometry args={[0.12, 0.6, 4.2]} />
+        <mesh position={[-1.1, 0.55, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.6, 4.4]} />
           <meshToonMaterial color="#6b4c35" />
         </mesh>
-        <mesh position={[1.0, 0.55, 0]} castShadow>
-          <boxGeometry args={[0.12, 0.6, 4.2]} />
+        <mesh position={[1.1, 0.55, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.6, 4.4]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+      </group>
+      <group position={[20.0, 0.35, -28.0]} rotation={[0, -0.5, 0]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[2.4, 0.45, 4.4]} />
+          <meshToonMaterial color="#8a7e70" />
+        </mesh>
+        <mesh position={[-1.1, 0.55, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.6, 4.4]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+        <mesh position={[1.1, 0.55, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.6, 4.4]} />
           <meshToonMaterial color="#6b4c35" />
         </mesh>
       </group>
 
-      {/* 🌊 Cascading 3D Waterfall Backdrop */}
-      <group position={[12.0, 3.2, -28.0]} rotation={[0.2, -0.6, 0]}>
+      {/* 🌊 Waterfall 1 (North-West Cliff Waterfall) */}
+      <group position={[-18.0, 2.5, -42.0]} rotation={[0.15, 0.3, 0]}>
         <mesh castShadow>
-          <boxGeometry args={[4.2, 6.5, 0.4]} />
+          <boxGeometry args={[4.2, 5.8, 0.4]} />
+          <meshToonMaterial color="#48cae4" transparent opacity={0.92} />
+        </mesh>
+        <Sparkles count={30} scale={4} size={4} speed={0.8} color="#ffffff" />
+      </group>
+
+      {/* 🌊 Waterfall 2 (North-East Cliff Waterfall) */}
+      <group position={[22.0, 2.8, -44.0]} rotation={[0.15, -0.4, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[4.5, 6.2, 0.4]} />
           <meshToonMaterial color="#48cae4" transparent opacity={0.92} />
         </mesh>
         <Sparkles count={35} scale={4} size={4} speed={0.8} color="#ffffff" />
@@ -106,21 +165,21 @@ function WaterfallRiverValley() {
 }
 
 /** -------------------------------------------------------------
- *  3. LONG WINDING COUNTRYSIDE PATH NETWORK
+ *  3. CONNECTED VILLAGE PATH NETWORK (BEIGE DIRT/STONE PATHS)
  * ------------------------------------------------------------- */
 function VillageWindingPaths() {
   return (
     <group position={[0, 0.015, 0]}>
       <mesh position={[-7.0, 0, -17.0]} rotation={[-Math.PI / 2, 0, -0.6]}>
-        <planeGeometry args={[1.5, 24.0]} />
+        <planeGeometry args={[1.8, 26.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
       <mesh position={[-26.0, 0, -35.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[1.4, 40.0]} />
+        <planeGeometry args={[1.6, 42.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
       <mesh position={[24.0, 0, -34.0]} rotation={[-Math.PI / 2, 0, -0.3]}>
-        <planeGeometry args={[1.4, 42.0]} />
+        <planeGeometry args={[1.6, 44.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
     </group>
@@ -889,13 +948,10 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      {/* Main Cottage Wall Body */}
       <mesh position={[0, 0.68, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.8, 1.35, 1.5]} />
         <meshToonMaterial color="#f4f1de" />
       </mesh>
-
-      {/* Pyramid Roof with Thick White Trim */}
       <group position={[0, 1.35, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[1.45, 0.85, 4]} />
@@ -906,8 +962,6 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
           <meshToonMaterial color="#ffffff" />
         </mesh>
       </group>
-
-      {/* Stone Chimney */}
       <group position={[-0.55, 1.7, -0.25]}>
         <mesh castShadow>
           <boxGeometry args={[0.32, 1.1, 0.32]} />
@@ -915,8 +969,6 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
         </mesh>
         <Sparkles position={[0, 0.75, 0]} count={8} scale={0.4} size={3} speed={0.4} color="#ffffff" />
       </group>
-
-      {/* Door & Porch */}
       <group position={[0.2, 0.54, 0.76]}>
         <mesh castShadow>
           <boxGeometry args={[0.48, 0.82, 0.04]} />
@@ -928,7 +980,7 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH REDESIGNED COTTAGE ARCHITECTURE & OPEN WORLD
+ *  MAIN SCENE WITH STEPPED TERRAIN, DUAL WATERFALLS & FULL VILLAGE
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -954,8 +1006,8 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         onOpenDialogue={onOpenDialogue}
       />
 
-      <ExtendedMeadowTerrain onGroundClick={setTargetPos} />
-      <WaterfallRiverValley />
+      <SteppedLowPolyTerrain onGroundClick={setTargetPos} />
+      <DualWaterfallRiverValley />
       <FluffyClouds />
       <DistantBirds />
       <DistantCountrysideHills />
