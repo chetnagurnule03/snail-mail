@@ -2,19 +2,19 @@ import React from 'react';
 import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER COTTAGES WITH FLOWER GARDENS OUTSIDE EVERY HOUSE
+ *  12 UNIQUE VILLAGER COTTAGES WITH LARGE FENCED FLOWER & CROP GARDENS
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
-  // 🔴 TYPE 1: RED/ORANGE ROOF COTTAGES
-  { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'tomato', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#f4f1de', roofColor: '#e63946', trimColor: '#6b4c35' },
-  { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'flower', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f4f1de', roofColor: '#d62828', trimColor: '#8c5a3c' },
+  // 🔴 TYPE 1: RED/ORANGE ROOF COTTAGES (LEFT FOREGROUND COTTAGE)
+  { id: 1, name: "Oliver's Gardener Cottage", gardenType: 'crops', pos: [-24.0, 0.2, -26.0], rot: 0.45, wallColor: '#f4f1de', roofColor: '#e63946', trimColor: '#6b4c35' },
+  { id: 7, name: "Leo's Snail Mail Post Office", gardenType: 'flowers', pos: [-26.0, 0.15, 12.0], rot: 2.15, wallColor: '#f4f1de', roofColor: '#d62828', trimColor: '#8c5a3c' },
 
-  // 🔵 TYPE 2: BRIGHT BLUE ROOF COTTAGES
-  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'sunflower', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#f4f1de', roofColor: '#2a9d8f', trimColor: '#7a4a2b' },
+  // 🔵 TYPE 2: BRIGHT BLUE ROOF COTTAGES (RIGHT FOREGROUND COTTAGE)
+  { id: 4, name: "Mia's Blossom Boutique", gardenType: 'flowers', pos: [22.0, 0.18, -28.0], rot: -0.45, wallColor: '#f4f1de', roofColor: '#2a9d8f', trimColor: '#7a4a2b' },
   { id: 11, name: "Felix's Astronomer Tower", gardenType: 'berry', pos: [32.0, 0.18, 24.0], rot: -2.5, wallColor: '#fdf0d5', roofColor: '#457b9d', trimColor: '#5c381e' },
 
   // 🟣 TYPE 3: PURPLE ROOF COTTAGES
-  { id: 2, name: "Sophie's Artist Studio", gardenType: 'flower', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#fdf0d5', roofColor: '#9c89b8', trimColor: '#5c381e' },
+  { id: 2, name: "Sophie's Artist Studio", gardenType: 'flowers', pos: [-32.0, 0.25, -20.0], rot: 0.95, wallColor: '#fdf0d5', roofColor: '#9c89b8', trimColor: '#5c381e' },
   { id: 10, name: "Luna's Storybook Library", gardenType: 'sunflower', pos: [24.0, 0.14, 14.0], rot: -2.1, wallColor: '#f4f1de', roofColor: '#7b2cbf', trimColor: '#7a4a2b' },
 
   // 🟡 TYPE 4: GOLDEN YELLOW/ORANGE ROOF COTTAGES
@@ -23,135 +23,143 @@ const VILLAGE_COTTAGES = [
 
   // 🟤 TYPE 5: WARM BROWN ROOF COTTAGES
   { id: 5, name: "Noah's Herbalist Haven", gardenType: 'berry', pos: [30.0, 0.22, -18.0], rot: -0.95, wallColor: '#fdf0d5', roofColor: '#f4a261', trimColor: '#5c381e' },
-  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'apple', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#e8e8e4', roofColor: '#6b4c35', trimColor: '#3d2616' },
+  { id: 6, name: "Ivy's Botanist Lodge", gardenType: 'crops', pos: [34.0, 0.26, -26.0], rot: -1.35, wallColor: '#e8e8e4', roofColor: '#6b4c35', trimColor: '#3d2616' },
   { id: 8, name: "Milo's Timber Workshop", gardenType: 'corn', pos: [-34.0, 0.2, 22.0], rot: 2.55, wallColor: '#fdf0d5', roofColor: '#7a4a2b', trimColor: '#4a2c11' },
-  { id: 9, name: "Jasper's Potter House", gardenType: 'tomato', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#fae1c5', roofColor: '#e07a5f', trimColor: '#3d2616' },
+  { id: 9, name: "Jasper's Potter House", gardenType: 'crops', pos: [-22.0, 0.12, 28.0], rot: 2.85, wallColor: '#fae1c5', roofColor: '#e07a5f', trimColor: '#3d2616' },
 ];
 
 /** -------------------------------------------------------------
- *  FLOWER GARDEN OUTSIDE EVERY SINGLE HOUSE (SECTION 7 IN BLUEPRINT)
+ *  LARGE FENCED FLOWER & CROP GARDENS MATCHING IN-GAME SCREENSHOT
  * ------------------------------------------------------------- */
-function FlowerGardenOutsideHouse({ gardenType }) {
+function LargeFencedCottageGarden({ gardenType }) {
   return (
-    <group position={[0, 0, 1.4]}>
-      {/* Brick Soil Bed Border */}
-      <mesh position={[0, 0.08, 0.6]} castShadow receiveShadow>
-        <boxGeometry args={[1.6, 0.16, 1.1]} />
+    <group position={[0, 0, 1.8]}>
+      {/* Brick Soil Bed Border (Large Multi-Row Plot) */}
+      <mesh position={[0, 0.08, 0.9]} castShadow receiveShadow>
+        <boxGeometry args={[2.4, 0.16, 1.6]} />
         <meshToonMaterial color="#6b4326" />
       </mesh>
 
-      {/* Wooden Fence Rails */}
-      <mesh position={[-0.85, 0.25, 0.6]} castShadow>
-        <boxGeometry args={[0.06, 0.5, 1.1]} />
+      {/* Wooden Fence Perimeter & Signboard */}
+      <mesh position={[-1.25, 0.25, 0.9]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.6]} />
         <meshToonMaterial color="#8c5a3c" />
       </mesh>
-      <mesh position={[0.85, 0.25, 0.6]} castShadow>
-        <boxGeometry args={[0.06, 0.5, 1.1]} />
+      <mesh position={[1.25, 0.25, 0.9]} castShadow>
+        <boxGeometry args={[0.06, 0.5, 1.6]} />
+        <meshToonMaterial color="#8c5a3c" />
+      </mesh>
+      <mesh position={[0, 0.25, 1.7]} castShadow>
+        <boxGeometry args={[2.5, 0.5, 0.06]} />
         <meshToonMaterial color="#8c5a3c" />
       </mesh>
 
-      {/* Colorful Flower Beds (Sunflowers, Daisies, Pink/Purple/Red Flowers) */}
-      <group position={[0, 0.16, 0.6]}>
-        {[-0.45, 0, 0.45].map((x, idx) => (
-          <group key={idx} position={[x, 0, 0]}>
-            <mesh position={[0, 0.22, 0]} castShadow>
-              <cylinderGeometry args={[0.025, 0.035, 0.44, 6]} />
-              <meshToonMaterial color="#6bab4f" />
-            </mesh>
-            <group position={[0, 0.44, 0]}>
-              <mesh castShadow>
-                <sphereGeometry args={[0.14, 12, 12]} />
-                <meshToonMaterial color={idx === 0 ? '#ff4d6d' : idx === 1 ? '#ffb703' : '#7209b7'} />
-              </mesh>
-              <mesh position={[0, 0, 0.06]}>
-                <sphereGeometry args={[0.06, 8, 8]} />
-                <meshToonMaterial color="#ffffff" />
-              </mesh>
-            </group>
-          </group>
-        ))}
+      {/* Wooden Crop Signboard */}
+      <group position={[0.7, 0.5, 1.72]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.42, 0.25, 0.04]} />
+          <meshToonMaterial color="#6b4c35" />
+        </mesh>
+        <mesh position={[0, -0.2, 0]}>
+          <boxGeometry args={[0.04, 0.3, 0.04]} />
+          <meshToonMaterial color="#4a2c11" />
+        </mesh>
       </group>
 
-      {/* 🌻 Extra Sunflowers for Sunflower Gardens */}
-      {gardenType === 'sunflower' && (
-        <group position={[0, 0.16, 0.6]}>
-          {[-0.5, 0.5].map((x, idx) => (
-            <group key={idx} position={[x, 0, -0.3]}>
+      {/* 🌹🌻🌼🌷 LARGE FLOWER GARDEN PLOT (SUNFLOWERS, ROSES, DAISIES, TULIPS) */}
+      {(gardenType === 'flowers' || gardenType === 'sunflower') && (
+        <group position={[0, 0.16, 0.9]}>
+          {/* Row 1: Giant Sunflowers */}
+          {[-0.8, -0.4, 0, 0.4, 0.8].map((x, idx) => (
+            <group key={`sun-${idx}`} position={[x, 0, -0.4]}>
               <mesh position={[0, 0.35, 0]} castShadow>
                 <cylinderGeometry args={[0.03, 0.04, 0.7, 8]} />
                 <meshToonMaterial color="#6bab4f" />
               </mesh>
               <group position={[0, 0.7, 0]}>
                 <mesh castShadow>
-                  <sphereGeometry args={[0.22, 16, 16]} />
+                  <sphereGeometry args={[0.2, 14, 14]} />
                   <meshToonMaterial color="#ffd23f" />
                 </mesh>
-                <mesh position={[0, 0, 0.08]}>
-                  <sphereGeometry args={[0.1, 12, 12]} />
+                <mesh position={[0, 0, 0.07]}>
+                  <sphereGeometry args={[0.09, 10, 10]} />
                   <meshToonMaterial color="#4a2c11" />
                 </mesh>
               </group>
             </group>
           ))}
+
+          {/* Row 2: Red Roses & Pink Blossoms */}
+          {[-0.8, -0.4, 0, 0.4, 0.8].map((x, idx) => (
+            <group key={`rose-${idx}`} position={[x, 0, 0]}>
+              <mesh position={[0, 0.22, 0]} castShadow>
+                <cylinderGeometry args={[0.025, 0.035, 0.44, 6]} />
+                <meshToonMaterial color="#6bab4f" />
+              </mesh>
+              <mesh position={[0, 0.44, 0]} castShadow>
+                <sphereGeometry args={[0.15, 12, 12]} />
+                <meshToonMaterial color={idx % 2 === 0 ? '#e63946' : '#ff4d6d'} />
+              </mesh>
+            </group>
+          ))}
+
+          {/* Row 3: White Daisies & Purple Tulips */}
+          {[-0.8, -0.4, 0, 0.4, 0.8].map((x, idx) => (
+            <group key={`tulip-${idx}`} position={[x, 0, 0.4]}>
+              <mesh position={[0, 0.2, 0]} castShadow>
+                <cylinderGeometry args={[0.025, 0.035, 0.4, 6]} />
+                <meshToonMaterial color="#6bab4f" />
+              </mesh>
+              <mesh position={[0, 0.4, 0]} castShadow>
+                <sphereGeometry args={[0.14, 12, 12]} />
+                <meshToonMaterial color={idx % 2 === 0 ? '#ffffff' : '#7209b7'} />
+              </mesh>
+            </group>
+          ))}
         </group>
       )}
 
-      {/* 🍅 Tomato Crop Plot */}
-      {gardenType === 'tomato' && (
-        <group position={[0, 0.16, 0.6]}>
-          {[-0.4, 0, 0.4].map((x, idx) => (
-            <group key={idx} position={[x, 0, 0]}>
+      {/* 🥕🍅🥬🎃 LARGE FARM CROP PLOT (CARROTS, TOMATOES, CABBAGES, PUMPKINS) */}
+      {(gardenType === 'crops' || gardenType === 'tomato' || gardenType === 'corn' || gardenType === 'berry') && (
+        <group position={[0, 0.16, 0.9]}>
+          {/* Row 1: Tomatoes */}
+          {[-0.8, -0.4, 0, 0.4, 0.8].map((x, idx) => (
+            <group key={`tom-${idx}`} position={[x, 0, -0.4]}>
               <mesh position={[0, 0.25, 0]}>
                 <cylinderGeometry args={[0.02, 0.03, 0.5, 6]} />
                 <meshToonMaterial color="#70e000" />
               </mesh>
               <mesh position={[0, 0.35, 0.05]} castShadow>
-                <sphereGeometry args={[0.12, 12, 12]} />
+                <sphereGeometry args={[0.13, 12, 12]} />
                 <meshToonMaterial color="#e63946" />
               </mesh>
             </group>
           ))}
-        </group>
-      )}
 
-      {/* 🌽 Corn Stalk Field */}
-      {gardenType === 'corn' && (
-        <group position={[0, 0.16, 0.6]}>
-          {[-0.35, 0.35].map((x, idx) => (
-            <group key={idx} position={[x, 0, 0]}>
-              <mesh position={[0, 0.45, 0]} castShadow>
-                <cylinderGeometry args={[0.04, 0.06, 0.9, 8]} />
-                <meshToonMaterial color="#38b000" />
+          {/* Row 2: Carrots & Cabbages */}
+          {[-0.8, -0.4, 0, 0.4, 0.8].map((x, idx) => (
+            <group key={`cab-${idx}`} position={[x, 0, 0]}>
+              <mesh position={[0, 0.12, 0]} castShadow>
+                <sphereGeometry args={[0.15, 12, 12]} />
+                <meshToonMaterial color={idx % 2 === 0 ? '#38b000' : '#ffb703'} />
               </mesh>
-              <mesh position={[0.06, 0.45, 0]} rotation={[0, 0, -0.3]} castShadow>
-                <capsuleGeometry args={[0.06, 0.22, 6, 12]} />
-                <meshToonMaterial color="#ffb703" />
+            </group>
+          ))}
+
+          {/* Row 3: Pumpkins */}
+          {[-0.6, 0, 0.6].map((x, idx) => (
+            <group key={`pump-${idx}`} position={[x, 0, 0.4]}>
+              <mesh position={[0, 0.16, 0]} castShadow>
+                <sphereGeometry args={[0.22, 14, 14]} />
+                <meshToonMaterial color="#fb8500" />
               </mesh>
             </group>
           ))}
         </group>
       )}
 
-      {/* 🫐 Blueberry Bushes */}
-      {gardenType === 'berry' && (
-        <group position={[0, 0.16, 0.6]}>
-          <mesh position={[0, 0.25, 0]} castShadow>
-            <sphereGeometry args={[0.3, 14, 14]} />
-            <meshToonMaterial color="#2d6a4f" />
-          </mesh>
-          <mesh position={[0.1, 0.3, 0.2]} castShadow>
-            <sphereGeometry args={[0.08, 10, 10]} />
-            <meshToonMaterial color="#4361ee" />
-          </mesh>
-          <mesh position={[-0.1, 0.22, 0.2]} castShadow>
-            <sphereGeometry args={[0.08, 10, 10]} />
-            <meshToonMaterial color="#4361ee" />
-          </mesh>
-        </group>
-      )}
-
       {/* 🚿 Watering Can Accessory */}
-      <group position={[0.75, 0.12, 0.4]} rotation={[0, 0.5, 0]}>
+      <group position={[1.0, 0.12, 0.5]} rotation={[0, 0.5, 0]}>
         <mesh position={[0, 0.12, 0]} castShadow>
           <cylinderGeometry args={[0.08, 0.1, 0.24, 10]} />
           <meshToonMaterial color="#457b9d" />
@@ -166,13 +174,13 @@ export default function VillageHouses() {
     <group>
       {VILLAGE_COTTAGES.map((c) => (
         <group key={c.id} position={c.pos} rotation={[0, c.rot, 0]}>
-          {/* [45% Height Weight] Main Cottage Wall Body (Cream/Off-White Low-Poly Cuboid) */}
+          {/* [45% Height Weight] Main Cottage Wall Body */}
           <mesh position={[0, 0.68, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.8, 1.35, 1.5]} />
             <meshToonMaterial color={c.wallColor} />
           </mesh>
 
-          {/* Warm Pastel Wood Corner Posts */}
+          {/* Warm Wood Corner Posts */}
           {[-0.9, 0.9].map((x, i) =>
             [-0.75, 0.75].map((z, j) => (
               <mesh key={`${i}-${j}`} position={[x, 0.68, z]} castShadow>
@@ -182,13 +190,12 @@ export default function VillageHouses() {
             ))
           )}
 
-          {/* [30% Height Weight] 4-Sided Pyramid Roof with 1.15x Overhang & Thick White Trim */}
+          {/* [30% Height Weight] 4-Sided Pyramid Roof with White Trim */}
           <group position={[0, 1.35, 0]}>
             <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
               <coneGeometry args={[1.45, 0.85, 4]} />
               <meshToonMaterial color={c.roofColor} />
             </mesh>
-            {/* Thick White/Cream Eaves Trim Edge */}
             <mesh position={[0, 0.02, 0]}>
               <boxGeometry args={[2.08, 0.08, 1.74]} />
               <meshToonMaterial color="#ffffff" />
@@ -205,7 +212,6 @@ export default function VillageHouses() {
               <boxGeometry args={[0.32, 1.1, 0.32]} />
               <meshToonMaterial color="#a89f91" />
             </mesh>
-            {/* Chimney Top Lip */}
             <mesh position={[0, 0.52, 0]}>
               <boxGeometry args={[0.38, 0.08, 0.38]} />
               <meshToonMaterial color="#8a7e70" />
@@ -241,8 +247,13 @@ export default function VillageHouses() {
             </mesh>
           </group>
 
-          {/* Glowing Windows with Wooden Frames & Flower Boxes */}
+          {/* Glowing Windows with Yellow Sun-Shade Awnings & Flower Boxes */}
           <group position={[-0.45, 0.78, 0.76]}>
+            {/* Yellow Sun-Shade Awning */}
+            <mesh position={[0, 0.26, 0.08]} rotation={[0.3, 0, 0]} castShadow>
+              <boxGeometry args={[0.52, 0.04, 0.24]} />
+              <meshToonMaterial color="#ffb703" />
+            </mesh>
             <mesh castShadow>
               <boxGeometry args={[0.42, 0.42, 0.04]} />
               <meshToonMaterial color="#ffe3a8" emissive="#ffb703" emissiveIntensity={0.5} />
@@ -270,8 +281,8 @@ export default function VillageHouses() {
             </mesh>
           </group>
 
-          {/* FLOWER GARDEN OUTSIDE EVERY SINGLE HOUSE */}
-          <FlowerGardenOutsideHouse gardenType={c.gardenType} />
+          {/* LARGE FENCED FLOWER & CROP GARDEN */}
+          <LargeFencedCottageGarden gardenType={c.gardenType} />
         </group>
       ))}
     </group>

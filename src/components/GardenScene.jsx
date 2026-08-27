@@ -43,7 +43,7 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. STEPPED LOW-POLY TERRACED TERRAIN & CLIFFS (SECTION 3 IN BLUEPRINT)
+ *  1. STEPPED LOW-POLY TERRACED TERRAIN & CLIFFS
  * ------------------------------------------------------------- */
 function SteppedLowPolyTerrain({ onGroundClick }) {
   return (
@@ -85,7 +85,7 @@ function SteppedLowPolyTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  2. DUAL WATERFALLS & WINDING RIVER VALLEY 🌊 (SECTION 4 IN BLUEPRINT)
+ *  2. DUAL WATERFALLS & WINDING RIVER VALLEY 🌊
  * ------------------------------------------------------------- */
 function DualWaterfallRiverValley() {
   return (
@@ -106,6 +106,7 @@ function DualWaterfallRiverValley() {
         </mesh>
       ))}
 
+      {/* Curved Wooden Arch Bridge */}
       <group position={[-2.0, 0.35, -10.0]} rotation={[0, 0.4, 0]}>
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.4, 0.45, 4.4]} />
@@ -155,7 +156,7 @@ function DualWaterfallRiverValley() {
 }
 
 /** -------------------------------------------------------------
- *  3. CONNECTED VILLAGE PATH NETWORK (SECTION 14 IN BLUEPRINT)
+ *  3. CONNECTED VILLAGE PATH NETWORK
  * ------------------------------------------------------------- */
 function VillageWindingPaths() {
   return (
@@ -177,7 +178,7 @@ function VillageWindingPaths() {
 }
 
 /** -------------------------------------------------------------
- *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES (SECTION 13 IN BLUEPRINT)
+ *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES
  * ------------------------------------------------------------- */
 function GiantSunflowerField() {
   return (
@@ -236,7 +237,7 @@ function AppleOrchardField() {
 }
 
 /** -------------------------------------------------------------
- *  5. ANIMALS: HORSES, COWS, SHEEP, CHICKENS, FOXES, RABBITS 🐴🐄🐑🐔🦊🐰 (SECTION 11)
+ *  5. ANIMALS: HORSES, COWS, SHEEP, CHICKENS, DUCKS, FOXES, RABBITS 🐴🐄🐑🐔🦆🦊🐰
  * ------------------------------------------------------------- */
 function ChunkyCow({ position, rotation = 0 }) {
   return (
@@ -273,14 +274,6 @@ function ChunkyCow({ position, rotation = 0 }) {
           <coneGeometry args={[0.04, 0.16, 6]} />
           <meshToonMaterial color="#d4a373" />
         </mesh>
-        <mesh position={[-0.14, 0.04, 0.23]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-        <mesh position={[0.14, 0.04, 0.23]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
       </group>
 
       {[
@@ -293,10 +286,6 @@ function ChunkyCow({ position, rotation = 0 }) {
           <mesh castShadow>
             <boxGeometry args={[0.16, 0.44, 0.16]} />
             <meshToonMaterial color="#ffffff" />
-          </mesh>
-          <mesh position={[0, -0.18, 0]}>
-            <boxGeometry args={[0.17, 0.08, 0.17]} />
-            <meshToonMaterial color="#3d2616" />
           </mesh>
         </group>
       ))}
@@ -320,14 +309,6 @@ function FluffySheep({ position, rotation = 0 }) {
           <boxGeometry args={[0.34, 0.32, 0.36]} />
           <meshToonMaterial color="#4a4e69" />
           <ToonOutline thickness={0.02} />
-        </mesh>
-        <mesh position={[-0.2, 0.04, -0.05]} rotation={[0, 0, -0.4]}>
-          <boxGeometry args={[0.12, 0.06, 0.18]} />
-          <meshToonMaterial color="#4a4e69" />
-        </mesh>
-        <mesh position={[0.2, 0.04, -0.05]} rotation={[0, 0, 0.4]}>
-          <boxGeometry args={[0.12, 0.06, 0.18]} />
-          <meshToonMaterial color="#4a4e69" />
         </mesh>
       </group>
 
@@ -353,13 +334,31 @@ function ChunkyChicken({ position, rotation = 0 }) {
         <sphereGeometry args={[0.24, 12, 12]} />
         <meshToonMaterial color="#ffffff" />
       </mesh>
-      {/* Red Comb & Yellow Beak */}
       <mesh position={[0, 0.48, 0.1]}>
         <boxGeometry args={[0.06, 0.12, 0.1]} />
         <meshToonMaterial color="#e63946" />
       </mesh>
       <mesh position={[0, 0.32, 0.26]}>
         <coneGeometry args={[0.06, 0.12, 6]} rotation={[Math.PI / 2, 0, 0]} />
+        <meshToonMaterial color="#ffb703" />
+      </mesh>
+    </group>
+  );
+}
+
+function ChunkyDuck({ position, rotation = 0 }) {
+  return (
+    <group position={position} rotation={[0, rotation, 0]} scale={0.45}>
+      <mesh position={[0, 0.15, 0]} castShadow>
+        <sphereGeometry args={[0.2, 12, 12]} />
+        <meshToonMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0, 0.28, 0.12]}>
+        <sphereGeometry args={[0.12, 10, 10]} />
+        <meshToonMaterial color="#2a9d8f" />
+      </mesh>
+      <mesh position={[0, 0.26, 0.25]}>
+        <boxGeometry args={[0.12, 0.04, 0.14]} />
         <meshToonMaterial color="#ffb703" />
       </mesh>
     </group>
@@ -374,35 +373,12 @@ function ChunkyFox({ position, rotation = 0 }) {
         <meshToonMaterial color="#f4a261" />
         <ToonOutline thickness={0.025} />
       </mesh>
-      <mesh position={[0, 0.24, 0.18]}>
-        <boxGeometry args={[0.24, 0.2, 0.28]} />
-        <meshToonMaterial color="#ffffff" />
-      </mesh>
 
       <group position={[0, 0.48, 0.38]}>
         <mesh castShadow>
           <boxGeometry args={[0.32, 0.3, 0.34]} />
           <meshToonMaterial color="#f4a261" />
           <ToonOutline thickness={0.02} />
-        </mesh>
-        <mesh position={[-0.1, 0.22, 0.02]} rotation={[0, 0, -0.15]}>
-          <coneGeometry args={[0.06, 0.18, 6]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-        <mesh position={[0.1, 0.22, 0.02]} rotation={[0, 0, 0.15]}>
-          <coneGeometry args={[0.06, 0.18, 6]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-      </group>
-
-      <group position={[0, 0.35, -0.42]} rotation={[-0.3, 0, 0]}>
-        <mesh castShadow>
-          <capsuleGeometry args={[0.12, 0.36, 6, 10]} />
-          <meshToonMaterial color="#f4a261" />
-        </mesh>
-        <mesh position={[0, -0.16, 0]}>
-          <sphereGeometry args={[0.11, 10, 10]} />
-          <meshToonMaterial color="#ffffff" />
         </mesh>
       </group>
     </group>
@@ -416,7 +392,6 @@ function ChunkyRabbit({ position, rotation = 0 }) {
         <sphereGeometry args={[0.2, 12, 12]} />
         <meshToonMaterial color="#ffffff" />
       </mesh>
-      {/* Long Bunny Ears */}
       <mesh position={[-0.08, 0.42, 0.02]} rotation={[0, 0, -0.1]}>
         <capsuleGeometry args={[0.04, 0.22, 4, 8]} />
         <meshToonMaterial color="#ffffff" />
@@ -513,7 +488,7 @@ function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
 }
 
 /** -------------------------------------------------------------
- *  6. DUAL PET FOLLOW SYSTEM (PET 1 + STORYBOOK CARTOON CAT 🐱)
+ *  6. DUAL PET FOLLOW SYSTEM
  * ------------------------------------------------------------- */
 function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
   const pet1Ref = useRef();
@@ -526,7 +501,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
     const px = targetGroupRef.current.position.x;
     const pz = targetGroupRef.current.position.z;
 
-    // Pet 1 (Left Flank)
     if (pet1Ref.current) {
       const t1x = px - 0.65;
       const t1z = pz + 0.65;
@@ -539,12 +513,9 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
         pet1Ref.current.position.z += d1z * 0.08;
         pet1Ref.current.rotation.y = Math.atan2(d1x, d1z);
         pet1Ref.current.position.y = Math.abs(Math.sin(clock * 16)) * 0.08;
-      } else {
-        pet1Ref.current.position.y = Math.sin(clock * 3) * 0.015;
       }
     }
 
-    // Pet 2 (Right Flank - Cute Storybook Cartoon Cat 🐱)
     if (pet2Ref.current) {
       const t2x = px + 0.65;
       const t2z = pz + 0.65;
@@ -557,8 +528,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
         pet2Ref.current.position.z += d2z * 0.08;
         pet2Ref.current.rotation.y = Math.atan2(d2x, d2z);
         pet2Ref.current.position.y = Math.abs(Math.sin(clock * 14)) * 0.07;
-      } else {
-        pet2Ref.current.position.y = Math.sin(clock * 2.5) * 0.015;
       }
     }
   });
@@ -582,23 +551,6 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
             <meshToonMaterial color="#f4a261" />
             <ToonOutline thickness={0.02} />
           </mesh>
-          <mesh position={[-0.07, 0.22, 0.12]} rotation={[0, 0, -0.2]}>
-            <coneGeometry args={[0.04, 0.12, 6]} />
-            <meshToonMaterial color="#f4a261" />
-          </mesh>
-          <mesh position={[0.07, 0.22, 0.12]} rotation={[0, 0, 0.2]}>
-            <coneGeometry args={[0.04, 0.12, 6]} />
-            <meshToonMaterial color="#f4a261" />
-          </mesh>
-          <mesh castShadow>
-            <capsuleGeometry args={[0.12, 0.2, 6, 12]} rotation={[Math.PI / 2, 0, 0]} />
-            <meshToonMaterial color="#f4a261" />
-            <ToonOutline thickness={0.02} />
-          </mesh>
-          <mesh position={[0, 0.12, -0.16]} rotation={[-0.4, 0, 0]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.25, 6]} />
-            <meshToonMaterial color="#f4a261" />
-          </mesh>
         </group>
       </group>
     </group>
@@ -606,7 +558,7 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
 }
 
 /** -------------------------------------------------------------
- *  7. HIGH-FIDELITY CHUNKY PINTO HORSE (MATCHES REFERENCE SHEET) 🐴
+ *  7. HIGH-FIDELITY CHUNKY PINTO HORSE 🐴
  * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
@@ -632,24 +584,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <boxGeometry args={[0.02, 0.45, 0.55]} />
           <meshToonMaterial color="#ffffff" />
         </mesh>
-        <mesh position={[-0.37, -0.05, -0.2]} castShadow>
-          <boxGeometry args={[0.02, 0.42, 0.48]} />
-          <meshToonMaterial color="#ffffff" />
-        </mesh>
-
-        <mesh position={[0, 0.42, 0]} castShadow>
-          <boxGeometry args={[0.64, 0.18, 0.66]} />
-          <meshToonMaterial color="#4a2c11" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-        <mesh position={[-0.34, 0.05, 0]} castShadow>
-          <boxGeometry args={[0.04, 0.55, 0.12]} />
-          <meshToonMaterial color="#6b4c35" />
-        </mesh>
-        <mesh position={[0.34, 0.05, 0]} castShadow>
-          <boxGeometry args={[0.04, 0.55, 0.12]} />
-          <meshToonMaterial color="#6b4c35" />
-        </mesh>
       </group>
 
       <group position={[0, 1.15, 0.42]} rotation={[0.36, 0, 0]}>
@@ -658,10 +592,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.025} />
         </mesh>
-        <mesh position={[0, 0.08, -0.24]} castShadow>
-          <boxGeometry args={[0.14, 0.62, 0.18]} />
-          <meshToonMaterial color="#3d2616" />
-        </mesh>
       </group>
 
       <group position={[0, 1.48, 0.72]}>
@@ -669,38 +599,6 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <boxGeometry args={[0.44, 0.44, 0.58]} />
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.025} />
-        </mesh>
-        <mesh position={[0, 0.08, 0.22]}>
-          <boxGeometry args={[0.14, 0.32, 0.16]} />
-          <meshToonMaterial color="#ffffff" />
-        </mesh>
-        <mesh position={[0, -0.1, 0.32]} castShadow>
-          <boxGeometry args={[0.38, 0.32, 0.35]} />
-          <meshToonMaterial color="#f5e6d3" />
-        </mesh>
-        <mesh position={[-0.1, -0.12, 0.5]}>
-          <sphereGeometry args={[0.04, 8, 8]} />
-          <meshToonMaterial color="#3d2616" />
-        </mesh>
-        <mesh position={[0.1, -0.12, 0.5]}>
-          <sphereGeometry args={[0.04, 8, 8]} />
-          <meshToonMaterial color="#3d2616" />
-        </mesh>
-        <mesh position={[-0.23, 0.06, 0.12]}>
-          <sphereGeometry args={[0.045, 10, 10]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-        <mesh position={[0.23, 0.06, 0.12]}>
-          <sphereGeometry args={[0.045, 10, 10]} />
-          <meshToonMaterial color="#222222" />
-        </mesh>
-        <mesh position={[-0.16, 0.26, -0.12]} rotation={[0, 0, -0.2]}>
-          <coneGeometry args={[0.06, 0.18, 6]} />
-          <meshToonMaterial color="#c68a4c" />
-        </mesh>
-        <mesh position={[0.16, 0.26, -0.12]} rotation={[0, 0, 0.2]}>
-          <coneGeometry args={[0.06, 0.18, 6]} />
-          <meshToonMaterial color="#c68a4c" />
         </mesh>
       </group>
 
@@ -715,29 +613,14 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
             <boxGeometry args={[0.18, 0.52, 0.18]} />
             <meshToonMaterial color="#c68a4c" />
           </mesh>
-          <mesh position={[0, -0.22, 0]} castShadow>
-            <boxGeometry args={[0.19, 0.16, 0.19]} />
-            <meshToonMaterial color="#ffffff" />
-          </mesh>
-          <mesh position={[0, -0.3, 0]} castShadow>
-            <boxGeometry args={[0.2, 0.08, 0.2]} />
-            <meshToonMaterial color="#3d2616" />
-          </mesh>
         </group>
       ))}
-
-      <group position={[0, 0.72, -0.68]} rotation={[-0.4, 0, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.16, 0.55, 0.22]} />
-          <meshToonMaterial color="#3d2616" />
-        </mesh>
-      </group>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  8. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE (UNTOUCHED)
+ *  8. CAMERA-RELATIVE WASD & ORBIT CONTROL ENGINE
  * ------------------------------------------------------------- */
 function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, resetSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const { camera } = useThree();
@@ -857,7 +740,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, re
 }
 
 /** -------------------------------------------------------------
- *  9. CHUNKY CHIBI 3D CARTOON PLAYER CHARACTER (35-40% HEAD RATIO)
+ *  9. CHUNKY CHIBI 3D CARTOON PLAYER CHARACTER
  * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
@@ -904,18 +787,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <sphereGeometry args={[0.04, 10, 10]} />
           <meshToonMaterial color="#222222" />
         </mesh>
-        <mesh position={[0, -0.04, 0.32]}>
-          <sphereGeometry args={[0.03, 8, 8]} />
-          <meshToonMaterial color="#f2c9a0" />
-        </mesh>
-        <mesh position={[-0.18, -0.06, 0.26]}>
-          <sphereGeometry args={[0.05, 10, 10]} />
-          <meshToonMaterial color="#ffb5a7" transparent opacity={0.65} />
-        </mesh>
-        <mesh position={[0.18, -0.06, 0.26]}>
-          <sphereGeometry args={[0.05, 10, 10]} />
-          <meshToonMaterial color="#ffb5a7" transparent opacity={0.65} />
-        </mesh>
       </group>
 
       <group position={[0, 0.44, 0]}>
@@ -926,45 +797,16 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      <group position={[-0.32, 0.42, 0]} rotation={[0, 0, 0.25]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.08, 0.08, 0.32, 10]} />
-          <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
-        </mesh>
-        <mesh position={[0, -0.18, 0]} castShadow>
-          <sphereGeometry args={[0.09, 12, 12]} />
-          <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
-        </mesh>
-      </group>
-      <group position={[0.32, 0.42, 0]} rotation={[0, 0, -0.25]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.08, 0.08, 0.32, 10]} />
-          <meshToonMaterial color={character?.outfit_color || '#c9a7e0'} />
-        </mesh>
-        <mesh position={[0, -0.18, 0]} castShadow>
-          <sphereGeometry args={[0.09, 12, 12]} />
-          <meshToonMaterial color={character?.skin_tone || '#f2c9a0'} />
-        </mesh>
-      </group>
-
       <group position={[-0.14, 0.12, 0]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.08, 0.08, 0.24, 10]} />
           <meshToonMaterial color="#457b9d" />
-        </mesh>
-        <mesh position={[0, -0.1, 0.05]} castShadow>
-          <boxGeometry args={[0.16, 0.1, 0.24]} />
-          <meshToonMaterial color="#6b4c35" />
         </mesh>
       </group>
       <group position={[0.14, 0.12, 0]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.08, 0.08, 0.24, 10]} />
           <meshToonMaterial color="#457b9d" />
-        </mesh>
-        <mesh position={[0, -0.1, 0.05]} castShadow>
-          <boxGeometry args={[0.16, 0.1, 0.24]} />
-          <meshToonMaterial color="#6b4c35" />
         </mesh>
       </group>
     </group>
@@ -1009,7 +851,7 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH STEPPED TERRAIN, DUAL WATERFALLS, ANIMALS & FULL VILLAGE
+ *  MAIN SCENE WITH DUCKS 🦆 & FULL VILLAGE BIOMES
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -1046,7 +888,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <GiantSunflowerField />
       <AppleOrchardField />
 
-      {/* 🐴🐄🐑🐔🦊🐰 Farm Animals Grazing in Pastures (Section 11) */}
+      {/* 🐴🐄🐑🐔🦆🦊🐰 Farm Animals Grazing in Pastures */}
       <group>
         <ChunkyCow position={[-38.0, 0, -15.0]} rotation={0.6} />
         <ChunkyCow position={[-42.0, 0, -22.0]} rotation={-0.8} />
@@ -1054,6 +896,8 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <FluffySheep position={[40.0, 0, -14.0]} rotation={0.8} />
         <ChunkyChicken position={[-16.0, 0, 14.0]} rotation={0.3} />
         <ChunkyChicken position={[-14.5, 0, 16.0]} rotation={-0.5} />
+        <ChunkyDuck position={[-2.0, 0.05, -8.0]} rotation={0.8} />
+        <ChunkyDuck position={[-1.2, 0.05, -12.0]} rotation={-0.4} />
         <ChunkyFox position={[-18.0, 0, 18.0]} rotation={1.2} />
         <ChunkyRabbit position={[16.0, 0, 18.0]} rotation={-0.8} />
         <ChunkyRabbit position={[18.0, 0, 15.0]} rotation={0.4} />
@@ -1069,7 +913,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} horsePosRef={horsePosRef} />
       
-      {/* Dual Pet Companions (Pet 1 + Storybook Cat 🐱) */}
+      {/* Dual Pet Companions */}
       <DualPetCompanions petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
       <Sparkles count={120} scale={60} size={3.5} speed={0.4} color="#ffe5ec" />
