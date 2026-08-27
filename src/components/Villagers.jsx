@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER NPCS (SPACIOUS HAMLET DISTRIBUTION)
+ *  12 UNIQUE VILLAGER NPCS (PROPER 3D CARTOON HUMANS)
  * ------------------------------------------------------------- */
 export const VILLAGERS_DATA = [
   { id: 1, name: 'Mia', job: 'Florist', pos: [20.5, 0.18, -26.5], outfitColor: '#ffb5a7', hairColor: '#e6c594', pet: 'bunny' },
@@ -32,51 +32,76 @@ function VillagerNPC({ npc }) {
 
   return (
     <group ref={npcRef} position={npc.pos}>
+      {/* Head, Eyes, Hair, Blush */}
       <group position={[0, 0.95, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.24, 20, 20]} />
-          <meshStandardMaterial color="#f2c9a0" roughness={0.45} />
+          <meshToonMaterial color="#f2c9a0" />
         </mesh>
+        {/* Hair Cap */}
         <mesh position={[0, 0.08, -0.02]}>
           <sphereGeometry args={[0.26, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
-          <meshStandardMaterial color={npc.hairColor} roughness={0.6} />
+          <meshToonMaterial color={npc.hairColor} />
         </mesh>
+        {/* Cute Eyes */}
         <mesh position={[-0.08, 0.02, 0.2]}>
           <sphereGeometry args={[0.03, 8, 8]} />
-          <meshStandardMaterial color="#222222" />
+          <meshToonMaterial color="#222222" />
         </mesh>
         <mesh position={[0.08, 0.02, 0.2]}>
           <sphereGeometry args={[0.03, 8, 8]} />
-          <meshStandardMaterial color="#222222" />
+          <meshToonMaterial color="#222222" />
         </mesh>
+        {/* Blush Cheeks */}
         <mesh position={[-0.12, -0.04, 0.18]}>
           <sphereGeometry args={[0.04, 8, 8]} />
-          <meshStandardMaterial color="#ffb5a7" transparent opacity={0.6} />
+          <meshToonMaterial color="#ffb5a7" transparent opacity={0.6} />
         </mesh>
         <mesh position={[0.12, -0.04, 0.18]}>
           <sphereGeometry args={[0.04, 8, 8]} />
-          <meshStandardMaterial color="#ffb5a7" transparent opacity={0.6} />
+          <meshToonMaterial color="#ffb5a7" transparent opacity={0.6} />
         </mesh>
       </group>
 
+      {/* Torso & Outfit */}
       <mesh position={[0, 0.48, 0]} castShadow>
         <capsuleGeometry args={[0.24, 0.36, 8, 16]} />
-        <meshStandardMaterial color={npc.outfitColor} roughness={0.5} />
+        <meshToonMaterial color={npc.outfitColor} />
       </mesh>
 
+      {/* Arms & Sleeves */}
+      <mesh position={[-0.26, 0.48, 0]} rotation={[0, 0, 0.2]} castShadow>
+        <capsuleGeometry args={[0.06, 0.28, 6, 10]} />
+        <meshToonMaterial color={npc.outfitColor} />
+      </mesh>
+      <mesh position={[0.26, 0.48, 0]} rotation={[0, 0, -0.2]} castShadow>
+        <capsuleGeometry args={[0.06, 0.28, 6, 10]} />
+        <meshToonMaterial color={npc.outfitColor} />
+      </mesh>
+
+      {/* Legs & Shoes */}
       <mesh position={[-0.11, 0.14, 0]} castShadow>
         <cylinderGeometry args={[0.05, 0.05, 0.28, 8]} />
-        <meshStandardMaterial color="#457b9d" />
+        <meshToonMaterial color="#457b9d" />
       </mesh>
       <mesh position={[0.11, 0.14, 0]} castShadow>
         <cylinderGeometry args={[0.05, 0.05, 0.28, 8]} />
-        <meshStandardMaterial color="#457b9d" />
+        <meshToonMaterial color="#457b9d" />
+      </mesh>
+      <mesh position={[-0.11, 0.02, 0.04]} castShadow>
+        <boxGeometry args={[0.1, 0.06, 0.16]} />
+        <meshToonMaterial color="#6b4c35" />
+      </mesh>
+      <mesh position={[0.11, 0.02, 0.04]} castShadow>
+        <boxGeometry args={[0.1, 0.06, 0.16]} />
+        <meshToonMaterial color="#6b4c35" />
       </mesh>
 
+      {/* Villager Companion Pet */}
       <group position={[0.5, 0.12, 0.3]} scale={0.6}>
         <mesh castShadow>
           <sphereGeometry args={[0.18, 12, 12]} />
-          <meshStandardMaterial color={npc.pet === 'cat' ? '#f4a261' : npc.pet === 'dog' ? '#7a4a2b' : '#ffffff'} />
+          <meshToonMaterial color={npc.pet === 'cat' ? '#f4a261' : npc.pet === 'dog' ? '#7a4a2b' : '#ffffff'} />
         </mesh>
       </group>
     </group>
