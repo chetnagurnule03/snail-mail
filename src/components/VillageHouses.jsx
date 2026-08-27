@@ -1,12 +1,8 @@
 import React from 'react';
-import { Sparkles, Outlines } from '@react-three/drei';
-
-function ToonOutline({ thickness = 0.025, color = '#2b2013' }) {
-  return <Outlines thickness={thickness} color={color} screenspace={false} />;
-}
+import { Sparkles } from '@react-three/drei';
 
 /** -------------------------------------------------------------
- *  VIBRANT FARM GAME GARDENS (SUNFLOWERS, CORN, TOMATOES, BRICK BEDS)
+ *  12 UNIQUE VILLAGER COTTAGES WITH VIBRANT FARM GARDENS
  * ------------------------------------------------------------- */
 const VILLAGE_COTTAGES = [
   // Hamlet 1: North-West Woodland Hamlet
@@ -33,11 +29,10 @@ const VILLAGE_COTTAGES = [
 function UniqueFarmGarden({ type }) {
   return (
     <group position={[0, 0, 1.4]}>
-      {/* Brick Soil Plot Border */}
+      {/* Brick Soil Bed Border */}
       <mesh position={[0, 0.08, 0.6]} castShadow receiveShadow>
         <boxGeometry args={[1.4, 0.16, 1.0]} />
         <meshToonMaterial color="#6b4326" />
-        <ToonOutline thickness={0.02} />
       </mesh>
 
       {/* 🌻 Giant Sunflowers Garden */}
@@ -48,13 +43,11 @@ function UniqueFarmGarden({ type }) {
               <mesh position={[0, 0.35, 0]} castShadow>
                 <cylinderGeometry args={[0.03, 0.04, 0.7, 8]} />
                 <meshToonMaterial color="#6bab4f" />
-                <ToonOutline thickness={0.015} />
               </mesh>
               <group position={[0, 0.7, 0]}>
                 <mesh castShadow>
                   <sphereGeometry args={[0.22, 16, 16]} />
                   <meshToonMaterial color="#ffd23f" />
-                  <ToonOutline thickness={0.02} />
                 </mesh>
                 <mesh position={[0, 0, 0.08]}>
                   <sphereGeometry args={[0.1, 12, 12]} />
@@ -78,7 +71,6 @@ function UniqueFarmGarden({ type }) {
               <mesh position={[0, 0.35, 0.05]} castShadow>
                 <sphereGeometry args={[0.12, 12, 12]} />
                 <meshToonMaterial color="#e63946" />
-                <ToonOutline thickness={0.015} />
               </mesh>
             </group>
           ))}
@@ -93,7 +85,6 @@ function UniqueFarmGarden({ type }) {
               <mesh position={[0, 0.45, 0]} castShadow>
                 <cylinderGeometry args={[0.04, 0.06, 0.9, 8]} />
                 <meshToonMaterial color="#38b000" />
-                <ToonOutline thickness={0.02} />
               </mesh>
               <mesh position={[0.06, 0.45, 0]} rotation={[0, 0, -0.3]} castShadow>
                 <capsuleGeometry args={[0.06, 0.22, 6, 12]} />
@@ -110,7 +101,6 @@ function UniqueFarmGarden({ type }) {
           <mesh position={[0, 0.25, 0]} castShadow>
             <sphereGeometry args={[0.3, 14, 14]} />
             <meshToonMaterial color="#2d6a4f" />
-            <ToonOutline thickness={0.02} />
           </mesh>
           <mesh position={[0.1, 0.3, 0.2]} castShadow>
             <sphereGeometry args={[0.08, 10, 10]} />
@@ -128,7 +118,6 @@ function UniqueFarmGarden({ type }) {
         <mesh position={[0, 0.12, 0]} castShadow>
           <cylinderGeometry args={[0.08, 0.1, 0.24, 10]} />
           <meshToonMaterial color="#457b9d" />
-          <ToonOutline thickness={0.015} />
         </mesh>
       </group>
     </group>
@@ -140,19 +129,17 @@ export default function VillageHouses() {
     <group>
       {VILLAGE_COTTAGES.map((c) => (
         <group key={c.id} position={c.pos} rotation={[0, c.rot, 0]}>
-          {/* Main House Body */}
+          {/* Main Cottage Architecture */}
           <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.85, 1.8, 1.65]} />
             <meshToonMaterial color={c.wallColor} />
-            <ToonOutline thickness={0.03} />
           </mesh>
 
-          {/* Roof */}
+          {/* Sloped Roof */}
           <group position={[0, 2.1, 0]}>
             <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
               <coneGeometry args={[1.7, 1.35, 4]} />
               <meshToonMaterial color={c.roofColor} />
-              <ToonOutline thickness={0.03} />
             </mesh>
             <mesh position={[0, -0.65, 0]}>
               <boxGeometry args={[1.92, 0.08, 1.72]} />
@@ -165,25 +152,23 @@ export default function VillageHouses() {
             <mesh castShadow>
               <boxGeometry args={[0.5, 0.92, 0.05]} />
               <meshToonMaterial color="#7a4a2b" />
-              <ToonOutline thickness={0.02} />
             </mesh>
           </group>
 
-          {/* Windows */}
+          {/* Windows with Warm Glow */}
           <mesh position={[-0.45, 1.0, 0.84]}>
             <boxGeometry args={[0.45, 0.45, 0.05]} />
             <meshToonMaterial color="#ffdda1" emissive="#ffb703" emissiveIntensity={0.6} />
           </mesh>
 
-          {/* Unique Farm Garden */}
+          {/* Individual Farm Garden Plot */}
           <UniqueFarmGarden type={c.gardenType} />
 
-          {/* Chimney */}
+          {/* Chimney & Smoke Sparkles */}
           <group position={[-0.65, 2.0, -0.3]}>
             <mesh castShadow>
               <boxGeometry args={[0.36, 1.25, 0.36]} />
               <meshToonMaterial color="#a89f91" />
-              <ToonOutline thickness={0.025} />
             </mesh>
             <Sparkles position={[0, 0.85, 0]} count={12} scale={0.5} size={3} speed={0.4} color="#ffffff" />
           </group>

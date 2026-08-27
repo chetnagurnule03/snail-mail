@@ -1,20 +1,20 @@
-import React, { useRef, useState, useMemo, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, ContactShadows, Sky, Sparkles, Outlines } from '@react-three/drei';
+import { OrbitControls, ContactShadows, Sparkles, Outlines } from '@react-three/drei';
 import * as THREE from 'three';
 import VillageSquare from './VillageSquare';
 import VillageHouses from './VillageHouses';
 import Villagers, { VILLAGERS_DATA } from './Villagers';
 
 /** -------------------------------------------------------------
- *  TOON OUTLINE HELPER FOR CHIBI STORYBOOK AESTHETIC
+ *  TOON OUTLINE FOR HERO MODELS (HUMAN, HORSE, PET)
  * ------------------------------------------------------------- */
 function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
   return <Outlines thickness={thickness} color={color} screenspace={false} />;
 }
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER (OPEN-WORLD RADIUS = 150m)
+ *  COLLISION & BOUNDARY HELPER (OPEN-WORLD EXPLORATION RADIUS = 150m)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -14.0, z: -12.0, radius: 1.8 },
@@ -90,17 +90,14 @@ function WaterfallRiverValley() {
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.2, 0.45, 4.2]} />
           <meshToonMaterial color="#8a7e70" />
-          <ToonOutline thickness={0.03} />
         </mesh>
         <mesh position={[-1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
           <meshToonMaterial color="#6b4c35" />
-          <ToonOutline thickness={0.025} />
         </mesh>
         <mesh position={[1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
           <meshToonMaterial color="#6b4c35" />
-          <ToonOutline thickness={0.025} />
         </mesh>
       </group>
 
@@ -109,7 +106,6 @@ function WaterfallRiverValley() {
         <mesh castShadow>
           <boxGeometry args={[4.2, 6.5, 0.4]} />
           <meshToonMaterial color="#48cae4" transparent opacity={0.92} />
-          <ToonOutline thickness={0.03} />
         </mesh>
         <Sparkles count={35} scale={4} size={4} speed={0.8} color="#ffffff" />
       </group>
@@ -151,13 +147,11 @@ function GiantSunflowerField() {
             <mesh position={[0, 0.6, 0]} castShadow>
               <cylinderGeometry args={[0.06, 0.08, 1.2, 8]} />
               <meshToonMaterial color="#6bab4f" />
-              <ToonOutline thickness={0.02} />
             </mesh>
             <group position={[0, 1.2, 0]}>
               <mesh castShadow>
                 <sphereGeometry args={[0.42, 16, 16]} />
                 <meshToonMaterial color="#ffd23f" />
-                <ToonOutline thickness={0.03} />
               </mesh>
               <mesh position={[0, 0, 0.15]}>
                 <sphereGeometry args={[0.2, 12, 12]} />
@@ -180,12 +174,10 @@ function AppleOrchardField() {
             <mesh position={[0, 0.9, 0]} castShadow>
               <cylinderGeometry args={[0.18, 0.28, 1.8, 10]} />
               <meshToonMaterial color="#6b4c35" />
-              <ToonOutline thickness={0.025} />
             </mesh>
             <mesh position={[0, 2.1, 0]} castShadow>
               <sphereGeometry args={[1.1, 20, 20]} />
               <meshToonMaterial color="#38b000" />
-              <ToonOutline thickness={0.03} />
             </mesh>
             {/* Red Apples */}
             <mesh position={[0.4, 2.2, 0.8]} castShadow>
@@ -245,20 +237,49 @@ function FluffyClouds() {
   );
 }
 
+function DistantBirds() {
+  const birdsGroupRef = useRef();
+
+  useFrame((state) => {
+    if (birdsGroupRef.current) {
+      const t = state.clock.getElapsedTime() * 0.4;
+      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 18;
+      birdsGroupRef.current.position.y = 10.5 + Math.cos(t * 0.3) * 0.5;
+      birdsGroupRef.current.rotation.y = Math.cos(t * 0.5) * 0.3;
+    }
+  });
+
+  return (
+    <group ref={birdsGroupRef} position={[0, 10.5, -28]}>
+      {[-1.8, 0, 1.8].map((offset, idx) => (
+        <group key={idx} position={[offset * 0.8, idx * 0.2, offset * 0.5]}>
+          <mesh position={[-0.1, 0, 0]} rotation={[0, 0, 0.3]}>
+            <boxGeometry args={[0.2, 0.02, 0.08]} />
+            <meshToonMaterial color="#556b2f" />
+          </mesh>
+          <mesh position={[0.1, 0, 0]} rotation={[0, 0, -0.3]}>
+            <boxGeometry args={[0.2, 0.02, 0.08]} />
+            <meshToonMaterial color="#556b2f" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
 function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
   return (
     <group position={position} rotation={[0, 0.3, 0]}>
       <mesh position={[-0.6, 0.35, 0]} castShadow>
         <boxGeometry args={[0.08, 0.7, 1.4]} />
         <meshToonMaterial color="#8c5a3c" />
-        <ToonOutline thickness={0.02} />
       </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  5. DUAL PET FOLLOW SYSTEM (BUNNY + STORYBOOK CARTOON CAT 🐱)
+ *  5. DUAL PET FOLLOW SYSTEM (PET 1 + STORYBOOK CARTOON CAT 🐱)
  * ------------------------------------------------------------- */
 function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
   const pet1Ref = useRef();
@@ -289,7 +310,7 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
       }
     }
 
-    // Pet 2 (Right Flank - Cute Cartoon Cat 🐱)
+    // Pet 2 (Right Flank - Cute Storybook Cartoon Cat 🐱)
     if (pet2Ref.current) {
       const t2x = px + 0.65;
       const t2z = pz + 0.65;
@@ -554,13 +575,11 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
       <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.85, 1.8, 1.65]} />
         <meshToonMaterial color="#faf0ca" />
-        <ToonOutline thickness={0.03} />
       </mesh>
       <group position={[0, 2.1, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[1.7, 1.35, 4]} />
           <meshToonMaterial color="#c96850" />
-          <ToonOutline thickness={0.03} />
         </mesh>
       </group>
     </group>
@@ -568,7 +587,7 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH CARTOON FARM ASSETS & CAT PET
+ *  MAIN SCENE WITH CARTOON FARM ASSETS & ROCK-SOLID WEBGL RENDERING
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
