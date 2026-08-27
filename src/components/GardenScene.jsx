@@ -14,7 +14,7 @@ function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
 }
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER (OPEN-WORLD EXPLORATION RADIUS = 150m)
+ *  COLLISION & OBSTACLE SANITIZER (UNRESTRICTED OPEN-WORLD)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -14.0, z: -12.0, radius: 1.8 },
@@ -28,14 +28,7 @@ function sanitizePlayableTarget(x, z) {
   let targetX = x;
   let targetZ = z;
 
-  const distFromCenter = Math.sqrt(targetX * targetX + targetZ * targetZ);
-  const maxRadius = 150.0;
-  if (distFromCenter > maxRadius) {
-    const angle = Math.atan2(targetZ, targetX);
-    targetX = Math.cos(angle) * maxRadius;
-    targetZ = Math.sin(angle) * maxRadius;
-  }
-
+  // Enforce obstacle collisions only (ZERO circular boundary clamping!)
   for (const obs of OBSTACLES) {
     const dx = targetX - obs.x;
     const dz = targetZ - obs.z;
@@ -51,7 +44,7 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. CONTINUOUS OPEN-WORLD MEADOW TERRAIN (300x300m)
+ *  1. EXPANSIVE CONTINUOUS OPEN-WORLD MEADOW TERRAIN (600x600m)
  * ------------------------------------------------------------- */
 function ExtendedMeadowTerrain({ onGroundClick }) {
   return (
@@ -67,7 +60,7 @@ function ExtendedMeadowTerrain({ onGroundClick }) {
         onGroundClick(sanitized);
       }}
     >
-      <planeGeometry args={[300, 300]} />
+      <planeGeometry args={[600, 600]} />
       <meshToonMaterial color="#94c77d" />
     </mesh>
   );
@@ -136,7 +129,7 @@ function VillageWindingPaths() {
 }
 
 /** -------------------------------------------------------------
- *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES (REFERENCE INSPIRED)
+ *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES
  * ------------------------------------------------------------- */
 function GiantSunflowerField() {
   return (
@@ -587,7 +580,7 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH CARTOON FARM ASSETS & ROCK-SOLID WEBGL RENDERING
+ *  MAIN SCENE WITH UNRESTRICTED 600x600m OPEN-WORLD MEADOW TERRAIN
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -597,7 +590,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   return (
     <Canvas shadows camera={{ position: [-14.0, 4.5, -5.0], fov: 42 }}>
       <color attach="background" args={['#bfe8f7']} />
-      <fog attach="fog" args={['#bfe8f7', 18, 70]} />
+      <fog attach="fog" args={['#bfe8f7', 35, 140]} />
       
       <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.9} />
       <directionalLight position={[6, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
@@ -637,8 +630,8 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {/* Dual Pet Companions (Pet 1 + Storybook Cat 🐱) */}
       <DualPetCompanions petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
-      <Sparkles count={120} scale={50} size={3.5} speed={0.4} color="#ffe5ec" />
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={50} blur={2.5} />
+      <Sparkles count={120} scale={60} size={3.5} speed={0.4} color="#ffe5ec" />
+      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={60} blur={2.5} />
     </Canvas>
   );
 }
