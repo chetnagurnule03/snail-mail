@@ -6,40 +6,6 @@ import VillagerDialogueModal from './components/VillagerDialogueModal';
 import Composer from './components/Composer';
 import SnailMailReceiverExperience from './components/SnailMailReceiverExperience';
 
-const OUTFIT_COLORS = ['#c9a7e0', '#e07a5f', '#84b574', '#76c8e3', '#ffb5a7', '#f4a261'];
-const HAIR_COLORS = ['#7a4a2b', '#3d2616', '#e6c594', '#b55239', '#c9a7e0'];
-const SKIN_TONES = ['#f2c9a0', '#fae1c5', '#d9a07b', '#8d5b4c', '#ffe0bd'];
-
-const HAIR_STYLES = [
-  { id: 'wanderer_cap', name: '🎩 Traveler Cap' },
-  { id: 'cute_bob', name: '💇 Cute Bob' },
-  { id: 'braids', name: '👧 Twin Braids' },
-  { id: 'wavy_locks', name: '✨ Wavy Locks' },
-];
-
-const OUTFIT_STYLES = [
-  { id: 'wanderer_coat', name: '🧥 Wanderer Coat' },
-  { id: 'cozy_sweater', name: '🧶 Cozy Knit' },
-  { id: 'gardener_overalls', name: '👖 Overalls' },
-];
-
-const ACCESSORIES = [
-  { id: 'backpack', name: '🎒 Traveler Pack' },
-  { id: 'cozy_scarf', name: '🧣 Knitted Scarf' },
-  { id: 'flower_crown', name: '🌸 Flower Crown' },
-  { id: 'round_glasses', name: '👓 Wire Glasses' },
-  { id: 'none', name: '🚫 None' },
-];
-
-const SMALL_PETS = [
-  { id: 'bunny', name: '🐰 Bunny' },
-  { id: 'cat', name: '🐱 Cat' },
-  { id: 'dog', name: '🐶 Dog' },
-  { id: 'fox', name: '🦊 Fox' },
-  { id: 'frog', name: '🐸 Frog' },
-  { id: 'squirrel', name: '🐿️ Squirrel' },
-];
-
 export default function App() {
   const { character, loading: charLoading, saving, save } = useCharacter();
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -48,13 +14,15 @@ export default function App() {
   const [resetCameraSignal, setResetCameraSignal] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
+  // Active Pet Selection State ('none', 'cat', 'horse') - Starts at 'none'
+  const [activePet, setActivePet] = useState('none');
+
   // Shared Letter Receiver Experience State
   const [sharedLetter, setSharedLetter] = useState(null);
   const [isReceiverMode, setIsReceiverMode] = useState(false);
 
-  // Snail Mail Toast & 3D Deliveries State
+  // Snail Mail Toast State
   const [mailToast, setMailToast] = useState(null);
-  const [activeSnailDeliveries, setActiveSnailDeliveries] = useState([]);
 
   // Villager Interaction State
   const [nearVillager, setNearVillager] = useState(null);
@@ -78,6 +46,9 @@ export default function App() {
   }, []);
 
   const toggleMount = () => {
+    if (activePet !== 'horse' && !isMounted) {
+      setActivePet('horse');
+    }
     setIsMounted((prev) => !prev);
   };
 
@@ -89,26 +60,7 @@ export default function App() {
   const handleLetterSent = (recipientName = 'Villager') => {
     setIsMailComposerOpen(false);
     setMailToast(`Letter sent to ${recipientName}! 🐌💌`);
-
-    // Add 3D Snail Messenger Delivery
-    const newDelivery = {
-      id: Date.now(),
-      recipient: recipientName,
-      progress: 0,
-      startX: -2.8,
-      startZ: 4.5,
-      targetX: -24.0,
-      targetZ: -26.0,
-    };
-    setActiveSnailDeliveries((prev) => [...prev, newDelivery]);
-
-    setTimeout(() => {
-      setMailToast(null);
-    }, 4000);
-  };
-
-  const handleRemoveSnailDelivery = (deliveryId) => {
-    setActiveSnailDeliveries((prev) => prev.filter((d) => d.id !== deliveryId));
+    setTimeout(() => setMailToast(null), 4000);
   };
 
   // Render Receiver Experience if opening a shared link
@@ -138,8 +90,7 @@ export default function App() {
         toggleMount={toggleMount}
         setNearVillager={setNearVillager}
         onOpenDialogue={setActiveDialogueVillager}
-        activeSnailDeliveries={activeSnailDeliveries}
-        onRemoveSnailDelivery={handleRemoveSnailDelivery}
+        activePet={activePet}
       />
 
       {/* Top HUD Bar */}
@@ -147,12 +98,28 @@ export default function App() {
         <div style={styles.badge}>
           🐌 {character.name || 'Little Wanderer'} {saving ? '(saving…)' : ''}
         </div>
+        
+        {/* Pet Selection Quick Toggle */}
         <button
-          style={{ ...styles.pill, background: isMounted ? '#e76f51' : '#e07a5f' }}
+          style={{
+            ...styles.pill,
+            background: activePet === 'cat' ? '#e07a5f' : '#457b9d',
+          }}
+          onClick={() => setActivePet(activePet === 'cat' ? 'none' : 'cat')}
+        >
+          {activePet === 'cat' ? '🐱 Dismiss Cat' : '🐱 Summon Orange Cat'}
+        </button>
+
+        <button
+          style={{
+            ...styles.pill,
+            background: activePet === 'horse' || isMounted ? '#e07a5f' : '#457b9d',
+          }}
           onClick={toggleMount}
         >
-          {isMounted ? '🚶 Dismount [E]' : '🐴 Ride Horse [E]'}
+          {isMounted ? '🚶 Dismount [E]' : activePet === 'horse' ? '🐴 Ride Horse [E]' : '🐴 Summon Horse'}
         </button>
+
         <button style={styles.pillSecondary} onClick={() => handleOpenMailComposer()}>
           📮 Send Snail Mail
         </button>
@@ -174,7 +141,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Snail Mail Dispatch Toast Notification */}
+      {/* Snail Mail Toast Notification */}
       {mailToast && (
         <div style={styles.mailToast}>
           {mailToast}
@@ -236,7 +203,7 @@ export default function App() {
           <div style={styles.modalCard}>
             <div style={styles.modalHeader}>
               <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#5b4a34' }}>
-                🎨 Customize Character & Companions
+                🎨 Character & Pet Companions
               </h2>
               <button
                 style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#8a7a63' }}
@@ -258,74 +225,38 @@ export default function App() {
               </div>
 
               <div style={styles.fieldGroup}>
-                <label style={styles.label}>Companion Pet 1</label>
+                <label style={styles.label}>Select Companion Pet</label>
                 <div style={styles.grid2}>
-                  {SMALL_PETS.map((p) => (
-                    <button
-                      key={p.id}
-                      style={{
-                        ...styles.choiceBtn,
-                        borderColor: character.pet1_type === p.id ? '#e07a5f' : '#e3d7bf',
-                        background: character.pet1_type === p.id ? '#fdf0ed' : '#fffaf1',
-                      }}
-                      onClick={() => save({ pet1_type: p.id })}
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Hairstyle</label>
-                <div style={styles.grid2}>
-                  {HAIR_STYLES.map((h) => (
-                    <button
-                      key={h.id}
-                      style={{
-                        ...styles.choiceBtn,
-                        borderColor: character.hair_style === h.id ? '#e07a5f' : '#e3d7bf',
-                        background: character.hair_style === h.id ? '#fdf0ed' : '#fffaf1',
-                      }}
-                      onClick={() => save({ hair_style: h.id })}
-                    >
-                      {h.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Hair Color</label>
-                <div style={styles.swatchRow}>
-                  {HAIR_COLORS.map((c) => (
-                    <button
-                      key={c}
-                      style={{
-                        ...styles.swatch,
-                        backgroundColor: c,
-                        boxShadow: character.hair_color === c ? '0 0 0 3px #e07a5f' : 'none',
-                      }}
-                      onClick={() => save({ hair_color: c })}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Skin Tone</label>
-                <div style={styles.swatchRow}>
-                  {SKIN_TONES.map((s) => (
-                    <button
-                      key={s}
-                      style={{
-                        ...styles.swatch,
-                        backgroundColor: s,
-                        boxShadow: character.skin_tone === s ? '0 0 0 3px #e07a5f' : 'none',
-                      }}
-                      onClick={() => save({ skin_tone: s })}
-                    />
-                  ))}
+                  <button
+                    style={{
+                      ...styles.choiceBtn,
+                      borderColor: activePet === 'cat' ? '#e07a5f' : '#e3d7bf',
+                      background: activePet === 'cat' ? '#fdf0ed' : '#fffaf1',
+                    }}
+                    onClick={() => setActivePet('cat')}
+                  >
+                    🐱 Orange Cat
+                  </button>
+                  <button
+                    style={{
+                      ...styles.choiceBtn,
+                      borderColor: activePet === 'horse' ? '#e07a5f' : '#e3d7bf',
+                      background: activePet === 'horse' ? '#fdf0ed' : '#fffaf1',
+                    }}
+                    onClick={() => setActivePet('horse')}
+                  >
+                    🐴 Horse
+                  </button>
+                  <button
+                    style={{
+                      ...styles.choiceBtn,
+                      borderColor: activePet === 'none' ? '#e07a5f' : '#e3d7bf',
+                      background: activePet === 'none' ? '#fdf0ed' : '#fffaf1',
+                    }}
+                    onClick={() => setActivePet('none')}
+                  >
+                    🚫 No Pet
+                  </button>
                 </div>
               </div>
             </div>
@@ -424,7 +355,6 @@ const styles = {
     boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
     cursor: 'pointer',
     zIndex: 20,
-    animation: 'bounce 1.5s infinite',
   },
   mailToast: {
     position: 'absolute',
@@ -469,7 +399,7 @@ const styles = {
     transform: 'translateX(-50%)',
     background: 'rgba(255,250,241,0.9)',
     color: '#5b4a34',
-    padding: '0.5rem 1.2rem',
+    padding: '0.55rem 1.2rem',
     borderRadius: 999,
     fontSize: '0.82rem',
     fontWeight: 600,
@@ -545,25 +475,12 @@ const styles = {
     gap: 8,
   },
   choiceBtn: {
-    padding: '0.5rem 0.75rem',
+    padding: '0.55rem 0.75rem',
     borderRadius: 10,
     border: '1px solid #e3d7bf',
     fontSize: '0.82rem',
     cursor: 'pointer',
     textAlign: 'left',
     transition: 'all 0.15s ease',
-  },
-  swatchRow: {
-    display: 'flex',
-    gap: 10,
-    alignItems: 'center',
-  },
-  swatch: {
-    width: 34,
-    height: 34,
-    borderRadius: 999,
-    border: '2px solid #ffffff',
-    cursor: 'pointer',
-    transition: 'transform 0.15s ease',
   },
 };
