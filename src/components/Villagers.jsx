@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 /** -------------------------------------------------------------
- *  12 UNIQUE VILLAGER NPCS (PROPER 3D CARTOON HUMANS)
+ *  12 UNIQUE VILLAGER NPCS (STYLIZED 3D CARTOON HUMANS)
  * ------------------------------------------------------------- */
 export const VILLAGERS_DATA = [
   { id: 1, name: 'Mia', job: 'Florist', pos: [20.5, 0.18, -26.5], outfitColor: '#ffb5a7', hairColor: '#e6c594', pet: 'bunny' },
@@ -32,18 +32,16 @@ function VillagerNPC({ npc }) {
 
   return (
     <group ref={npcRef} position={npc.pos}>
-      {/* Head, Eyes, Hair, Blush */}
+      {/* Head, Hair, Eyes, Blush */}
       <group position={[0, 0.95, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.24, 20, 20]} />
           <meshToonMaterial color="#f2c9a0" />
         </mesh>
-        {/* Hair Cap */}
         <mesh position={[0, 0.08, -0.02]}>
           <sphereGeometry args={[0.26, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
           <meshToonMaterial color={npc.hairColor} />
         </mesh>
-        {/* Cute Eyes */}
         <mesh position={[-0.08, 0.02, 0.2]}>
           <sphereGeometry args={[0.03, 8, 8]} />
           <meshToonMaterial color="#222222" />
@@ -52,7 +50,6 @@ function VillagerNPC({ npc }) {
           <sphereGeometry args={[0.03, 8, 8]} />
           <meshToonMaterial color="#222222" />
         </mesh>
-        {/* Blush Cheeks */}
         <mesh position={[-0.12, -0.04, 0.18]}>
           <sphereGeometry args={[0.04, 8, 8]} />
           <meshToonMaterial color="#ffb5a7" transparent opacity={0.6} />
@@ -97,7 +94,7 @@ function VillagerNPC({ npc }) {
         <meshToonMaterial color="#6b4c35" />
       </mesh>
 
-      {/* Villager Companion Pet */}
+      {/* Companion Pet */}
       <group position={[0.5, 0.12, 0.3]} scale={0.6}>
         <mesh castShadow>
           <sphereGeometry args={[0.18, 12, 12]} />
