@@ -6,9 +6,6 @@ function ToonOutline({ thickness = 0.025, color = '#2b2013' }) {
   return <Outlines thickness={thickness} color={color} screenspace={false} />;
 }
 
-/** -------------------------------------------------------------
- *  SPACIOUS MARKET PLAZA (CENTER AT Z = -22m) WITH STONE WELL & PROPS
- * ------------------------------------------------------------- */
 export default function VillageSquare({ position = [0, 0, -22] }) {
   const fountainWaterRef = useRef();
 
@@ -43,37 +40,16 @@ export default function VillageSquare({ position = [0, 0, -22] }) {
           <meshToonMaterial color="#8a7e70" />
           <ToonOutline thickness={0.025} />
         </mesh>
-        <mesh position={[0, 1.15, 0]} castShadow>
-          <cylinderGeometry args={[0.55, 0.2, 0.3, 16]} />
-          <meshToonMaterial color="#8a7e70" />
-          <ToonOutline thickness={0.025} />
-        </mesh>
         <Sparkles position={[0, 1.25, 0]} count={20} scale={1.2} size={3} speed={0.6} color="#e0f4f7" />
       </group>
 
-      {/* ⛲ Stone Water Well (East of Fountain) */}
+      {/* ⛲ Stone Water Well */}
       <group position={[4.2, 0, 2.5]} rotation={[0, -0.4, 0]}>
         <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.7, 0.75, 0.7, 16]} />
           <meshToonMaterial color="#8a7e70" />
           <ToonOutline thickness={0.03} />
         </mesh>
-        <mesh position={[0, 0.68, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.62, 16]} />
-          <meshToonMaterial color="#1d3557" transparent opacity={0.9} />
-        </mesh>
-        {/* Wooden Canopy Posts */}
-        <mesh position={[-0.55, 1.0, 0]} castShadow>
-          <cylinderGeometry args={[0.05, 0.05, 1.2, 8]} />
-          <meshToonMaterial color="#6b4c35" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-        <mesh position={[0.55, 1.0, 0]} castShadow>
-          <cylinderGeometry args={[0.05, 0.05, 1.2, 8]} />
-          <meshToonMaterial color="#6b4c35" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-        {/* Roof Canopy */}
         <mesh position={[0, 1.65, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[0.9, 0.6, 4]} />
           <meshToonMaterial color="#c96850" />
@@ -81,7 +57,7 @@ export default function VillageSquare({ position = [0, 0, -22] }) {
         </mesh>
       </group>
 
-      {/* 🥐 Theo's Bakery (North-West) */}
+      {/* 🥐 Theo's Bakery & Market Stand */}
       <group position={[-5.8, 0.1, -4.5]} rotation={[0, 0.45, 0]}>
         <mesh position={[0, 1.0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.9, 2.0, 1.7]} />
@@ -93,19 +69,22 @@ export default function VillageSquare({ position = [0, 0, -22] }) {
           <meshToonMaterial color="#c96850" />
           <ToonOutline thickness={0.03} />
         </mesh>
-        <mesh position={[0, 1.25, 0.9]} rotation={[0.3, 0, 0]}>
-          <boxGeometry args={[1.7, 0.08, 0.5]} />
-          <meshToonMaterial color="#e76f51" />
-        </mesh>
-        {/* Bakery Crates */}
-        <mesh position={[1.2, 0.2, 0.6]} castShadow>
-          <boxGeometry args={[0.45, 0.4, 0.45]} />
-          <meshToonMaterial color="#d4a373" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
+
+        {/* 🧺 Fruit Baskets (Apples & Bananas) */}
+        <group position={[1.2, 0.25, 0.6]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.25, 0.2, 0.22, 12]} />
+            <meshToonMaterial color="#d4a373" />
+            <ToonOutline thickness={0.02} />
+          </mesh>
+          <mesh position={[0, 0.14, 0]} castShadow>
+            <sphereGeometry args={[0.08, 10, 10]} />
+            <meshToonMaterial color="#e63946" />
+          </mesh>
+        </group>
       </group>
 
-      {/* ☕ Nora's Cozy Café (West) */}
+      {/* ☕ Nora's Cozy Café */}
       <group position={[-6.5, 0.15, 2.2]} rotation={[0, 1.15, 0]}>
         <mesh position={[0, 1.0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.9, 2.0, 1.7]} />
@@ -117,15 +96,9 @@ export default function VillageSquare({ position = [0, 0, -22] }) {
           <meshToonMaterial color="#7a4a2b" />
           <ToonOutline thickness={0.03} />
         </mesh>
-        {/* Café Patio Bench */}
-        <mesh position={[0, 0.2, 1.1]} castShadow>
-          <boxGeometry args={[1.2, 0.22, 0.4]} />
-          <meshToonMaterial color="#6b4c35" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
       </group>
 
-      {/* 🛍️ Emma's General Store (East) */}
+      {/* 🛍️ Emma's General Store */}
       <group position={[5.8, 0.08, -4.5]} rotation={[0, -0.45, 0]}>
         <mesh position={[0, 1.0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.9, 2.0, 1.7]} />
@@ -136,12 +109,6 @@ export default function VillageSquare({ position = [0, 0, -22] }) {
           <coneGeometry args={[1.7, 1.1, 4]} />
           <meshToonMaterial color="#f4a261" />
           <ToonOutline thickness={0.03} />
-        </mesh>
-        {/* Wooden Barrels */}
-        <mesh position={[-1.1, 0.3, 0.7]} castShadow>
-          <cylinderGeometry args={[0.22, 0.25, 0.55, 12]} />
-          <meshToonMaterial color="#7a4a2b" />
-          <ToonOutline thickness={0.02} />
         </mesh>
       </group>
     </group>

@@ -14,7 +14,7 @@ function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
 }
 
 /** -------------------------------------------------------------
- *  COLLISION & BOUNDARY HELPER (VARSITY OPEN-WORLD RADIUS = 120m)
+ *  COLLISION & BOUNDARY HELPER (OPEN-WORLD RADIUS = 150m)
  * ------------------------------------------------------------- */
 const OBSTACLES = [
   { name: 'Cottage', x: -14.0, z: -12.0, radius: 1.8 },
@@ -29,7 +29,7 @@ function sanitizePlayableTarget(x, z) {
   let targetZ = z;
 
   const distFromCenter = Math.sqrt(targetX * targetX + targetZ * targetZ);
-  const maxRadius = 120.0; // Open-world exploration freedom (120 meters)
+  const maxRadius = 150.0;
   if (distFromCenter > maxRadius) {
     const angle = Math.atan2(targetZ, targetX);
     targetX = Math.cos(angle) * maxRadius;
@@ -74,23 +74,24 @@ function ExtendedMeadowTerrain({ onGroundClick }) {
 }
 
 /** -------------------------------------------------------------
- *  2. WINDING STREAM & 3D STONE ARCH BRIDGE 🌊
+ *  2. CASCADING 3D WATERFALL & RIVER VALLEY 🌊
  * ------------------------------------------------------------- */
-function StoneRiverBridge() {
+function WaterfallRiverValley() {
   return (
     <group position={[-2.0, 0, -10.0]}>
+      {/* 🌊 Winding Blue Stream Water */}
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[3.2, 54.0]} />
+        <planeGeometry args={[3.5, 60.0]} />
         <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
       </mesh>
 
+      {/* 🌉 Stone Arch Bridge */}
       <group position={[0, 0.35, 0]} rotation={[0, 0.4, 0]}>
         <mesh castShadow receiveShadow>
           <boxGeometry args={[2.2, 0.45, 4.2]} />
           <meshToonMaterial color="#8a7e70" />
           <ToonOutline thickness={0.03} />
         </mesh>
-
         <mesh position={[-1.0, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 0.6, 4.2]} />
           <meshToonMaterial color="#6b4c35" />
@@ -101,6 +102,16 @@ function StoneRiverBridge() {
           <meshToonMaterial color="#6b4c35" />
           <ToonOutline thickness={0.025} />
         </mesh>
+      </group>
+
+      {/* 🌊 Cascading 3D Waterfall Backdrop */}
+      <group position={[12.0, 3.2, -28.0]} rotation={[0.2, -0.6, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[4.2, 6.5, 0.4]} />
+          <meshToonMaterial color="#48cae4" transparent opacity={0.92} />
+          <ToonOutline thickness={0.03} />
+        </mesh>
+        <Sparkles count={35} scale={4} size={4} speed={0.8} color="#ffffff" />
       </group>
     </group>
   );
@@ -124,48 +135,35 @@ function VillageWindingPaths() {
         <planeGeometry args={[1.4, 42.0]} />
         <meshToonMaterial color="#cbb994" />
       </mesh>
-      <mesh position={[-26.0, 0, 15.0]} rotation={[-Math.PI / 2, 0, -0.9]}>
-        <planeGeometry args={[1.4, 44.0]} />
-        <meshToonMaterial color="#cbb994" />
-      </mesh>
-      <mesh position={[26.0, 0, 16.0]} rotation={[-Math.PI / 2, 0, 0.8]}>
-        <planeGeometry args={[1.4, 45.0]} />
-        <meshToonMaterial color="#cbb994" />
-      </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  4. EXPLORABLE BIOMES (WOODLAND, BLOSSOM, WINDMILL KNOLL)
+ *  4. GIANT SUNFLOWERS & APPLE ORCHARD BIOMES (REFERENCE INSPIRED)
  * ------------------------------------------------------------- */
-function WoodlandForestBiome() {
+function GiantSunflowerField() {
   return (
-    <group position={[-55, 0, -45]}>
-      {/* Dense Woodland Canopy */}
-      {[-12, -4, 4, 12].map((x, i) =>
-        [-10, 0, 10].map((z, j) => (
-          <group key={`${i}-${j}`} position={[x + Math.sin(i) * 2, 0, z + Math.cos(j) * 2]}>
-            <StorybookTree position={[0, 0, 0]} scale={1.6 + (i % 3) * 0.2} colorScale={i % 3} />
-          </group>
-        ))
-      )}
-      <MushroomGroup position={[0, 0.08, 0]} scale={1.8} />
-      <MushroomGroup position={[-5, 0.08, 6]} scale={1.5} />
-    </group>
-  );
-}
-
-function BlossomMeadowBiome() {
-  return (
-    <group position={[55, 0, -45]}>
-      {/* Cherry Blossom Trees & Wildflower Fields */}
-      {[-10, 0, 10].map((x, i) =>
-        [-8, 2, 12].map((z, j) => (
+    <group position={[45, 0, -35]}>
+      {[-8, 0, 8].map((x, i) =>
+        [-6, 2, 10].map((z, j) => (
           <group key={`${i}-${j}`} position={[x, 0, z]}>
-            <StorybookTree position={[0, 0, 0]} scale={1.5} colorScale={2} />
-            <SoftFlowerCluster position={[1.2, 0.04, 1]} color="#ffb5a7" />
-            <SoftFlowerCluster position={[-1.2, 0.04, -1]} color="#c77dff" />
+            <mesh position={[0, 0.6, 0]} castShadow>
+              <cylinderGeometry args={[0.06, 0.08, 1.2, 8]} />
+              <meshToonMaterial color="#6bab4f" />
+              <ToonOutline thickness={0.02} />
+            </mesh>
+            <group position={[0, 1.2, 0]}>
+              <mesh castShadow>
+                <sphereGeometry args={[0.42, 16, 16]} />
+                <meshToonMaterial color="#ffd23f" />
+                <ToonOutline thickness={0.03} />
+              </mesh>
+              <mesh position={[0, 0, 0.15]}>
+                <sphereGeometry args={[0.2, 12, 12]} />
+                <meshToonMaterial color="#4a2c11" />
+              </mesh>
+            </group>
           </group>
         ))
       )}
@@ -173,30 +171,34 @@ function BlossomMeadowBiome() {
   );
 }
 
-function WindmillKnollLandmark() {
+function AppleOrchardField() {
   return (
-    <group position={[0, 0, -85]}>
-      {/* Rustic 3D Windmill */}
-      <mesh position={[0, 2.5, 0]} castShadow>
-        <cylinderGeometry args={[1.2, 1.8, 5.0, 16]} />
-        <meshToonMaterial color="#fbead0" />
-        <ToonOutline thickness={0.03} />
-      </mesh>
-      <mesh position={[0, 5.2, 0]} castShadow>
-        <coneGeometry args={[1.5, 1.2, 16]} />
-        <meshToonMaterial color="#c96850" />
-        <ToonOutline thickness={0.03} />
-      </mesh>
-      {/* Windmill Blades */}
-      <group position={[0, 4.2, 1.3]} rotation={[0, 0, 0.4]}>
-        {[-1.8, 1.8].map((offset, idx) => (
-          <mesh key={idx} position={[offset, 0, 0]}>
-            <boxGeometry args={[3.2, 0.25, 0.04]} />
-            <meshToonMaterial color="#ffffff" />
-            <ToonOutline thickness={0.02} />
-          </mesh>
-        ))}
-      </group>
+    <group position={[-45, 0, -35]}>
+      {[-8, 0, 8].map((x, i) =>
+        [-6, 2, 10].map((z, j) => (
+          <group key={`${i}-${j}`} position={[x, 0, z]}>
+            <mesh position={[0, 0.9, 0]} castShadow>
+              <cylinderGeometry args={[0.18, 0.28, 1.8, 10]} />
+              <meshToonMaterial color="#6b4c35" />
+              <ToonOutline thickness={0.025} />
+            </mesh>
+            <mesh position={[0, 2.1, 0]} castShadow>
+              <sphereGeometry args={[1.1, 20, 20]} />
+              <meshToonMaterial color="#38b000" />
+              <ToonOutline thickness={0.03} />
+            </mesh>
+            {/* Red Apples */}
+            <mesh position={[0.4, 2.2, 0.8]} castShadow>
+              <sphereGeometry args={[0.14, 10, 10]} />
+              <meshToonMaterial color="#e63946" />
+            </mesh>
+            <mesh position={[-0.4, 1.9, 0.8]} castShadow>
+              <sphereGeometry args={[0.14, 10, 10]} />
+              <meshToonMaterial color="#e63946" />
+            </mesh>
+          </group>
+        ))
+      )}
     </group>
   );
 }
@@ -211,10 +213,6 @@ function DistantCountrysideHills() {
       <mesh position={[75, 1.0, -92]} scale={[54, 8.8, 54]}>
         <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
         <meshToonMaterial color="#9ec891" />
-      </mesh>
-      <mesh position={[0, 0.8, -100]} scale={[68, 9.2, 68]}>
-        <sphereGeometry args={[1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-        <meshToonMaterial color="#7cb268" />
       </mesh>
     </group>
   );
@@ -235,42 +233,11 @@ function FluffyClouds() {
         { pos: [-40, 12.5, -48], scale: 3.2 },
         { pos: [-10, 13.2, -52], scale: 3.8 },
         { pos: [26, 12.8, -46], scale: 3.0 },
-        { pos: [55, 13.5, -60], scale: 3.5 },
       ].map((c, idx) => (
         <group key={idx} position={c.pos} scale={c.scale}>
           <mesh position={[0, 0, 0]}>
             <sphereGeometry args={[1.0, 16, 16]} />
             <meshToonMaterial color="#ffffff" transparent opacity={0.92} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function DistantBirds() {
-  const birdsGroupRef = useRef();
-
-  useFrame((state) => {
-    if (birdsGroupRef.current) {
-      const t = state.clock.getElapsedTime() * 0.4;
-      birdsGroupRef.current.position.x = Math.sin(t * 0.5) * 18;
-      birdsGroupRef.current.position.y = 10.5 + Math.cos(t * 0.3) * 0.5;
-      birdsGroupRef.current.rotation.y = Math.cos(t * 0.5) * 0.3;
-    }
-  });
-
-  return (
-    <group ref={birdsGroupRef} position={[0, 10.5, -28]}>
-      {[-1.8, 0, 1.8].map((offset, idx) => (
-        <group key={idx} position={[offset * 0.8, idx * 0.2, offset * 0.5]}>
-          <mesh position={[-0.1, 0, 0]} rotation={[0, 0, 0.3]}>
-            <boxGeometry args={[0.2, 0.02, 0.08]} />
-            <meshToonMaterial color="#556b2f" />
-          </mesh>
-          <mesh position={[0.1, 0, 0]} rotation={[0, 0, -0.3]}>
-            <boxGeometry args={[0.2, 0.02, 0.08]} />
-            <meshToonMaterial color="#556b2f" />
           </mesh>
         </group>
       ))}
@@ -286,17 +253,12 @@ function HomeHorseStable({ position = [-15.0, 0, -9.5] }) {
         <meshToonMaterial color="#8c5a3c" />
         <ToonOutline thickness={0.02} />
       </mesh>
-      <mesh position={[0, 0.35, -0.6]} castShadow>
-        <boxGeometry args={[1.2, 0.7, 0.08]} />
-        <meshToonMaterial color="#8c5a3c" />
-        <ToonOutline thickness={0.02} />
-      </mesh>
     </group>
   );
 }
 
 /** -------------------------------------------------------------
- *  5. DUAL PET COMPANION FOLLOW SYSTEM (PET 1 + PET 2) 🐰🐶
+ *  5. DUAL PET FOLLOW SYSTEM (BUNNY + STORYBOOK CARTOON CAT 🐱)
  * ------------------------------------------------------------- */
 function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
   const pet1Ref = useRef();
@@ -309,6 +271,7 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
     const px = targetGroupRef.current.position.x;
     const pz = targetGroupRef.current.position.z;
 
+    // Pet 1 (Left Flank)
     if (pet1Ref.current) {
       const t1x = px - 0.65;
       const t1z = pz + 0.65;
@@ -326,6 +289,7 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
       }
     }
 
+    // Pet 2 (Right Flank - Cute Cartoon Cat 🐱)
     if (pet2Ref.current) {
       const t2x = px + 0.65;
       const t2z = pz + 0.65;
@@ -346,6 +310,7 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
 
   return (
     <group>
+      {/* Pet 1 (Custom Companion) */}
       <group ref={pet1Ref} position={[-14.65, 0, -11.35]} scale={0.55}>
         <group position={[0, 0.18, 0]}>
           <mesh castShadow>
@@ -356,15 +321,31 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
         </group>
       </group>
 
+      {/* Pet 2 (Cute Storybook Cartoon Cat 🐱) */}
       <group ref={pet2Ref} position={[-13.35, 0, -11.35]} scale={0.55}>
         <group position={[0, 0.18, 0]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.17, 16, 16]} />
+          {/* Head & Pointy Ears */}
+          <mesh position={[0, 0.08, 0.12]} castShadow>
+            <sphereGeometry args={[0.13, 14, 14]} />
             <meshToonMaterial color="#f4a261" />
             <ToonOutline thickness={0.02} />
           </mesh>
-          <mesh position={[0, 0.12, 0.12]} castShadow>
-            <sphereGeometry args={[0.11, 12, 12]} />
+          <mesh position={[-0.07, 0.22, 0.12]} rotation={[0, 0, -0.2]}>
+            <coneGeometry args={[0.04, 0.12, 6]} />
+            <meshToonMaterial color="#f4a261" />
+          </mesh>
+          <mesh position={[0.07, 0.22, 0.12]} rotation={[0, 0, 0.2]}>
+            <coneGeometry args={[0.04, 0.12, 6]} />
+            <meshToonMaterial color="#f4a261" />
+          </mesh>
+          {/* Body & Tail */}
+          <mesh castShadow>
+            <capsuleGeometry args={[0.12, 0.2, 6, 12]} rotation={[Math.PI / 2, 0, 0]} />
+            <meshToonMaterial color="#f4a261" />
+            <ToonOutline thickness={0.02} />
+          </mesh>
+          <mesh position={[0, 0.12, -0.16]} rotation={[-0.4, 0, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.25, 6]} />
             <meshToonMaterial color="#f4a261" />
           </mesh>
         </group>
@@ -378,33 +359,13 @@ function DualPetCompanions({ petType = 'bunny', targetGroupRef }) {
  * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
   const horseRef = useRef();
-  const leftFrontLegRef = useRef();
-  const rightFrontLegRef = useRef();
-  const leftBackLegRef = useRef();
-  const rightBackLegRef = useRef();
 
   useFrame((state) => {
     if (!horseRef.current) return;
-    const clock = state.clock.getElapsedTime();
-
     if (isMounted && playerGroupRef.current) {
       horseRef.current.position.x = playerGroupRef.current.position.x;
       horseRef.current.position.z = playerGroupRef.current.position.z;
       horseRef.current.rotation.y = playerGroupRef.current.rotation.y;
-
-      const isWalking = playerGroupRef.current.position.y > 0.01;
-
-      if (isWalking) {
-        const legSwing = Math.sin(clock * 14) * 0.45;
-        if (leftFrontLegRef.current) leftFrontLegRef.current.rotation.x = legSwing;
-        if (rightFrontLegRef.current) rightFrontLegRef.current.rotation.x = -legSwing;
-        if (leftBackLegRef.current) leftBackLegRef.current.rotation.x = -legSwing;
-        if (rightBackLegRef.current) rightBackLegRef.current.rotation.x = legSwing;
-      }
-    }
-
-    if (horsePosRef && horseRef.current) {
-      horsePosRef.current = [horseRef.current.position.x, horseRef.current.position.z];
     }
   });
 
@@ -416,67 +377,11 @@ function StorybookHorse({ isMounted, playerGroupRef, horsePosRef }) {
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.03} />
         </mesh>
-        <mesh position={[0.08, 0.05, 0.12]} castShadow>
-          <sphereGeometry args={[0.24, 12, 12]} />
-          <meshToonMaterial color="#ffffff" />
-        </mesh>
       </group>
-
       <group position={[0, 0.78, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.15, 0.48]} />
           <meshToonMaterial color="#6a3b1d" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-        <mesh position={[0, 0.08, 0]}>
-          <boxGeometry args={[0.44, 0.04, 0.44]} />
-          <meshToonMaterial color="#e9c46a" />
-        </mesh>
-      </group>
-
-      <group position={[0, 0.82, 0.42]}>
-        <mesh position={[0, 0.28, 0.14]} rotation={[0.36, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.18, 0.24, 0.62, 12]} />
-          <meshToonMaterial color="#c68a4c" />
-          <ToonOutline thickness={0.025} />
-        </mesh>
-        <mesh position={[0, 0.58, 0.3]} rotation={[-0.18, 0, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.26, 0.46]} />
-          <meshToonMaterial color="#c68a4c" />
-          <ToonOutline thickness={0.025} />
-        </mesh>
-        <mesh position={[0, 0.48, 0.02]} rotation={[0.36, 0, 0]}>
-          <boxGeometry args={[0.09, 0.65, 0.16]} />
-          <meshToonMaterial color="#f4e2bb" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-      </group>
-
-      <group ref={leftFrontLegRef} position={[-0.18, 0.3, 0.28]}>
-        <mesh position={[0, -0.15, 0]} castShadow>
-          <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshToonMaterial color="#ffffff" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-      </group>
-      <group ref={rightFrontLegRef} position={[0.18, 0.3, 0.28]}>
-        <mesh position={[0, -0.15, 0]} castShadow>
-          <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshToonMaterial color="#c68a4c" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-      </group>
-      <group ref={leftBackLegRef} position={[-0.18, 0.3, -0.28]}>
-        <mesh position={[0, -0.15, 0]} castShadow>
-          <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshToonMaterial color="#c68a4c" />
-          <ToonOutline thickness={0.02} />
-        </mesh>
-      </group>
-      <group ref={rightBackLegRef} position={[0.18, 0.3, -0.28]}>
-        <mesh position={[0, -0.15, 0]} castShadow>
-          <cylinderGeometry args={[0.07, 0.06, 0.34, 10]} />
-          <meshToonMaterial color="#ffffff" />
           <ToonOutline thickness={0.02} />
         </mesh>
       </group>
@@ -662,49 +567,8 @@ function CozyCottage({ position = [-14.0, 0.1, -12.0], rotation = 0.45 }) {
   );
 }
 
-function StorybookTree({ position, scale = 1, rotation = 0 }) {
-  return (
-    <group position={position} scale={scale} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <cylinderGeometry args={[0.16, 0.28, 1.4, 16]} />
-        <meshToonMaterial color="#6b4c35" />
-        <ToonOutline thickness={0.025} />
-      </mesh>
-      <mesh position={[0, 1.6, 0]} castShadow>
-        <sphereGeometry args={[0.85, 24, 24]} />
-        <meshToonMaterial color="#84b574" />
-        <ToonOutline thickness={0.03} />
-      </mesh>
-    </group>
-  );
-}
-
-function MushroomGroup({ position, scale = 1 }) {
-  return (
-    <group position={position} scale={scale}>
-      <mesh position={[0, 0.18, 0]}>
-        <cylinderGeometry args={[0.04, 0.07, 0.36, 12]} />
-        <meshToonMaterial color="#fdf0d5" />
-        <ToonOutline thickness={0.015} />
-      </mesh>
-    </group>
-  );
-}
-
-function SoftFlowerCluster({ position, color = '#ffb5a7' }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.2, 0]}>
-        <sphereGeometry args={[0.09, 12, 12]} />
-        <meshToonMaterial color={color} />
-        <ToonOutline thickness={0.012} />
-      </mesh>
-    </group>
-  );
-}
-
 /** -------------------------------------------------------------
- *  MAIN SCENE WITH OPEN-WORLD EXPLORATION & MULTI-BIOMES (120m RADIUS)
+ *  MAIN SCENE WITH CARTOON FARM ASSETS & CAT PET
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
@@ -714,7 +578,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   return (
     <Canvas shadows camera={{ position: [-14.0, 4.5, -5.0], fov: 42 }}>
       <color attach="background" args={['#bfe8f7']} />
-      <fog attach="fog" args={['#bfe8f7', 15, 60]} />
+      <fog attach="fog" args={['#bfe8f7', 18, 70]} />
       
       <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.9} />
       <directionalLight position={[6, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
@@ -730,36 +594,32 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         onOpenDialogue={onOpenDialogue}
       />
 
-      {/* 300m x 300m Continuous Open-World Meadow Ground */}
       <ExtendedMeadowTerrain onGroundClick={setTargetPos} />
-      
-      <StoneRiverBridge />
+      <WaterfallRiverValley />
       <FluffyClouds />
       <DistantBirds />
       <DistantCountrysideHills />
       <VillageWindingPaths />
       
-      {/* 4 Explorable Biomes & Landmarks */}
-      <WoodlandForestBiome />
-      <BlossomMeadowBiome />
-      <WindmillKnollLandmark />
+      {/* Cartoon Farm Biomes */}
+      <GiantSunflowerField />
+      <AppleOrchardField />
 
       <VillageSquare position={[0, 0, -22.0]} />
       <VillageHouses />
       <Villagers />
 
-      {/* Player Cottage & Yard */}
       <CozyCottage position={[-16.6, 0.1, -14.4]} rotation={0.45} />
       <HomeHorseStable position={[-17.5, 0, -11.2]} />
 
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} horsePosRef={horsePosRef} />
       
-      {/* Dual Pet Companions (Pet 1 + Pet 2) */}
+      {/* Dual Pet Companions (Pet 1 + Storybook Cat 🐱) */}
       <DualPetCompanions petType={character?.pet1_type || 'bunny'} targetGroupRef={playerGroupRef} />
 
-      <Sparkles count={120} scale={45} size={3.5} speed={0.4} color="#ffe5ec" />
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={45} blur={2.5} />
+      <Sparkles count={120} scale={50} size={3.5} speed={0.4} color="#ffe5ec" />
+      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={50} blur={2.5} />
     </Canvas>
   );
 }
