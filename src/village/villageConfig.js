@@ -60,18 +60,18 @@ export const LOOSE_FLOWER_CLUSTERS = {
 
 export const VEGETABLE_FARMS = [
   {
-    center: [3.47, 19.7], // farmA
-    width: 12,
-    depth: 8,
+    center: [3.47, 19.7], // farmA (14 x 9)
+    width: 14,
+    depth: 9,
     rowSpacing: 1.4,
-    crops: ['carrot', 'tomato', 'cabbage', 'lettuce'],
+    crops: ['carrot', 'tomato', 'cabbage', 'lettuce', 'pumpkin'],
   },
   {
-    center: [-10, -17.32], // farmB
-    width: 12,
-    depth: 8,
+    center: [-10, -17.32], // farmB (14 x 9)
+    width: 14,
+    depth: 9,
     rowSpacing: 1.4,
-    crops: ['pumpkin', 'corn', 'tomato'],
+    crops: ['pumpkin', 'corn', 'tomato', 'carrot', 'cabbage'],
   },
 ];
 

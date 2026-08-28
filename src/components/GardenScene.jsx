@@ -13,17 +13,16 @@ function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
 }
 
 /** -------------------------------------------------------------
- *  STRICT BOUNDARY SANITIZER USING VILLAGE CONFIG BOUNDS
+ *  STRICT CIRCULAR PLAYABLE BOUNDARY SANITIZER (RADIUS <= 28.0)
  * ------------------------------------------------------------- */
 function sanitizePlayableTarget(x, z, bounds) {
-  const xMin = bounds?.xMin ?? -38.5;
-  const xMax = bounds?.xMax ?? 38.5;
-  const zMin = bounds?.zMin ?? -38.5;
-  const zMax = bounds?.zMax ?? 38.5;
-
-  const targetX = THREE.MathUtils.clamp(x, xMin, xMax);
-  const targetZ = THREE.MathUtils.clamp(z, zMin, zMax);
-  return [targetX, targetZ];
+  const maxR = 28.0;
+  const dist = Math.hypot(x, z);
+  if (dist > maxR) {
+    const scale = maxR / dist;
+    return [x * scale, z * scale];
+  }
+  return [x, z];
 }
 
 /** -------------------------------------------------------------
@@ -290,9 +289,20 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
 }
 
 /** -------------------------------------------------------------
- *  DETAILED MARKET STALL WITH STOCKED 3D GOODS 🏪
+ *  DETAILED MARKET STALL WITH COLORFUL STRIPED ROOF & 3D GOODS 🏪
  * ------------------------------------------------------------- */
-function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods = 'flowers' }) {
+function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods = 'flowers', id = '0' }) {
+  const stallIdx = parseInt(id.replace('stall-', ''), 10) || 0;
+  const stripePalettes = [
+    ['#e63946', '#ffffff'], // red/white
+    ['#ffb703', '#ffffff'], // yellow/white
+    ['#457b9d', '#ffffff'], // blue/white
+    ['#38b000', '#ffffff'], // green/white
+    ['#7209b7', '#ffffff'], // purple/white
+    ['#fb8500', '#ffffff'], // orange/white
+  ];
+  const [c1, c2] = stripePalettes[stallIdx % stripePalettes.length];
+
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
       {/* Stall Counter & Poles */}
@@ -309,12 +319,21 @@ function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods =
           </mesh>
         ))
       )}
+
+      {/* Colorful Striped Roof Awning */}
       <group position={[0, 2.1, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[2.2, 0.16, 1.3]} />
-          <meshToonMaterial color={awningColor} />
-          <ToonOutline thickness={0.03} />
-        </mesh>
+        {[0, 1, 2, 3, 4, 5].map((sIdx) => {
+          const width = 2.2 / 6;
+          const posX = -1.1 + width / 2 + sIdx * width;
+          const color = sIdx % 2 === 0 ? c1 : c2;
+          return (
+            <mesh key={sIdx} position={[posX, 0, 0]} castShadow>
+              <boxGeometry args={[width, 0.16, 1.3]} />
+              <meshToonMaterial color={color} />
+            </mesh>
+          );
+        })}
+        <ToonOutline thickness={0.03} />
       </group>
 
       {/* Stocked 3D Goods Crates */}
@@ -1233,7 +1252,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {/* Market Square */}
       <VillageFountain position={village.market.fountainCenter} radius={village.market.fountainRadius} />
       {village.market.stalls.map((s) => (
-        <MarketStall key={s.id} position={s.position} rotationY={s.rotationY} awningColor={s.awningColor} goods={s.goods} />
+        <MarketStall key={s.id} id={s.id} position={s.position} rotationY={s.rotationY} awningColor={s.awningColor} goods={s.goods} />
       ))}
       {village.market.benches.map((b) => (
         <WoodenBench key={b.id} position={b.position} rotationY={b.rotationY} />

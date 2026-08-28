@@ -116,17 +116,18 @@ export function generateVillage() {
     };
   });
 
-  // --- Vegetable farms: fenced plots with crop rows ---
+  // --- Vegetable farms: fenced 14x9 plots with 10x6 crop rows (60 crops per farm = 120 total) ---
   const vegetableFarms = VEGETABLE_FARMS.map((farm, fi) => {
     const rows = jitteredGrid({
       center: farm.center,
-      width: farm.width,
-      depth: farm.depth,
-      spacingX: farm.rowSpacing,
-      spacingZ: farm.rowSpacing,
-      jitter: 0.15,
+      width: farm.width - 0.4,
+      depth: farm.depth - 0.4,
+      spacingX: (farm.width - 0.4) / 10,
+      spacingZ: (farm.depth - 0.4) / 6,
+      jitter: 0.08,
       rng,
-    });
+    }).slice(0, 60);
+
     return {
       id: `farm-${fi}`,
       fence: { center: farm.center, width: farm.width, depth: farm.depth },
