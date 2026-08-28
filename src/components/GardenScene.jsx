@@ -2,9 +2,7 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Sparkles, Outlines } from '@react-three/drei';
 import * as THREE from 'three';
-import VillageSquare from './VillageSquare';
-import VillageHouses from './VillageHouses';
-import Villagers, { VILLAGERS_DATA } from './Villagers';
+import { generateVillage } from '../village/generateVillage';
 
 /** -------------------------------------------------------------
  *  TOON OUTLINE FOR HERO MODELS
@@ -14,37 +12,21 @@ function ToonOutline({ thickness = 0.03, color = '#2b2013' }) {
 }
 
 /** -------------------------------------------------------------
- *  STRICT MATHEMATICAL PLAYABLE BOUNDARY SANITIZER
- *  VILLAGE WIDTH = 100 (X: -50 to +50)
- *  VILLAGE DEPTH = 80  (Z: -40 to +40)
+ *  STRICT BOUNDARY SANITIZER USING VILLAGE CONFIG BOUNDS
  * ------------------------------------------------------------- */
-const OBSTACLES = [
-  { name: 'Fountain', x: 0, z: 0, radius: 2.2 },
-];
+function sanitizePlayableTarget(x, z, bounds) {
+  const xMin = bounds?.xMin ?? -38.5;
+  const xMax = bounds?.xMax ?? 38.5;
+  const zMin = bounds?.zMin ?? -38.5;
+  const zMax = bounds?.zMax ?? 38.5;
 
-function sanitizePlayableTarget(x, z) {
-  let targetX = THREE.MathUtils.clamp(x, -48.5, 48.5);
-  let targetZ = THREE.MathUtils.clamp(z, -38.5, 38.5);
-
-  for (const obs of OBSTACLES) {
-    const dx = targetX - obs.x;
-    const dz = targetZ - obs.z;
-    const dist = Math.sqrt(dx * dx + dz * dz);
-    if (dist < obs.radius) {
-      const angle = Math.atan2(dz, dx);
-      targetX = obs.x + Math.cos(angle) * (obs.radius + 0.05);
-      targetZ = obs.z + Math.sin(angle) * (obs.radius + 0.05);
-    }
-  }
-
-  targetX = THREE.MathUtils.clamp(targetX, -48.5, 48.5);
-  targetZ = THREE.MathUtils.clamp(targetZ, -38.5, 38.5);
-
+  const targetX = THREE.MathUtils.clamp(x, xMin, xMax);
+  const targetZ = THREE.MathUtils.clamp(z, zMin, zMax);
   return [targetX, targetZ];
 }
 
 /** -------------------------------------------------------------
- *  RADIAL 5-8 PETAL PROPORTIONAL FLOWER GEOMETRY 🌸
+ *  PROPORTIONAL PETAL FLOWER COMPONENT 🌸🌼
  * ------------------------------------------------------------- */
 function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) {
   const petals = useMemo(() => {
@@ -60,14 +42,11 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
   }, [petalCount]);
 
   return (
-    <group position={position} scale={0.65}>
-      {/* Green Stem */}
+    <group position={[position[0], 0, position[1]]} scale={0.65}>
       <mesh position={[0, 0.5, 0]} castShadow>
         <cylinderGeometry args={[0.04, 0.05, 1.0, 8]} />
         <meshToonMaterial color="#38b000" />
       </mesh>
-
-      {/* Two Green Leaves */}
       <mesh position={[-0.18, 0.4, 0]} rotation={[0, 0, -0.4]}>
         <boxGeometry args={[0.35, 0.02, 0.15]} />
         <meshToonMaterial color="#2b9348" />
@@ -76,14 +55,11 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
         <boxGeometry args={[0.35, 0.02, 0.15]} />
         <meshToonMaterial color="#2b9348" />
       </mesh>
-
-      {/* Flower Head Group at Top of Stem (y: 1.0) */}
       <group position={[0, 1.0, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.16, 12, 12]} />
           <meshToonMaterial color="#ffb703" />
         </mesh>
-
         {petals.map((p, idx) => (
           <mesh key={idx} position={[p.px, 0, p.pz]} rotation={[0, -p.angle, 0]} castShadow>
             <sphereGeometry args={[0.13, 10, 10]} />
@@ -96,351 +72,317 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
 }
 
 /** -------------------------------------------------------------
- *  2. LARGE DENSE FLOWER GARDEN PLOTS (40-100 FLOWERS PER PLOT) 🌸🌼
+ *  LOW-POLY COTTAGE & MAILBOX 🏡📮
  * ------------------------------------------------------------- */
-function LargeDenseFlowerPlots() {
-  const plots = useMemo(() => {
-    const list = [];
-    const plotCenters = [
-      { cx: -20, cz: -18, rows: 7, cols: 7, width: 8, depth: 8 },
-      { cx: 20, cz: -18, rows: 7, cols: 7, width: 8, depth: 8 },
-      { cx: -20, cz: 18, rows: 7, cols: 7, width: 8, depth: 8 },
-      { cx: 20, cz: 18, rows: 7, cols: 7, width: 8, depth: 8 },
-    ];
-    const colors = ['#ff4d6d', '#e63946', '#ffb703', '#4cc9f0', '#7209b7', '#ffffff'];
+function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallColor = '#fbead0', mailboxOffset = [1.4, 1.4] }) {
+  return (
+    <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
+      {/* Base & Walls */}
+      <mesh position={[0, 0.75, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.2, 1.5, 1.8]} />
+        <meshToonMaterial color={wallColor} />
+        <ToonOutline thickness={0.03} />
+      </mesh>
 
-    plotCenters.forEach((p, pIdx) => {
-      const flowers = [];
-      for (let r = 0; r < p.rows; r++) {
-        for (let c = 0; c < p.cols; c++) {
-          const fx = p.cx - p.width / 2 + (c * (p.width / (p.cols - 1))) + (Math.sin(r * 3 + c) * 0.2);
-          const fz = p.cz - p.depth / 2 + (r * (p.depth / (p.rows - 1))) + (Math.cos(r + c * 3) * 0.2);
-          const color = colors[(pIdx * 13 + r * 7 + c) % colors.length];
-          flowers.push({ x: fx, z: fz, color, petals: 6 + ((r + c) % 3) });
-        }
-      }
-      list.push({ ...p, flowers });
-    });
+      {/* Hip Roof */}
+      <group position={[0, 1.5, 0]}>
+        <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
+          <coneGeometry args={[1.85, 1.0, 4]} />
+          <meshToonMaterial color={roofColor} />
+          <ToonOutline thickness={0.03} />
+        </mesh>
+      </group>
 
-    return list;
-  }, []);
+      {/* Wooden Door */}
+      <mesh position={[0, 0.45, 0.91]} castShadow>
+        <boxGeometry args={[0.45, 0.85, 0.06]} />
+        <meshToonMaterial color="#5c381e" />
+      </mesh>
+
+      {/* Glass Windows */}
+      <mesh position={[-0.65, 0.85, 0.91]} castShadow>
+        <boxGeometry args={[0.35, 0.35, 0.06]} />
+        <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
+      </mesh>
+      <mesh position={[0.65, 0.85, 0.91]} castShadow>
+        <boxGeometry args={[0.35, 0.35, 0.06]} />
+        <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
+      </mesh>
+
+      {/* Mailbox 📮 */}
+      <group position={[mailboxOffset[0], 0, mailboxOffset[1]]}>
+        <mesh position={[0, 0.35, 0]} castShadow>
+          <cylinderGeometry args={[0.035, 0.035, 0.7, 8]} />
+          <meshToonMaterial color="#5c381e" />
+        </mesh>
+        <mesh position={[0, 0.75, 0]} castShadow>
+          <boxGeometry args={[0.26, 0.28, 0.38]} />
+          <meshToonMaterial color="#e07a5f" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  MARKET STALL, BENCH & FOUNTAIN 🏪⛲
+ * ------------------------------------------------------------- */
+function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods = 'flowers' }) {
+  return (
+    <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.6, 0.7, 0.9]} />
+        <meshToonMaterial color="#8c5a3c" />
+        <ToonOutline thickness={0.025} />
+      </mesh>
+      {[-0.72, 0.72].map((x, i) =>
+        [-0.38, 0.38].map((z, j) => (
+          <mesh key={`${i}-${j}`} position={[x, 1.15, z]} castShadow>
+            <cylinderGeometry args={[0.035, 0.035, 1.4, 8]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+        ))
+      )}
+      <group position={[0, 1.85, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[1.75, 0.14, 1.1]} />
+          <meshToonMaterial color={awningColor} />
+          <ToonOutline thickness={0.025} />
+        </mesh>
+      </group>
+
+      {/* Goods Crates */}
+      <group position={[0, 0.85, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.4, 0.16, 0.3]} />
+          <meshToonMaterial color="#a8763e" />
+        </mesh>
+        <mesh position={[0, 0.12, 0]} castShadow>
+          <sphereGeometry args={[0.12, 8, 8]} />
+          <meshToonMaterial color={goods === 'fruit' ? '#e63946' : goods === 'vegetables' ? '#38b000' : '#ffb703'} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function WoodenBench({ position, rotationY = 0 }) {
+  return (
+    <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 0.28, 0]} castShadow>
+        <boxGeometry args={[1.3, 0.08, 0.45]} />
+        <meshToonMaterial color="#6b4c35" />
+        <ToonOutline thickness={0.025} />
+      </mesh>
+      <mesh position={[-0.55, 0.14, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.28, 0.4]} />
+        <meshToonMaterial color="#4a2c11" />
+      </mesh>
+      <mesh position={[0.55, 0.14, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.28, 0.4]} />
+        <meshToonMaterial color="#4a2c11" />
+      </mesh>
+    </group>
+  );
+}
+
+function VillageFountain({ position, radius = 1.4 }) {
+  return (
+    <group position={[position[0], 0, position[1]]}>
+      <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[radius, radius * 0.95, 0.7, 16]} />
+        <meshToonMaterial color="#8a7e70" />
+        <ToonOutline thickness={0.03} />
+      </mesh>
+      <mesh position={[0, 0.71, 0]}>
+        <cylinderGeometry args={[radius * 0.85, radius * 0.85, 0.04, 16]} />
+        <meshToonMaterial color="#2a9d8f" transparent opacity={0.88} />
+      </mesh>
+      <mesh position={[0, 0.9, 0]} castShadow>
+        <cylinderGeometry args={[0.2, 0.25, 0.8, 8]} />
+        <meshToonMaterial color="#8a7e70" />
+      </mesh>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  CROPS & FARMS 🌽🥕🎃
+ * ------------------------------------------------------------- */
+function CropItem({ position, type }) {
+  let color = '#38b000';
+  let isCone = false;
+  let isTall = false;
+
+  if (type === 'carrot') { color = '#fb8500'; isCone = true; }
+  else if (type === 'tomato') { color = '#e63946'; }
+  else if (type === 'pumpkin') { color = '#e76f51'; }
+  else if (type === 'corn') { color = '#ffb703'; isTall = true; }
+  else if (type === 'lettuce') { color = '#52b788'; }
 
   return (
-    <group>
-      {plots.map((plot, pIdx) => (
-        <group key={pIdx}>
-          {/* Wooden Fence Perimeter */}
-          <mesh position={[plot.cx, 0.25, plot.cz]} receiveShadow>
-            <boxGeometry args={[plot.width + 0.6, 0.45, plot.depth + 0.6]} />
-            <meshToonMaterial color="#7a4a2b" wireframe />
+    <group position={[position[0], 0, position[1]]}>
+      {isCone ? (
+        <mesh position={[0, 0.15, 0]} castShadow>
+          <coneGeometry args={[0.15, 0.45, 6]} />
+          <meshToonMaterial color={color} />
+        </mesh>
+      ) : isTall ? (
+        <group position={[0, 0.45, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.03, 0.04, 0.9, 6]} />
+            <meshToonMaterial color="#e9c46a" />
           </mesh>
-          {plot.flowers.map((f, fIdx) => (
-            <AnatomicalPetalFlower key={fIdx} position={[f.x, 0, f.z]} color={f.color} petalCount={f.petals} />
-          ))}
+          <mesh position={[0, 0.45, 0]}>
+            <sphereGeometry args={[0.12, 8, 8]} />
+            <meshToonMaterial color={color} />
+          </mesh>
         </group>
+      ) : (
+        <mesh position={[0, 0.2, 0]} castShadow>
+          <sphereGeometry args={[0.24, 10, 10]} />
+          <meshToonMaterial color={color} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  FRUIT TREE & ANIMAL COMPONENTS 🍎🐮🐑
+ * ------------------------------------------------------------- */
+function FruitTree({ position, fruitType = 'apple' }) {
+  const fruitColor = fruitType === 'apple' ? '#e63946' : '#fb8500';
+
+  return (
+    <group position={[position[0], 0, position[1]]} scale={0.9}>
+      <mesh position={[0, 1.0, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.28, 2.0, 8]} />
+        <meshToonMaterial color="#5c381e" />
+      </mesh>
+      <mesh position={[0, 2.3, 0]} castShadow>
+        <sphereGeometry args={[1.2, 14, 14]} />
+        <meshToonMaterial color="#38b000" />
+        <ToonOutline thickness={0.03} color="#1b4332" />
+      </mesh>
+
+      {[
+        [-0.5, 2.1, 0.5],
+        [0.5, 2.2, 0.4],
+        [0.0, 2.4, 0.7],
+        [-0.5, 2.3, -0.5],
+        [0.5, 2.0, -0.6],
+      ].map((fp, fIdx) => (
+        <mesh key={fIdx} position={fp} castShadow>
+          <sphereGeometry args={[0.15, 8, 8]} />
+          <meshToonMaterial color={fruitColor} />
+        </mesh>
       ))}
     </group>
   );
 }
 
-/** -------------------------------------------------------------
- *  3. VEGETABLE FARMS WITH CROP ROWS & PROPS 🌽🥕🎃
- * ------------------------------------------------------------- */
-function FourMathematicalFarms() {
+function Animal({ position, type }) {
+  let bodyColor = '#ffffff';
+  let size = 0.35;
+
+  if (type === 'cow') { bodyColor = '#f4f1de'; size = 0.55; }
+  else if (type === 'sheep') { bodyColor = '#ffffff'; size = 0.45; }
+  else if (type === 'chicken') { bodyColor = '#f4a261'; size = 0.22; }
+  else if (type === 'rabbit') { bodyColor = '#e0a96d'; size = 0.2; }
+  else if (type === 'duck') { bodyColor = '#ffb703'; size = 0.22; }
+  else if (type === 'horse') { bodyColor = '#c68a4c'; size = 0.65; }
+
   return (
-    <group>
-      {/* 1. Southwest Farm (-32, 0, -26) */}
-      <group position={[-32, 0, -26]}>
-        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[12, 8]} />
-          <meshToonMaterial color="#5c381e" />
-        </mesh>
-        {[-4.5, -3.0, -1.5, 0, 1.5, 3.0, 4.5].map((x, i) =>
-          [-2.5, 0, 2.5].map((z, j) => (
-            <mesh key={`${i}-${j}`} position={[x, 0.15, z]} castShadow>
-              <coneGeometry args={[0.15, 0.45, 6]} />
-              <meshToonMaterial color={i % 2 === 0 ? '#e76f51' : '#fb8500'} />
-            </mesh>
-          ))
-        )}
-        {/* Watering Can & Tool Props */}
-        <mesh position={[5.2, 0.2, 3.2]} castShadow>
-          <cylinderGeometry args={[0.2, 0.2, 0.35, 8]} />
-          <meshToonMaterial color="#457b9d" />
-        </mesh>
-      </group>
-
-      {/* 2. Southeast Farm (+32, 0, -26) */}
-      <group position={[32, 0, -26]}>
-        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[12, 8]} />
-          <meshToonMaterial color="#5c381e" />
-        </mesh>
-        {[-4.5, -3.0, -1.5, 0, 1.5, 3.0, 4.5].map((x, i) =>
-          [-2.5, 0, 2.5].map((z, j) => (
-            <mesh key={`${i}-${j}`} position={[x, 0.2, z]} castShadow>
-              <sphereGeometry args={[0.22, 10, 10]} />
-              <meshToonMaterial color={i % 2 === 0 ? '#e63946' : '#38b000'} />
-            </mesh>
-          ))
-        )}
-      </group>
-
-      {/* 3. Northwest Farm (-32, 0, +26) */}
-      <group position={[-32, 0, 26]}>
-        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[12, 8]} />
-          <meshToonMaterial color="#5c381e" />
-        </mesh>
-        {[-4.5, -3.0, -1.5, 0, 1.5, 3.0, 4.5].map((x, i) =>
-          [-2.5, 0, 2.5].map((z, j) => (
-            <mesh key={`${i}-${j}`} position={[x, 0.22, z]} castShadow>
-              <sphereGeometry args={[0.25, 10, 10]} />
-              <meshToonMaterial color={i % 2 === 0 ? '#2b9348' : '#ffb703'} />
-            </mesh>
-          ))
-        )}
-      </group>
-
-      {/* 4. Northeast Farm (+32, 0, +26) */}
-      <group position={[32, 0, 26]}>
-        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[12, 8]} />
-          <meshToonMaterial color="#5c381e" />
-        </mesh>
-        {[-4.5, -3.0, -1.5, 0, 1.5, 3.0, 4.5].map((x, i) =>
-          [-2.5, 0, 2.5].map((z, j) => (
-            <group key={`${i}-${j}`} position={[x, 0, z]}>
-              <mesh position={[0, 0.45, 0]}>
-                <cylinderGeometry args={[0.03, 0.04, 0.9, 6]} />
-                <meshToonMaterial color="#e9c46a" />
-              </mesh>
-            </group>
-          ))
-        )}
-      </group>
+    <group position={[position[0], 0, position[1]]}>
+      <mesh position={[0, size, 0]} castShadow>
+        <sphereGeometry args={[size, 10, 10]} />
+        <meshToonMaterial color={bodyColor} />
+        <ToonOutline thickness={0.025} />
+      </mesh>
     </group>
   );
 }
 
-/** -------------------------------------------------------------
- *  4. FRUIT TREE ORCHARDS & BASKETS 🍎🍊🍋
- * ------------------------------------------------------------- */
-function FruitOrchard() {
-  const fruitTrees = useMemo(() => [
-    { x: -18, z: 20, fruit: '#e63946' }, // Red Apple
-    { x: -12, z: 20, fruit: '#fb8500' }, // Orange
-    { x: -6, z: 20, fruit: '#ffb703' },  // Yellow Lemon
-    { x: 6, z: 20, fruit: '#7209b7' },   // Purple Plum
-    { x: 12, z: 20, fruit: '#e63946' },  // Red Apple
-    { x: 18, z: 20, fruit: '#fb8500' },  // Orange
-  ], []);
+function ForestTree({ position, scale = 1, rotationY = 0, kind = 'round' }) {
+  return (
+    <group position={[position[0], 0, position[1]]} scale={scale} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 0.9, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.28, 1.8, 8]} />
+        <meshToonMaterial color="#5c381e" />
+      </mesh>
 
+      {kind === 'pine' ? (
+        <mesh position={[0, 2.0, 0]} castShadow>
+          <coneGeometry args={[1.0, 2.3, 8]} />
+          <meshToonMaterial color="#1b4332" />
+        </mesh>
+      ) : (
+        <mesh position={[0, 2.1, 0]} castShadow>
+          <sphereGeometry args={[1.15, 14, 14]} />
+          <meshToonMaterial color="#2d6a4f" />
+          <ToonOutline thickness={0.03} color="#10251b" />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+function VillagerNPC({ position, outfitColor = '#c9a7e0', hairColor = '#3a2e22', skinTone = '#f2c9a0' }) {
+  return (
+    <group position={[position[0], 0, position[1]]}>
+      <mesh position={[0, 0.85, 0]} castShadow>
+        <sphereGeometry args={[0.3, 14, 14]} />
+        <meshToonMaterial color={skinTone} />
+        <ToonOutline thickness={0.025} />
+      </mesh>
+      <mesh position={[0, 1.1, 0]}>
+        <sphereGeometry args={[0.32, 12, 12]} />
+        <meshToonMaterial color={hairColor} />
+      </mesh>
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.32, 0.65, 10]} />
+        <meshToonMaterial color={outfitColor} />
+      </mesh>
+    </group>
+  );
+}
+
+function RiverWaterFeature({ segments, lilyPads }) {
   return (
     <group>
-      {fruitTrees.map((t, idx) => (
-        <group key={idx} position={[t.x, 0, t.z]} scale={0.9}>
-          <mesh position={[0, 1.0, 0]} castShadow>
-            <cylinderGeometry args={[0.18, 0.28, 2.0, 8]} />
-            <meshToonMaterial color="#5c381e" />
-          </mesh>
+      {segments.map((seg) => {
+        const midX = (seg.from[0] + seg.to[0]) / 2;
+        const midZ = (seg.from[1] + seg.to[1]) / 2;
+        const dx = seg.to[0] - seg.from[0];
+        const dz = seg.to[1] - seg.from[1];
+        const length = Math.hypot(dx, dz);
+        const angle = Math.atan2(dx, dz);
 
-          <mesh position={[0, 2.3, 0]} castShadow>
-            <sphereGeometry args={[1.2, 14, 14]} />
-            <meshToonMaterial color="#38b000" />
-            <ToonOutline thickness={0.03} color="#1b4332" />
-          </mesh>
-
-          {[
-            [-0.5, 2.1, 0.5],
-            [0.5, 2.2, 0.4],
-            [0.0, 2.4, 0.7],
-            [-0.5, 2.3, -0.5],
-            [0.5, 2.0, -0.6],
-          ].map((fp, fIdx) => (
-            <mesh key={fIdx} position={fp} castShadow>
-              <sphereGeometry args={[0.15, 8, 8]} />
-              <meshToonMaterial color={t.fruit} />
+        return (
+          <group key={seg.id} position={[midX, 0.005, midZ]} rotation={[0, angle, 0]}>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+              <planeGeometry args={[seg.width, length + 0.5]} />
+              <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
             </mesh>
-          ))}
-
-          {/* Fruit Basket Under Tree */}
-          <group position={[0.7, 0.12, 0.7]}>
-            <mesh castShadow>
-              <cylinderGeometry args={[0.26, 0.2, 0.25, 8]} />
-              <meshToonMaterial color="#8a7e70" />
-            </mesh>
-            <mesh position={[0, 0.15, 0]}>
-              <sphereGeometry args={[0.18, 8, 8]} />
-              <meshToonMaterial color={t.fruit} />
-            </mesh>
+            {seg.hasBridge && (
+              <group position={[0, 0.35, 0]}>
+                <mesh castShadow receiveShadow>
+                  <boxGeometry args={[seg.width + 1.2, 0.3, 3.2]} />
+                  <meshToonMaterial color="#8a7e70" />
+                  <ToonOutline thickness={0.03} color="#2b1a0e" />
+                </mesh>
+              </group>
+            )}
           </group>
-        </group>
-      ))}
-    </group>
-  );
-}
+        );
+      })}
 
-/** -------------------------------------------------------------
- *  8. CURVING RIVER STREAM & 2 WOODEN BRIDGES 🌊🌉
- * ------------------------------------------------------------- */
-function CurvingStreamWithBridges() {
-  return (
-    <group position={[0, 0, 0]}>
-      {/* Curving Blue Water Stream */}
-      <mesh position={[-2.0, 0.005, 0.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[3.8, 75.0]} />
-        <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
-      </mesh>
-
-      {/* Wooden Arch Bridge 1 (North) */}
-      <group position={[-6.0, 0.35, -14.0]} rotation={[0, 0.4, 0]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[3.4, 0.35, 5.2]} />
-          <meshToonMaterial color="#8a7e70" />
-          <ToonOutline thickness={0.03} color="#2b1a0e" />
-        </mesh>
-      </group>
-
-      {/* Wooden Arch Bridge 2 (South) */}
-      <group position={[2.0, 0.35, 14.0]} rotation={[0, 0.4, 0]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[3.4, 0.35, 5.2]} />
-          <meshToonMaterial color="#8a7e70" />
-          <ToonOutline thickness={0.03} color="#2b1a0e" />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-/** -------------------------------------------------------------
- *  9. FENCED ANIMAL PASTURES (COWS, SHEEP, CHICKENS, HORSES) 🐮🐑
- * ------------------------------------------------------------- */
-function FencedAnimalPastures() {
-  return (
-    <group>
-      {/* Animal Pen 1: Cows & Sheep (-20, 0, -32) */}
-      <group position={[-20, 0, -32]}>
-        <mesh position={[0, 0.25, 0]}>
-          <boxGeometry args={[10, 0.5, 8]} />
-          <meshToonMaterial color="#7a4a2b" wireframe />
-        </mesh>
-
-        {/* Spotty Cow 1 */}
-        <group position={[-2.5, 0.55, 0]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.85, 0.75, 1.3]} />
-            <meshToonMaterial color="#f4f1de" />
-          </mesh>
-          <mesh position={[0.2, 0.2, 0.2]}>
-            <boxGeometry args={[0.3, 0.3, 0.3]} />
-            <meshToonMaterial color="#2b2d42" />
-          </mesh>
-        </group>
-
-        {/* Fluffy Sheep 1 */}
-        <group position={[2.2, 0.45, 1.2]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.52, 12, 12]} />
-            <meshToonMaterial color="#ffffff" />
-          </mesh>
-          <mesh position={[0, 0.1, 0.45]}>
-            <sphereGeometry args={[0.25, 10, 10]} />
-            <meshToonMaterial color="#2b2d42" />
-          </mesh>
-        </group>
-      </group>
-
-      {/* Animal Pen 2: Chickens & Ducks (20, 0, -32) */}
-      <group position={[20, 0, -32]}>
-        <mesh position={[0, 0.25, 0]}>
-          <boxGeometry args={[10, 0.5, 8]} />
-          <meshToonMaterial color="#7a4a2b" wireframe />
-        </mesh>
-
-        {/* Chickens */}
-        {[-2, 0, 2].map((x, i) => (
-          <mesh key={i} position={[x, 0.25, 0]} castShadow>
-            <sphereGeometry args={[0.2, 8, 8]} />
-            <meshToonMaterial color="#f4a261" />
-          </mesh>
-        ))}
-      </group>
-    </group>
-  );
-}
-
-function SmallBushesAndEnvironmentalDetails() {
-  const bushes = useMemo(() => [
-    { x: -10, z: -12, scale: 0.8 },
-    { x: -18, z: -4, scale: 1.1 },
-    { x: 12, z: -14, scale: 0.7 },
-    { x: 18, z: -4, scale: 0.9 },
-    { x: -6, z: 12, scale: 1.0 },
-    { x: 14, z: 14, scale: 0.85 },
-  ], []);
-
-  return (
-    <group>
-      {bushes.map((b, idx) => (
-        <mesh key={idx} position={[b.x, 0.35 * b.scale, b.z]} scale={b.scale} castShadow>
-          <sphereGeometry args={[0.6, 12, 12]} />
+      {lilyPads.map((pad) => (
+        <mesh key={pad.id} position={[pad.position[0], 0.02, pad.position[1]]} rotation={[-Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.35, 0.35, 0.02, 10]} />
           <meshToonMaterial color="#52b788" />
-          <ToonOutline thickness={0.025} color="#1b4332" />
         </mesh>
-      ))}
-    </group>
-  );
-}
-
-function VillageWindingPaths() {
-  return (
-    <group position={[0, 0.015, 0]}>
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[5.0, 75.0]} />
-        <meshToonMaterial color="#cbb994" />
-      </mesh>
-    </group>
-  );
-}
-
-function DenseMultiColorForestBoundary() {
-  const FOREST_TREES = useMemo(() => {
-    const trees = [];
-    for (let angle = 0; angle < Math.PI * 2; angle += 0.08) {
-      const rx = 49 + Math.sin(angle * 5) * 3;
-      const rz = 39 + Math.cos(angle * 5) * 3;
-      const x = Math.cos(angle) * rx;
-      const z = Math.sin(angle) * rz;
-      const isPine = Math.floor((x + z) % 2) === 0;
-      const scale = 0.85 + (Math.abs(Math.sin(x * z)) * 0.25);
-      trees.push({ x, z, isPine, scale });
-    }
-    return trees;
-  }, []);
-
-  return (
-    <group>
-      {FOREST_TREES.map((t, idx) => (
-        <group key={idx} position={[t.x, 0, t.z]} scale={t.scale}>
-          <mesh position={[0, 0.9, 0]} castShadow>
-            <cylinderGeometry args={[0.18, 0.28, 1.8, 8]} />
-            <meshToonMaterial color="#5c381e" />
-          </mesh>
-
-          {t.isPine ? (
-            <mesh position={[0, 2.0, 0]} castShadow>
-              <coneGeometry args={[1.0, 2.3, 8]} />
-              <meshToonMaterial color="#1b4332" />
-            </mesh>
-          ) : (
-            <mesh position={[0, 2.1, 0]} castShadow>
-              <sphereGeometry args={[1.15, 14, 14]} />
-              <meshToonMaterial color="#2d6a4f" />
-            </mesh>
-          )}
-        </group>
       ))}
     </group>
   );
@@ -481,7 +423,7 @@ function AnimatedBatMessenger() {
   );
 }
 
-function OrangeCatPet({ targetGroupRef, activePet }) {
+function OrangeCatPet({ targetGroupRef, activePet, bounds }) {
   const catRef = useRef();
 
   useFrame((state) => {
@@ -494,8 +436,7 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
     const rawTargetX = px - 0.75;
     const rawTargetZ = pz + 0.75;
 
-    const targetX = THREE.MathUtils.clamp(rawTargetX, -48.5, 48.5);
-    const targetZ = THREE.MathUtils.clamp(rawTargetZ, -38.5, 38.5);
+    const [targetX, targetZ] = sanitizePlayableTarget(rawTargetX, rawTargetZ, bounds);
 
     const dx = targetX - catRef.current.position.x;
     const dz = targetZ - catRef.current.position.z;
@@ -534,53 +475,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
           <meshToonMaterial color="#f4a261" />
           <ToonOutline thickness={0.025} />
         </mesh>
-
-        <mesh position={[0, -0.06, 0.19]}>
-          <boxGeometry args={[0.22, 0.14, 0.04]} />
-          <meshToonMaterial color="#ffffff" />
-        </mesh>
-
-        <mesh position={[0, -0.02, 0.21]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
-          <meshToonMaterial color="#ffb5a7" />
-        </mesh>
-
-        <mesh position={[-0.1, 0.06, 0.19]}>
-          <sphereGeometry args={[0.045, 8, 8]} />
-          <meshToonMaterial color="#2a9d8f" />
-        </mesh>
-        <mesh position={[0.1, 0.06, 0.19]}>
-          <sphereGeometry args={[0.045, 8, 8]} />
-          <meshToonMaterial color="#2a9d8f" />
-        </mesh>
-
-        <mesh position={[-0.14, 0.22, 0]} rotation={[0, 0, -0.2]}>
-          <coneGeometry args={[0.08, 0.18, 4]} />
-          <meshToonMaterial color="#e76f51" />
-        </mesh>
-        <mesh position={[0.14, 0.22, 0]} rotation={[0, 0, 0.2]}>
-          <coneGeometry args={[0.08, 0.18, 4]} />
-          <meshToonMaterial color="#e76f51" />
-        </mesh>
-      </group>
-
-      {[
-        [-0.12, 0.1, 0.22],
-        [0.12, 0.1, 0.22],
-        [-0.12, 0.1, -0.22],
-        [0.12, 0.1, -0.22],
-      ].map((p, idx) => (
-        <mesh key={idx} position={p} castShadow>
-          <boxGeometry args={[0.1, 0.2, 0.12]} />
-          <meshToonMaterial color="#ffffff" />
-        </mesh>
-      ))}
-
-      <group position={[0, 0.35, -0.34]} rotation={[0.6, 0, 0]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.04, 0.03, 0.45, 8]} />
-          <meshToonMaterial color="#e76f51" />
-        </mesh>
       </group>
     </group>
   );
@@ -589,7 +483,7 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
 function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
   const horseRef = useRef();
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!horseRef.current) return;
     if (isMounted && playerGroupRef.current) {
       horseRef.current.position.x = playerGroupRef.current.position.x;
@@ -608,68 +502,32 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.03} />
         </mesh>
-        <mesh position={[0.37, -0.05, 0.15]} castShadow>
-          <boxGeometry args={[0.02, 0.45, 0.55]} />
-          <meshToonMaterial color="#ffffff" />
-        </mesh>
       </group>
-
-      <group position={[0, 1.15, 0.42]} rotation={[0.36, 0, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.36, 0.65, 0.44]} />
-          <meshToonMaterial color="#c68a4c" />
-          <ToonOutline thickness={0.025} />
-        </mesh>
-      </group>
-
-      <group position={[0, 1.48, 0.72]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.44, 0.44, 0.58]} />
-          <meshToonMaterial color="#c68a4c" />
-          <ToonOutline thickness={0.025} />
-        </mesh>
-      </group>
-
-      {[
-        [-0.26, 0.28, 0.42],
-        [0.26, 0.28, 0.42],
-        [-0.26, 0.28, -0.42],
-        [0.26, 0.28, -0.42],
-      ].map((p, idx) => (
-        <group key={idx} position={p}>
-          <mesh castShadow>
-            <boxGeometry args={[0.18, 0.52, 0.18]} />
-            <meshToonMaterial color="#c68a4c" />
-          </mesh>
-        </group>
-      ))}
     </group>
   );
 }
 
-function SteppedLowPolyTerrain({ onGroundClick }) {
+function SteppedLowPolyTerrain({ onGroundClick, bounds }) {
   return (
-    <group>
-      <mesh
-        position={[0, -0.06, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow
-        onClick={(e) => {
-          e.stopPropagation();
-          const pointX = e.point.x;
-          const pointZ = e.point.z;
-          const sanitized = sanitizePlayableTarget(pointX, pointZ);
-          onGroundClick(sanitized);
-        }}
-      >
-        <planeGeometry args={[100, 80]} />
-        <meshToonMaterial color="#94c77d" />
-      </mesh>
-    </group>
+    <mesh
+      position={[0, -0.06, 0]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      receiveShadow
+      onClick={(e) => {
+        e.stopPropagation();
+        const pointX = e.point.x;
+        const pointZ = e.point.z;
+        const sanitized = sanitizePlayableTarget(pointX, pointZ, bounds);
+        onGroundClick(sanitized);
+      }}
+    >
+      <planeGeometry args={[100, 80]} />
+      <meshToonMaterial color="#94c77d" />
+    </mesh>
   );
 }
 
-function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, isMounted, toggleMount, setNearVillager, onOpenDialogue }) {
+function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, isMounted, toggleMount, setNearVillager, onOpenDialogue, bounds }) {
   const { camera } = useThree();
   const orbitRef = useRef();
   const keysPressed = useRef({});
@@ -682,7 +540,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
         orbitRef.current.reset();
       }
       if (k === 'e') {
-        if (!isMounted && onOpenDialogue) {
+        if (!isMounted && onOpenDialogue && VILLAGERS_DATA) {
           const px = playerGroupRef.current?.position.x || 0;
           const pz = playerGroupRef.current?.position.z || 0;
           for (const v of VILLAGERS_DATA) {
@@ -717,13 +575,15 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
     const pz = playerGroupRef.current.position.z;
 
     let foundVillager = null;
-    for (const v of VILLAGERS_DATA) {
-      const dx = px - v.pos[0];
-      const dz = pz - v.pos[2];
-      const dist = Math.sqrt(dx * dx + dz * dz);
-      if (dist < 2.5) {
-        foundVillager = v;
-        break;
+    if (VILLAGERS_DATA) {
+      for (const v of VILLAGERS_DATA) {
+        const dx = px - v.pos[0];
+        const dz = pz - v.pos[2];
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < 2.5) {
+          foundVillager = v;
+          break;
+        }
       }
     }
     if (setNearVillager) setNearVillager(foundVillager);
@@ -758,7 +618,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
         let nextX = playerGroupRef.current.position.x + moveVec.x * moveSpeed;
         let nextZ = playerGroupRef.current.position.z + moveVec.z * moveSpeed;
 
-        const [sanX, sanZ] = sanitizePlayableTarget(nextX, nextZ);
+        const [sanX, sanZ] = sanitizePlayableTarget(nextX, nextZ, bounds);
         setTargetPos([sanX, sanZ]);
       }
     }
@@ -786,12 +646,11 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
   );
 }
 
-function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
+function StorybookHuman({ character, targetPos, groupRef, isMounted, bounds }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
 
-    const clampedX = THREE.MathUtils.clamp(targetPos[0], -48.5, 48.5);
-    const clampedZ = THREE.MathUtils.clamp(targetPos[1], -38.5, 38.5);
+    const [clampedX, clampedZ] = sanitizePlayableTarget(targetPos[0], targetPos[1], bounds);
 
     const dx = clampedX - groupRef.current.position.x;
     const dz = clampedZ - groupRef.current.position.z;
@@ -810,8 +669,9 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
       }
     }
 
-    groupRef.current.position.x = THREE.MathUtils.clamp(groupRef.current.position.x, -48.5, 48.5);
-    groupRef.current.position.z = THREE.MathUtils.clamp(groupRef.current.position.z, -38.5, 38.5);
+    const [finalX, finalZ] = sanitizePlayableTarget(groupRef.current.position.x, groupRef.current.position.z, bounds);
+    groupRef.current.position.x = finalX;
+    groupRef.current.position.z = finalZ;
   });
 
   return (
@@ -822,7 +682,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshToonMaterial color="#2b2d42" />
           <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
-
         <mesh position={[-0.18, 0.38, -0.05]} rotation={[-0.1, 0, -0.15]}>
           <coneGeometry args={[0.09, 0.32, 4]} />
           <meshToonMaterial color="#2b2d42" />
@@ -833,19 +692,9 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshToonMaterial color="#2b2d42" />
           <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
-
         <mesh position={[0, -0.1, 0.22]}>
           <boxGeometry args={[0.32, 0.2, 0.12]} />
           <meshToonMaterial color="#fae1c5" />
-        </mesh>
-
-        <mesh position={[-0.12, 0.06, 0.34]} rotation={[0, 0, -0.18]}>
-          <boxGeometry args={[0.14, 0.035, 0.04]} />
-          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
-        </mesh>
-        <mesh position={[0.12, 0.06, 0.34]} rotation={[0, 0, 0.18]}>
-          <boxGeometry args={[0.14, 0.035, 0.04]} />
-          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
         </mesh>
       </group>
 
@@ -855,37 +704,9 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <meshToonMaterial color="#3d405b" />
           <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
-
         <mesh position={[0, -0.14, 0]} castShadow>
           <boxGeometry args={[0.49, 0.1, 0.35]} />
           <meshToonMaterial color="#c68a4c" />
-        </mesh>
-
-        {[-0.18, 0, 0.18].map((x, i) => (
-          <mesh key={i} position={[x, -0.14, 0.19]} castShadow>
-            <boxGeometry args={[0.1, 0.11, 0.06]} />
-            <meshToonMaterial color="#e0a96d" />
-          </mesh>
-        ))}
-
-        <group position={[0, 0.04, -0.18]} rotation={[0.2, 0, 0]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.52, 0.58, 0.04]} />
-            <meshToonMaterial color="#2b2d42" />
-          </mesh>
-        </group>
-      </group>
-
-      <group position={[-0.28, 0.44, 0]} rotation={[0, 0, 0.25]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
-          <meshToonMaterial color="#2b2d42" />
-        </mesh>
-      </group>
-      <group position={[0.28, 0.44, 0]} rotation={[0, 0, -0.25]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
-          <meshToonMaterial color="#2b2d42" />
         </mesh>
       </group>
 
@@ -906,9 +727,10 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN GARDEN SCENE (DYNAMIC DAY / NIGHT CYCLE SUPPORT)
+ *  MAIN GARDEN SCENE (DETERMINISTIC VILLAGE DATA INTEGRATION)
  * ------------------------------------------------------------- */
 export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue, activePet = 'none', isNight = false }) {
+  const village = useMemo(() => generateVillage(), []);
   const [targetPos, setTargetPos] = useState([0.0, 0.0]);
   const playerGroupRef = useRef();
 
@@ -929,53 +751,103 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         toggleMount={toggleMount}
         setNearVillager={setNearVillager}
         onOpenDialogue={onOpenDialogue}
+        bounds={village.bounds}
       />
 
-      <SteppedLowPolyTerrain onGroundClick={setTargetPos} />
-      
-      {/* 8. CURVING STREAM WITH 2 WOODEN BRIDGES */}
-      <CurvingStreamWithBridges />
+      <SteppedLowPolyTerrain onGroundClick={setTargetPos} bounds={village.bounds} />
 
-      <VillageWindingPaths />
+      {/* River & Bridges */}
+      <RiverWaterFeature segments={village.river.segments} lilyPads={village.river.lilyPads} />
 
-      {/* 🌿 SMALL ENVIRONMENTAL BUSHES & DETAILS */}
-      <SmallBushesAndEnvironmentalDetails />
+      {/* Houses & House Gardens */}
+      {village.houses.map((h) => (
+        <LowPolyCottage
+          key={h.id}
+          position={h.position}
+          rotationY={h.rotationY}
+          roofColor={h.roofColor}
+          wallColor={h.wallColor}
+          mailboxOffset={h.mailboxOffset}
+        />
+      ))}
+      {village.houseGardenFlowers.map((f) => (
+        <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+      ))}
 
-      {/* 🍎🍊 4. FRUIT TREE ORCHARDS */}
-      <FruitOrchard />
+      {/* Market Square (Stalls, Fountain, Benches) */}
+      <VillageFountain position={village.market.fountainCenter} radius={village.market.fountainRadius} />
+      {village.market.stalls.map((s) => (
+        <MarketStall key={s.id} position={s.position} rotationY={s.rotationY} awningColor={s.awningColor} goods={s.goods} />
+      ))}
+      {village.market.benches.map((b) => (
+        <WoodenBench key={b.id} position={b.position} rotationY={b.rotationY} />
+      ))}
 
-      {/* 🌸 2. LARGE DENSE FLOWER GARDEN PLOTS (40-100 FLOWERS PER PLOT) */}
-      <LargeDenseFlowerPlots />
+      {/* Flower Gardens */}
+      {village.flowerGardens.map((g) => (
+        <group key={g.id}>
+          <mesh position={[g.fence.center[0], 0.2, g.fence.center[1]]}>
+            <boxGeometry args={[g.fence.width + 0.4, 0.4, g.fence.depth + 0.4]} />
+            <meshToonMaterial color="#7a4a2b" wireframe />
+          </mesh>
+          {g.flowers.map((f) => (
+            <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+          ))}
+        </group>
+      ))}
 
-      {/* 🌾 3. VEGETABLE FARMS WITH CROP ROWS */}
-      <FourMathematicalFarms />
+      {/* Vegetable Farms */}
+      {village.vegetableFarms.map((farm) => (
+        <group key={farm.id}>
+          <mesh position={[farm.fence.center[0], 0.01, farm.fence.center[1]]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[farm.fence.width, farm.fence.depth]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+          {farm.crops.map((crop) => (
+            <CropItem key={crop.id} position={crop.position} type={crop.type} />
+          ))}
+        </group>
+      ))}
 
-      {/* 🐮🐑 9. FENCED ANIMAL PASTURES */}
-      <FencedAnimalPastures />
+      {/* Orchard Trees */}
+      {village.orchardTrees.map((tree) => (
+        <FruitTree key={tree.id} position={tree.position} fruitType={tree.fruitType} />
+      ))}
 
-      {/* 🌲 11. SOFT TOON FOREST BOUNDARY */}
-      <DenseMultiColorForestBoundary />
+      {/* Animal Pens */}
+      {village.animalPens.map((pen) => (
+        <group key={pen.id}>
+          <mesh position={[pen.fence.center[0], 0.2, pen.fence.center[1]]}>
+            <boxGeometry args={[pen.fence.width + 0.4, 0.4, pen.fence.depth + 0.4]} />
+            <meshToonMaterial color="#7a4a2b" wireframe />
+          </mesh>
+          {pen.animals.map((animal) => (
+            <Animal key={animal.id} position={animal.position} type={animal.type} />
+          ))}
+        </group>
+      ))}
+
+      {/* Forest Boundary Trees */}
+      {village.forestTrees.map((tree) => (
+        <ForestTree key={tree.id} position={tree.position} scale={tree.scale} rotationY={tree.rotationY} kind={tree.kind} />
+      ))}
+
+      {/* Villagers */}
+      {village.villagers.map((v) => (
+        <VillagerNPC key={v.id} position={v.position} outfitColor={v.outfitColor} hairColor={v.hairColor} skinTone={v.skinTone} />
+      ))}
 
       {/* 🦇 ANIMATED 3D BAT MESSENGER OVERHEAD */}
       <AnimatedBatMessenger />
 
-      {/* 6. CENTRAL MARKET SQUARE & FOUNTAIN */}
-      <VillageSquare position={[0, 0, 0]} />
-
-      {/* 5. 14 COZY HOUSES WITH MAILBOXES & GARDENS */}
-      <VillageHouses />
-      
-      {/* 10. VILLAGERS DISTRIBUTED THROUGHOUT SCENE */}
-      <Villagers />
-
       {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER */}
-      <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
+      <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} bounds={village.bounds} />
 
       {/* 🐴 HORSE PET COMPANION & MOUNT */}
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} activePet={activePet} />
 
       {/* 🐱 3D ORANGE CAT PET COMPANION */}
-      <OrangeCatPet targetGroupRef={playerGroupRef} activePet={activePet} />
+      <OrangeCatPet targetGroupRef={playerGroupRef} activePet={activePet} bounds={village.bounds} />
 
       {isNight ? (
         <>
