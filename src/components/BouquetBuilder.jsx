@@ -309,14 +309,17 @@ export class BouquetErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '1rem', background: '#fffaf1', borderRadius: 12, border: '1.5px solid #e07a5f', textAlign: 'center' }}>
-          <h4 style={{ color: '#5c381e', margin: '0 0 0.5rem 0' }}>🌸 Digital Bouquet</h4>
-          <p style={{ color: '#7a5c3e', fontSize: '0.8rem' }}>Displaying fallback pixel bouquet composition.</p>
+        <div style={{ padding: '1.5rem', background: '#fffaf1', borderRadius: 16, border: '2px solid #e07a5f', textAlign: 'center', margin: '1rem 0' }}>
+          <h4 style={{ color: '#5c381e', margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>🌸 Snail Mail Bouquet</h4>
+          <p style={{ color: '#7a5c3e', fontSize: '0.85rem', marginBottom: '1rem' }}>
+            Unable to load bouquet
+          </p>
           <button
-            style={{ marginTop: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: 6, background: '#e07a5f', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+            type="button"
+            style={{ padding: '0.55rem 1.1rem', borderRadius: 8, background: '#e07a5f', color: '#ffffff', border: 'none', cursor: 'pointer', fontWeight: 700 }}
             onClick={() => this.setState({ hasError: false })}
           >
-            Reset View
+            Back to Letter
           </button>
         </div>
       );
@@ -339,6 +342,7 @@ export function RenderPixelFlowerSVG({ type = 'daisy', seed = 12345, fx = 0, fy 
     <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale * 2.3})`}>
       {Object.entries(pixels).map(([coord, color]) => {
         const [px, py] = coord.split(',').map(Number);
+        if (isNaN(px) || isNaN(py) || px < 0 || px >= 17 || py < 0 || py >= 17 || !color) return null;
         return (
           <rect
             key={coord}

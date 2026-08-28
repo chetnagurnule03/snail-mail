@@ -81,7 +81,11 @@ export default function App() {
   }
 
   if (charLoading || !character) {
-    return <Centered>Waking up your village world…</Centered>;
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#faf6ee', fontFamily: 'system-ui, sans-serif', color: '#5c381e', fontSize: '1.2rem', fontWeight: 700 }}>
+        Waking up your village world…
+      </div>
+    );
   }
 
   return (
@@ -235,7 +239,7 @@ export default function App() {
       {/* Snail Mail Composer Modal */}
       {isMailComposerOpen && (
         <div style={styles.modalOverlay}>
-          <div style={{ ...styles.modalCard, maxWidth: 640 }}>
+          <div style={{ ...styles.modalCard, maxWidth: 840, width: '92vw' }}>
             <div style={styles.modalHeader}>
               <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#5b4a34' }}>
                 📮 Compose Snail Mail Letter 🐌💌
