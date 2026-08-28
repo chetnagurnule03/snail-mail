@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Send, Clock, Sparkles, Shield, Check, Copy, Eye, Bell } from 'lucide-react';
 import { letterService } from '../lib/supabase';
 import BouquetBuilder, { RenderBouquetSVG } from './BouquetBuilder';
 import { CornerFlourishes } from './LeafFlourish';
