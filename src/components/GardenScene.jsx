@@ -603,24 +603,78 @@ function ForestTree({ position, scale = 1, rotationY = 0, kind = 'round' }) {
 }
 
 /** -------------------------------------------------------------
- *  2.2X SCALED VILLAGER NPC COMPONENT 👤
+ *  FULL 3D CHIBI VILLAGER NPC CHARACTER MODEL 👤
  * ------------------------------------------------------------- */
 function VillagerNPC({ position, outfitColor = '#c9a7e0', hairColor = '#3a2e22', skinTone = '#f2c9a0' }) {
   return (
-    <group position={[position[0], 0, position[1]]}>
-      <mesh position={[0, 1.3, 0]} castShadow>
-        <sphereGeometry args={[0.55, 14, 14]} />
-        <meshToonMaterial color={skinTone} />
-        <ToonOutline thickness={0.03} />
-      </mesh>
-      <mesh position={[0, 1.65, 0]}>
-        <sphereGeometry args={[0.58, 12, 12]} />
-        <meshToonMaterial color={hairColor} />
-      </mesh>
-      <mesh position={[0, 0.6, 0]} castShadow>
-        <cylinderGeometry args={[0.38, 0.52, 1.0, 10]} />
+    <group position={[position[0], 0, position[1]]} scale={1.2}>
+      {/* Head */}
+      <group position={[0, 0.95, 0]}>
+        <mesh castShadow>
+          <sphereGeometry args={[0.38, 20, 20]} />
+          <meshToonMaterial color={skinTone} />
+          <ToonOutline thickness={0.03} color="#2b2013" />
+        </mesh>
+        {/* Hair */}
+        <mesh position={[0, 0.12, -0.04]} castShadow>
+          <sphereGeometry args={[0.41, 16, 16]} />
+          <meshToonMaterial color={hairColor} />
+          <ToonOutline thickness={0.025} color="#100b05" />
+        </mesh>
+        {/* Eyes */}
+        <mesh position={[-0.14, 0.02, 0.33]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshToonMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0.14, 0.02, 0.33]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshToonMaterial color="#1a1a1a" />
+        </mesh>
+        {/* Cheeks */}
+        <mesh position={[-0.2, -0.08, 0.31]}>
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshToonMaterial color="#f4a261" transparent opacity={0.6} />
+        </mesh>
+        <mesh position={[0.2, -0.08, 0.31]}>
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshToonMaterial color="#f4a261" transparent opacity={0.6} />
+        </mesh>
+      </group>
+
+      {/* Outfit Torso */}
+      <group position={[0, 0.44, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.44, 0.45, 0.32]} />
+          <meshToonMaterial color={outfitColor} />
+          <ToonOutline thickness={0.03} color="#2b2013" />
+        </mesh>
+        {/* Belt */}
+        <mesh position={[0, -0.16, 0]}>
+          <boxGeometry args={[0.47, 0.08, 0.34]} />
+          <meshToonMaterial color="#5c381e" />
+        </mesh>
+      </group>
+
+      {/* Arms */}
+      <mesh position={[-0.28, 0.42, 0]} castShadow>
+        <boxGeometry args={[0.13, 0.36, 0.13]} />
         <meshToonMaterial color={outfitColor} />
-        <ToonOutline thickness={0.03} />
+        <ToonOutline thickness={0.02} />
+      </mesh>
+      <mesh position={[0.28, 0.42, 0]} castShadow>
+        <boxGeometry args={[0.13, 0.36, 0.13]} />
+        <meshToonMaterial color={outfitColor} />
+        <ToonOutline thickness={0.02} />
+      </mesh>
+
+      {/* Legs & Boots */}
+      <mesh position={[-0.12, 0.1, 0]} castShadow>
+        <boxGeometry args={[0.15, 0.22, 0.16]} />
+        <meshToonMaterial color="#3d2616" />
+      </mesh>
+      <mesh position={[0.12, 0.1, 0]} castShadow>
+        <boxGeometry args={[0.15, 0.22, 0.16]} />
+        <meshToonMaterial color="#3d2616" />
       </mesh>
     </group>
   );

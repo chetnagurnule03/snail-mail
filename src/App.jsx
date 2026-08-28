@@ -101,50 +101,99 @@ export default function App() {
       {/* Top HUD Bar */}
       <div style={styles.hud}>
         <div style={styles.badge}>
-          🐌 {character.name || 'Little Wanderer'} {saving ? '(saving…)' : ''}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5c381e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10" />
+            <path d="M12 12a4 4 0 1 0 4 4" />
+          </svg>
+          <span style={{ fontWeight: 700 }}>{character.name || 'Little Wanderer'}</span>
+          {saving ? <span style={{ opacity: 0.7 }}>(saving…)</span> : ''}
         </div>
-        
-        {/* Day/Night Cycle Toggle */}
+
+        {/* Day/Night Mode Toggle */}
         <button
           style={{
-            ...styles.pill,
-            background: isNight ? '#7209b7' : '#ffb703',
-            color: isNight ? '#ffffff' : '#4a2c11',
+            ...styles.hudBtn,
+            background: isNight ? 'linear-gradient(135deg, #7209b7, #3a0ca3)' : 'linear-gradient(135deg, #ffb703, #fb8500)',
+            color: isNight ? '#ffffff' : '#3d2616',
+            borderColor: isNight ? '#a06cd5' : '#ffd166',
+            boxShadow: isNight ? '0 4px 14px rgba(114,9,183,0.4)' : '0 4px 14px rgba(255,183,3,0.4)',
           }}
           onClick={() => setIsNight((prev) => !prev)}
         >
-          {isNight ? '🌙 Night Mode' : '☀️ Day Mode'}
+          {isNight ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="5" />
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          )}
+          <span>{isNight ? 'Night Mode' : 'Day Mode'}</span>
         </button>
 
-        {/* Pet Selection Quick Toggle */}
+        {/* Summon Cat */}
         <button
           style={{
-            ...styles.pill,
-            background: activePet === 'cat' ? '#e07a5f' : '#457b9d',
+            ...styles.hudBtn,
+            background: activePet === 'cat' ? '#e07a5f' : '#fffaf1',
+            color: activePet === 'cat' ? '#ffffff' : '#5c381e',
+            borderColor: activePet === 'cat' ? '#c8553d' : '#e3d7bf',
           }}
           onClick={() => setActivePet(activePet === 'cat' ? 'none' : 'cat')}
         >
-          {activePet === 'cat' ? '🐱 Dismiss Cat' : '🐱 Summon Orange Cat'}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5c-4 0-7.5 2.5-7.5 7 0 4 3 6.5 7.5 6.5s7.5-2.5 7.5-6.5c0-4.5-3.5-7-7.5-7z" />
+            <path d="M6 8L3 3l5 2.5M18 8l3-5-5 2.5" />
+          </svg>
+          <span>{activePet === 'cat' ? 'Dismiss Cat' : 'Orange Cat'}</span>
         </button>
 
+        {/* Summon Horse */}
         <button
           style={{
-            ...styles.pill,
-            background: activePet === 'horse' || isMounted ? '#e07a5f' : '#457b9d',
+            ...styles.hudBtn,
+            background: activePet === 'horse' || isMounted ? '#e07a5f' : '#fffaf1',
+            color: activePet === 'horse' || isMounted ? '#ffffff' : '#5c381e',
+            borderColor: activePet === 'horse' || isMounted ? '#c8553d' : '#e3d7bf',
           }}
           onClick={toggleMount}
         >
-          {isMounted ? '🚶 Dismount [E]' : activePet === 'horse' ? '🐴 Ride Horse [E]' : '🐴 Summon Horse'}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 16l3-8 5 2 4-5 2 1-3 7-4-1-2 4z" />
+            <circle cx="18" cy="7" r="1.5" />
+          </svg>
+          <span>{isMounted ? 'Dismount [E]' : activePet === 'horse' ? 'Ride Horse [E]' : 'Summon Horse'}</span>
         </button>
 
-        <button style={styles.pillSecondary} onClick={() => handleOpenMailComposer()}>
-          📮 Send Snail Mail
+        {/* Send Snail Mail */}
+        <button style={styles.hudBtnParchment} onClick={() => handleOpenMailComposer()}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="3" />
+            <path d="M22 6l-10 7L2 6" />
+          </svg>
+          <span>Send Snail Mail</span>
         </button>
-        <button style={styles.pillSecondary} onClick={() => setIsCustomizerOpen(true)}>
-          🎨 Customize
+
+        {/* Customize */}
+        <button style={styles.hudBtnParchment} onClick={() => setIsCustomizerOpen(true)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a10 10 0 0 0-10 10c0 4.4 3.6 8 8 8 1 0 1.5-.5 1.5-1 0-.4-.2-.8-.4-1.2-.2-.4-.3-.8-.3-1.2 0-1.1.9-2 2-2h1.7c4.4 0 7.5-3.1 7.5-7.5A10 10 0 0 0 12 2z" />
+            <circle cx="7" cy="8" r="1.2" fill="currentColor" />
+            <circle cx="12" cy="6" r="1.2" fill="currentColor" />
+            <circle cx="17" cy="8" r="1.2" fill="currentColor" />
+          </svg>
+          <span>Customize</span>
         </button>
-        <button style={styles.pillGhost} onClick={() => setResetCameraSignal(Date.now())}>
-          🎥 Reset View [R]
+
+        {/* Reset View */}
+        <button style={styles.hudBtnGhost} onClick={() => setResetCameraSignal(Date.now())}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 4v6h-6M1 20v-6h6" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+          <span>Reset View [R]</span>
         </button>
       </div>
 
@@ -317,45 +366,65 @@ const styles = {
     alignItems: 'center',
     flexWrap: 'wrap',
     zIndex: 10,
+    fontFamily: "'Quicksand', 'Outfit', 'Nunito', system-ui, sans-serif",
   },
   badge: {
-    background: 'rgba(255,250,241,0.92)',
-    padding: '0.55rem 1rem',
+    background: 'rgba(255, 252, 242, 0.94)',
+    padding: '0.6rem 1.1rem',
     borderRadius: 999,
     fontSize: '0.9rem',
-    color: '#5b4a34',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    color: '#5c381e',
+    border: '1.5px solid #e3d7bf',
+    boxShadow: '0 4px 14px rgba(60, 40, 20, 0.12)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 7,
   },
-  pill: {
-    background: '#e07a5f',
-    color: 'white',
-    border: 'none',
-    padding: '0.55rem 1rem',
+  hudBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 7,
+    padding: '0.6rem 1.1rem',
     borderRadius: 999,
+    fontSize: '0.88rem',
+    fontWeight: 700,
+    border: '1.5px solid #e3d7bf',
     cursor: 'pointer',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    boxShadow: '0 2px 8px rgba(224,122,95,0.3)',
+    transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 4px 14px rgba(60, 40, 20, 0.12)',
+    fontFamily: 'inherit',
   },
-  pillSecondary: {
-    background: '#457b9d',
-    color: 'white',
-    border: 'none',
-    padding: '0.55rem 1rem',
+  hudBtnParchment: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 7,
+    padding: '0.6rem 1.1rem',
     borderRadius: 999,
+    fontSize: '0.88rem',
+    fontWeight: 700,
+    background: '#fffaf1',
+    color: '#5c381e',
+    border: '1.5px solid #e3d7bf',
     cursor: 'pointer',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    boxShadow: '0 2px 8px rgba(69,123,157,0.3)',
+    transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 4px 14px rgba(60, 40, 20, 0.12)',
+    fontFamily: 'inherit',
   },
-  pillGhost: {
-    background: 'rgba(255,250,241,0.92)',
+  hudBtnGhost: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 7,
+    padding: '0.6rem 1.1rem',
+    borderRadius: 999,
+    fontSize: '0.88rem',
+    fontWeight: 700,
+    background: 'rgba(255, 252, 242, 0.88)',
     color: '#7a5c3e',
-    border: '1px solid #cbb994',
-    padding: '0.55rem 1rem',
-    borderRadius: 999,
+    border: '1.5px solid #d4c5b0',
     cursor: 'pointer',
-    fontSize: '0.85rem',
+    transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 4px 12px rgba(60, 40, 20, 0.08)',
+    fontFamily: 'inherit',
   },
   villagerPrompt: {
     position: 'absolute',
