@@ -295,9 +295,45 @@ function IllustratedCherryBlossom({ fx, fy, scale = 1, rotation = 0 }) {
   );
 }
 
+export class BouquetErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error("BouquetErrorBoundary caught error:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '1rem', background: '#fffaf1', borderRadius: 12, border: '1.5px solid #e07a5f', textAlign: 'center' }}>
+          <h4 style={{ color: '#5c381e', margin: '0 0 0.5rem 0' }}>🌸 Digital Bouquet</h4>
+          <p style={{ color: '#7a5c3e', fontSize: '0.8rem' }}>Displaying fallback pixel bouquet composition.</p>
+          <button
+            style={{ marginTop: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: 6, background: '#e07a5f', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+            onClick={() => this.setState({ hasError: false })}
+          >
+            Reset View
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function RenderPixelFlowerSVG({ type = 'daisy', seed = 12345, fx = 0, fy = 0, scale = 1, rotation = 0 }) {
-  const pixelMap = useMemo(() => generatePixelFlower(type, seed), [type, seed]);
-  const pixels = pixelMap.pixels || {};
+  const flowerType = typeof type === 'string'
+    ? type
+    : (type && typeof type === 'object' && type.id)
+      ? String(type.id)
+      : 'daisy';
+
+  const pixelMap = useMemo(() => generatePixelFlower(flowerType, seed), [flowerType, seed]);
+  const pixels = pixelMap?.pixels || {};
 
   return (
     <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale * 2.3})`}>
@@ -326,7 +362,15 @@ function RenderSingleFlowerSVG({ type, seed = 12345, fx, fy, scale = 1, rotation
 /** -------------------------------------------------------------
  *  SHARED BOUQUET ILLUSTRATION COMPONENT (TRUE PIXEL-ART FLOWERS)
  * ------------------------------------------------------------- */
-export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width = 280, height = 360 }) {
+export function RenderBouquetSVG(props) {
+  return (
+    <BouquetErrorBoundary>
+      <RenderBouquetSVGInner {...props} />
+    </BouquetErrorBoundary>
+  );
+}
+
+function RenderBouquetSVGInner({ bouquet, isNight: isNightProp = false, width = 280, height = 360 }) {
   let bouquetData = bouquet;
   const isNightMode = bouquetData?.isNight ?? isNightProp;
 
@@ -505,10 +549,15 @@ export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width 
   );
 }
 
-/** -------------------------------------------------------------
- *  MAIN BOUQUET BUILDER COMPONENT
- * ------------------------------------------------------------- */
-export default function BouquetBuilder({ isNight = false, onDone, onCancel }) {
+export default function BouquetBuilder(props) {
+  return (
+    <BouquetErrorBoundary>
+      <BouquetBuilderInner {...props} />
+    </BouquetErrorBoundary>
+  );
+}
+
+function BouquetBuilderInner({ isNight = false, onDone, onCancel }) {
   const [activeStep, setActiveStep] = useState(0); // 0: Flowers, 1: Greenery, 2: Wrap, 3: Card, 4: Background, 5: Preview
   const defaultBouquet = useMemo(() => generateDefaultBouquet(isNight), [isNight]);
 
