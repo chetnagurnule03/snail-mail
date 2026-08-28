@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Outlines, Sparkles, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { letterService } from '../lib/supabase';
+import { RenderBouquetSVG } from './BouquetBuilder';
 
 function ToonOutline({ thickness = 0.03, color = '#1a0b2e' }) {
   return <Outlines thickness={thickness} color={color} screenspace={false} />;
@@ -355,6 +356,14 @@ export default function SnailMailReceiverExperience({ letterId }) {
             </div>
 
             <h3 style={styles.letterSubject}>{letter.subject}</h3>
+            
+            {/* Attached Bouquet Rendering */}
+            {letter.bouquet && (
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '0.8rem 0' }}>
+                <RenderBouquetSVG bouquet={letter.bouquet} width={190} height={210} />
+              </div>
+            )}
+
             <div style={styles.letterBody}>{letter.body}</div>
 
             <div style={styles.letterFooter}>

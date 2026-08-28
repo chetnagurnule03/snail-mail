@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Clock, Sparkles, Shield, Check, Copy, Eye, Bell } from 'lucide-react';
 import { letterService } from '../lib/supabase';
+import BouquetBuilder, { RenderBouquetSVG } from './BouquetBuilder';
 
 const STAMPS = [
   { id: 'royal_snail', name: 'Royal Snail', icon: '🐌', color: 'from-amber-600 to-yellow-500' },
@@ -17,6 +18,10 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
   const [stampType, setStampType] = useState('royal_snail');
   const [deliveryMethod, setDeliveryMethod] = useState('snail'); // 'snail' | 'bat'
   const [isSealing, setIsSealing] = useState(false);
+
+  // Custom Bouquet State
+  const [attachedBouquet, setAttachedBouquet] = useState(null);
+  const [isBouquetBuilderOpen, setIsBouquetBuilderOpen] = useState(false);
 
   // Unique Share Link Modal State
   const [shareModalData, setShareModalData] = useState(null);
@@ -43,6 +48,7 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
       body,
       stamp_type: stampType,
       delivery_method: deliveryMethod,
+      bouquet: attachedBouquet,
       share_url: shareUrl,
       deliver_at: new Date().toISOString(),
     };
@@ -72,7 +78,15 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
 
   return (
     <div style={styles.composerContainer}>
-      {!shareModalData ? (
+      {isBouquetBuilderOpen ? (
+        <BouquetBuilder
+          onDone={(bouquetData) => {
+            setAttachedBouquet(bouquetData);
+            setIsBouquetBuilderOpen(false);
+          }}
+          onCancel={() => setIsBouquetBuilderOpen(false)}
+        />
+      ) : !shareModalData ? (
         <form onSubmit={handleSend} style={styles.form}>
           {/* Dual Delivery Method Selector */}
           <div style={styles.fieldGroup}>
@@ -136,6 +150,59 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
               style={styles.input}
               required
             />
+          </div>
+
+          {/* Attached Bouquet Section */}
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Custom Bouquet Gift (Optional)</label>
+            {attachedBouquet ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.75rem', background: '#fffaf1', borderRadius: 14, border: '1.5px solid #e07a5f' }}>
+                <RenderBouquetSVG bouquet={attachedBouquet} width={70} height={75} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#4a2c11' }}>
+                    Custom Bouquet ({attachedBouquet.flowers?.length || 0} blooms)
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#7a5c3e' }}>
+                    Wrap: {attachedBouquet.wrap?.name || 'Kraft Paper'} • Ribbon: {attachedBouquet.ribbon?.name || 'Silk'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: '1px solid #e3d7bf', background: '#ffffff', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                  onClick={() => setIsBouquetBuilderOpen(true)}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  style={{ padding: '0.4rem 0.75rem', borderRadius: 8, border: 'none', background: '#e63946', color: '#ffffff', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                  onClick={() => setAttachedBouquet(null)}
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                style={{
+                  padding: '0.75rem 1rem',
+                  borderRadius: 14,
+                  border: '1.5px dashed #e07a5f',
+                  background: '#fdf0ed',
+                  color: '#5c381e',
+                  fontWeight: 800,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+                onClick={() => setIsBouquetBuilderOpen(true)}
+              >
+                <span>🌸 Build & Attach Custom Bouquet</span>
+              </button>
+            )}
           </div>
 
           <div style={styles.fieldGroup}>
