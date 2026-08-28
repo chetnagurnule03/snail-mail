@@ -49,151 +49,158 @@ export const BACKGROUND_STYLES = [
 ];
 
 /** -------------------------------------------------------------
- *  GEOMETRIC FLOWER GENERATOR RENDERERS (8 UNIQUE TYPES WITH 3D SHADING)
+ *  2D ILLUSTRATED FLOWER ASSETS (HAND-DRAWN ART STYLE)
  * ------------------------------------------------------------- */
 
-function RenderDaisySVG({ fx, fy, scale = 1 }) {
+function IllustratedDaisy({ fx, fy, scale = 1, rotation = 0 }) {
   const numPetals = 12;
-  const petalAngle = 360 / numPetals;
-  const radius = 16 * scale;
+  const angleStep = 360 / numPetals;
 
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      {/* 12 Long Narrow Petals with Gradient & Soft Shadow */}
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      {/* 12 Hand-Drawn Petal Paths with 1.5px Drawn Outline */}
       {Array.from({ length: numPetals }).map((_, i) => {
-        const angle = (i * petalAngle * Math.PI) / 180;
-        const px = Math.cos(angle) * radius;
-        const py = Math.sin(angle) * radius;
+        const angle = (i * angleStep * Math.PI) / 180;
+        const px = Math.cos(angle) * 16;
+        const py = Math.sin(angle) * 16;
         return (
-          <g key={i} transform={`rotate(${i * petalAngle}, ${px * 0.7}, ${py * 0.7})`}>
-            <ellipse
-              cx={px * 0.7}
-              cy={py * 0.7}
-              rx={11 * scale}
-              ry={4.8 * scale}
-              fill="url(#daisyPetalGrad)"
-              stroke="#d4a373"
-              strokeWidth="0.6"
+          <g key={i} transform={`rotate(${i * angleStep}, ${px * 0.7}, ${py * 0.7})`}>
+            <path
+              d={`M 0 0 C -4.5 -10 -4.5 -22 0 -25 C 4.5 -22 4.5 -10 0 0`}
+              fill="url(#illDaisyPetal)"
+              stroke="#6c584c"
+              strokeWidth="1.2"
+              strokeLinejoin="round"
             />
-            {/* Center Petal Vein Ridge */}
-            <line x1={px * 0.3} y1={py * 0.3} x2={px * 0.9} y2={py * 0.9} stroke="#e9d8a6" strokeWidth="0.7" opacity="0.6" />
+            {/* Soft Petal Center Crease Line */}
+            <line x1="0" y1="-4" x2="0" y2="-18" stroke="#d4a373" strokeWidth="0.8" opacity="0.5" />
           </g>
         );
       })}
-      {/* Domed Yellow Center Disc with Radial Highlight */}
-      <circle cx="0" cy="0" r={8.5 * scale} fill="url(#centerYellowGrad)" stroke="#2b2013" strokeWidth="0.8" />
-      <circle cx="-2.5" cy="-2.5" r={3.2 * scale} fill="#ffffff" opacity="0.45" />
+      {/* Center Disc with Dot Texture & Outline */}
+      <circle cx="0" cy="0" r="9" fill="url(#illDaisyCenter)" stroke="#5c381e" strokeWidth="1.4" />
+      <circle cx="-3" cy="-3" r="3" fill="#ffffff" opacity="0.4" />
+      <circle cx="3" cy="2" r="1" fill="#7a5c3e" opacity="0.6" />
+      <circle cx="-2" cy="4" r="0.8" fill="#7a5c3e" opacity="0.6" />
+      <circle cx="4" cy="-2" r="0.8" fill="#7a5c3e" opacity="0.6" />
     </g>
   );
 }
 
-function RenderTulipSVG({ fx, fy, scale = 1 }) {
+function IllustratedTulip({ fx, fy, scale = 1, rotation = 0 }) {
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      {/* Outer Cupped Petals with Curvature Shading */}
-      <path d="M -15 12 C -24 -10 -14 -30 0 -34 C 14 -30 24 -10 15 12 Z" fill="url(#tulipOuterGrad)" stroke="#2b2013" strokeWidth="1" />
-      <path d="M -17 6 C -22 -16 -10 -28 0 -30 C 10 -28 22 -16 17 6 Z" fill="url(#tulipMidGrad)" stroke="#2b2013" strokeWidth="0.8" />
-      {/* Inner Petal Layers with Cup Highlight */}
-      <path d="M -9 3 C -11 -14 0 -24 0 -24 C 0 -24 11 -14 9 3 Z" fill="url(#tulipInnerGrad)" />
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      {/* Goblet Silhouette Overlapping Cup Petal Paths */}
+      <path d="M -16 14 C -26 -8 -16 -32 0 -36 C 16 -32 26 -8 16 14 Z" fill="url(#illTulipOuter)" stroke="#590d22" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M -18 8 C -22 -14 -10 -28 0 -30 C 10 -28 22 -14 18 8 Z" fill="url(#illTulipMid)" stroke="#590d22" strokeWidth="1.2" />
+      <path d="M -10 4 C -12 -12 0 -22 0 -22 C 0 -22 12 -12 10 4 Z" fill="url(#illTulipInner)" stroke="#800f2f" strokeWidth="1" />
+      {/* Highlight Curved Fold Edge */}
+      <path d="M -14 -10 Q 0 -28 14 -10" fill="none" stroke="#ff8fa3" strokeWidth="1.2" opacity="0.6" />
     </g>
   );
 }
 
-function RenderRoseSVG({ fx, fy, scale = 1 }) {
+function IllustratedRose({ fx, fy, scale = 1, rotation = 0 }) {
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      {/* Outer Layer */}
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      {/* Layered Spiral Petal Paths */}
       {Array.from({ length: 10 }).map((_, i) => {
-        const angle = (i * 36 * Math.PI) / 180;
-        const px = Math.cos(angle) * 15 * scale;
-        const py = Math.sin(angle) * 15 * scale;
+        const angle = i * 36;
+        const rad = (angle * Math.PI) / 180;
+        const rx = Math.cos(rad) * 15;
+        const ry = Math.sin(rad) * 15;
         return (
-          <circle key={`out-${i}`} cx={px} cy={py} r={10.5 * scale} fill="url(#roseOuterGrad)" stroke="#590d22" strokeWidth="0.7" />
+          <path
+            key={`r-out-${i}`}
+            d={`M ${rx} ${ry} C ${rx * 1.5} ${ry * 1.5 - 6} ${rx * 1.3} ${ry * 1.3 + 8} ${rx * 0.4} ${ry * 0.4}`}
+            fill="url(#illRoseOuter)"
+            stroke="#590d22"
+            strokeWidth="1.2"
+          />
         );
       })}
-      {/* Middle Layer */}
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = ((i * 45 + 20) * Math.PI) / 180;
-        const px = Math.cos(angle) * 8.5 * scale;
-        const py = Math.sin(angle) * 8.5 * scale;
+      {Array.from({ length: 7 }).map((_, i) => {
+        const angle = i * 51 + 20;
+        const rad = (angle * Math.PI) / 180;
+        const rx = Math.cos(rad) * 9;
+        const ry = Math.sin(rad) * 9;
         return (
-          <circle key={`mid-${i}`} cx={px} cy={py} r={8 * scale} fill="url(#roseMidGrad)" stroke="#800f2f" strokeWidth="0.6" />
+          <path
+            key={`r-mid-${i}`}
+            d={`M ${rx} ${ry} C ${rx * 1.4} ${ry * 1.4 - 4} ${rx * 1.2} ${ry * 1.2 + 5} ${rx * 0.3} ${ry * 0.3}`}
+            fill="url(#illRoseMid)"
+            stroke="#800f2f"
+            strokeWidth="1"
+          />
         );
       })}
-      {/* Inner Bud Layer */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const angle = ((i * 72 + 35) * Math.PI) / 180;
-        const px = Math.cos(angle) * 4.5 * scale;
-        const py = Math.sin(angle) * 4.5 * scale;
-        return (
-          <circle key={`in-${i}`} cx={px} cy={py} r={5.2 * scale} fill="#ff758f" />
-        );
-      })}
-      <circle cx="0" cy="0" r={3.2 * scale} fill="#590d22" />
+      {/* Spiral Bud Center */}
+      <path d="M -5 -2 C -8 -8 4 -10 6 -3 C 8 4 -4 8 -5 -2 Z" fill="#ff758f" stroke="#590d22" strokeWidth="1" />
+      <circle cx="0" cy="0" r="3" fill="#590d22" />
     </g>
   );
 }
 
-function RenderPoppySVG({ fx, fy, scale = 1 }) {
+function IllustratedPoppy({ fx, fy, scale = 1, rotation = 0 }) {
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      {Array.from({ length: 5 }).map((_, i) => {
-        const angle = (i * 72 * Math.PI) / 180;
-        const px = Math.cos(angle) * 13 * scale;
-        const py = Math.sin(angle) * 13 * scale;
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      {/* Papery Petal Paths with Wavy Edges */}
+      {[0, 72, 144, 216, 288].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const px = Math.cos(rad) * 14;
+        const py = Math.sin(rad) * 14;
         return (
           <path
             key={i}
-            d={`M ${px} ${py} Q ${px * 1.9} ${py * 1.9 - 7} ${px * 1.5} ${py * 1.5 + 5} Z`}
-            fill="url(#poppyPetalGrad)"
-            stroke="#2b2013"
-            strokeWidth="0.9"
+            d={`M 0 0 C ${px * 1.8} ${py * 1.8 - 10} ${px * 2.1} ${py * 2.1 + 8} 0 0`}
+            fill="url(#illPoppyPetal)"
+            stroke="#4a1a0e"
+            strokeWidth="1.3"
           />
         );
       })}
-      {/* Dark Center Disc & Radiating Stamens */}
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i * 45 * Math.PI) / 180;
-        const sx = Math.cos(angle) * 9.5 * scale;
-        const sy = Math.sin(angle) * 9.5 * scale;
-        return <line key={i} x1="0" y1="0" x2={sx} y2={sy} stroke="#3a0ca3" strokeWidth="1.5" />;
+      {/* Radiating Stamens & Dark Center */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const sx = Math.cos(rad) * 10;
+        const sy = Math.sin(rad) * 10;
+        return <line key={i} x1="0" y1="0" x2={sx} y2={sy} stroke="#2b001e" strokeWidth="1.4" />;
       })}
-      <circle cx="0" cy="0" r={5.8 * scale} fill="#1a1a1a" />
-      <circle cx="-1.5" cy="-1.5" r={2} fill="#ffffff" opacity="0.3" />
+      <circle cx="0" cy="0" r="6" fill="#1a1a1a" stroke="#2b001e" strokeWidth="1.2" />
+      <circle cx="-2" cy="-2" r="2" fill="#ffffff" opacity="0.35" />
     </g>
   );
 }
 
-function RenderLilySVG({ fx, fy, scale = 1 }) {
+function IllustratedLily({ fx, fy, scale = 1, rotation = 0 }) {
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      {/* Set B (Behind) */}
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      {/* 6 Pointed Petal Paths */}
       {[60, 180, 300].map((ang, i) => {
         const rad = (ang * Math.PI) / 180;
-        const px = Math.cos(rad) * 22 * scale;
-        const py = Math.sin(rad) * 22 * scale;
+        const px = Math.cos(rad) * 24;
+        const py = Math.sin(rad) * 24;
         return (
-          <path key={`b-${i}`} d={`M 0 0 Q ${px * 0.5} ${py * 0.5 - 6} ${px} ${py} Q ${px * 0.5} ${py * 0.5 + 6} 0 0`} fill="url(#lilyPetalGradB)" stroke="#2b2013" strokeWidth="0.8" />
+          <path key={`b-${i}`} d={`M 0 0 Q ${px * 0.5} ${py * 0.5 - 7} ${px} ${py} Q ${px * 0.5} ${py * 0.5 + 7} 0 0`} fill="url(#illLilyB)" stroke="#5c381e" strokeWidth="1.2" />
         );
       })}
-      {/* Set A (Front) */}
       {[0, 120, 240].map((ang, i) => {
         const rad = (ang * Math.PI) / 180;
-        const px = Math.cos(rad) * 26 * scale;
-        const py = Math.sin(rad) * 26 * scale;
+        const px = Math.cos(rad) * 28;
+        const py = Math.sin(rad) * 28;
         return (
-          <path key={`a-${i}`} d={`M 0 0 Q ${px * 0.5} ${py * 0.5 - 7} ${px} ${py} Q ${px * 0.5} ${py * 0.5 + 7} 0 0`} fill="url(#lilyPetalGradA)" stroke="#2b2013" strokeWidth="1" />
+          <path key={`a-${i}`} d={`M 0 0 Q ${px * 0.5} ${py * 0.5 - 8} ${px} ${py} Q ${px * 0.5} ${py * 0.5 + 8} 0 0`} fill="url(#illLilyA)" stroke="#5c381e" strokeWidth="1.4" />
         );
       })}
-      {/* 6 Stamens with Anther Tips */}
+      {/* Stamens */}
       {[0, 60, 120, 180, 240, 300].map((ang, i) => {
         const rad = (ang * Math.PI) / 180;
-        const sx = Math.cos(rad) * 13 * scale;
-        const sy = Math.sin(rad) * 13 * scale;
+        const sx = Math.cos(rad) * 14;
+        const sy = Math.sin(rad) * 14;
         return (
           <g key={`st-${i}`}>
-            <line x1="0" y1="0" x2={sx} y2={sy} stroke="#ffe5ec" strokeWidth="1.5" />
-            <circle cx={sx} cy={sy} r="2.2" fill="#5c381e" />
+            <line x1="0" y1="0" x2={sx} y2={sy} stroke="#ffe5ec" strokeWidth="1.6" />
+            <circle cx={sx} cy={sy} r="2.4" fill="#4a2c11" />
           </g>
         );
       })}
@@ -201,48 +208,51 @@ function RenderLilySVG({ fx, fy, scale = 1 }) {
   );
 }
 
-function RenderSunflowerSVG({ fx, fy, scale = 1 }) {
+function IllustratedSunflower({ fx, fy, scale = 1, rotation = 0 }) {
   const numPetals = 22;
   const angleStep = 360 / numPetals;
+
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
       {Array.from({ length: numPetals }).map((_, i) => {
         const angle = (i * angleStep * Math.PI) / 180;
-        const px = Math.cos(angle) * 18 * scale;
-        const py = Math.sin(angle) * 18 * scale;
+        const px = Math.cos(angle) * 20;
+        const py = Math.sin(angle) * 20;
         return (
-          <ellipse
+          <path
             key={i}
-            cx={px * 0.8}
-            cy={py * 0.8}
-            rx={9.5 * scale}
-            ry={3.4 * scale}
-            fill="url(#sunflowerPetalGrad)"
-            stroke="#d4a373"
-            strokeWidth="0.6"
-            transform={`rotate(${i * angleStep}, ${px * 0.8}, ${py * 0.8})`}
+            d={`M 0 0 Q ${px * 0.6} ${py * 0.6 - 4} ${px} ${py} Q ${px * 0.6} ${py * 0.6 + 4} 0 0`}
+            fill="url(#illSunPetal)"
+            stroke="#7a5c3e"
+            strokeWidth="1"
           />
         );
       })}
-      {/* Large Dark Brown Center Disc with Spiral Pattern */}
-      <circle cx="0" cy="0" r={14 * scale} fill="url(#centerBrownGrad)" stroke="#2b2013" strokeWidth="1" />
-      <circle cx="0" cy="0" r={11.5 * scale} fill="#8c5a3c" opacity="0.6" />
-      <circle cx="0" cy="0" r={6.5 * scale} fill="#3d2616" />
+      {/* Large Brown Center Disc with Dot Texture */}
+      <circle cx="0" cy="0" r={14.5} fill="url(#illSunCenter)" stroke="#3d2616" strokeWidth="1.5" />
+      <circle cx="0" cy="0" r={11} fill="#8c5a3c" opacity="0.5" />
+      {/* Spiral Seed Dots */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const sx = Math.cos(rad) * 6;
+        const sy = Math.sin(rad) * 6;
+        return <circle key={i} cx={sx} cy={sy} r="1.2" fill="#2b180d" />;
+      })}
     </g>
   );
 }
 
-function RenderLavenderSVG({ fx, fy, scale = 1 }) {
+function IllustratedLavender({ fx, fy, scale = 1, rotation = 0 }) {
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      <line x1="0" y1="28" x2="0" y2="-28" stroke="#38b000" strokeWidth="2.8" />
-      {Array.from({ length: 14 }).map((_, j) => {
-        const y = 16 - j * 3.4;
-        const offsetX = (j % 2 === 0 ? 1 : -1) * 5.5;
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      <path d="M 0 30 Q 2 0 0 -30" fill="none" stroke="#2d6a4f" strokeWidth="3" strokeLinecap="round" />
+      {Array.from({ length: 15 }).map((_, j) => {
+        const y = 18 - j * 3.5;
+        const offsetX = (j % 2 === 0 ? 1 : -1) * 6;
         return (
           <g key={j} transform={`translate(${offsetX}, ${y})`}>
-            <circle cx="0" cy="0" r="3.8" fill="url(#lavenderGrad)" stroke="#2b2013" strokeWidth="0.5" />
-            <circle cx="-2" cy="-1" r="2.6" fill="#e0aaff" />
+            <ellipse cx="0" cy="0" rx="4.5" ry="3.5" fill="url(#illLavenderFloret)" stroke="#3c096c" strokeWidth="0.9" />
+            <circle cx="-1.5" cy="-1" r="2" fill="#e0aaff" />
           </g>
         );
       })}
@@ -250,59 +260,64 @@ function RenderLavenderSVG({ fx, fy, scale = 1 }) {
   );
 }
 
-function RenderCherryBlossomSVG({ fx, fy, scale = 1 }) {
+function IllustratedCherryBlossom({ fx, fy, scale = 1, rotation = 0 }) {
   return (
-    <g transform={`translate(${fx}, ${fy})`} filter="url(#softShadow)">
-      {Array.from({ length: 5 }).map((_, i) => {
-        const angle = (i * 72 * Math.PI) / 180;
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale})`} filter="url(#dropShadow2D)">
+      {[0, 72, 144, 216, 288].map((ang, i) => {
         return (
-          <g key={i} transform={`rotate(${i * 72})`}>
-            <path d="M 0 0 C -8 -14 -13 -23 -4 -25 C 0 -23 4 -23 4 -25 C 13 -23 8 -14 0 0" fill="url(#cherryPetalGrad)" stroke="#2b2013" strokeWidth="0.7" />
+          <g key={i} transform={`rotate(${ang})`}>
+            {/* Notched Petal Path */}
+            <path
+              d="M 0 0 C -9 -14 -14 -24 -4 -26 C 0 -24 4 -24 4 -26 C 14 -24 9 -14 0 0"
+              fill="url(#illCherryPetal)"
+              stroke="#b7094c"
+              strokeWidth="1.1"
+              strokeLinejoin="round"
+            />
           </g>
         );
       })}
-      {/* 10 Center Stamens */}
-      {Array.from({ length: 10 }).map((_, i) => {
-        const angle = (i * 36 * Math.PI) / 180;
-        const sx = Math.cos(angle) * 7.5 * scale;
-        const sy = Math.sin(angle) * 7.5 * scale;
+      {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const sx = Math.cos(rad) * 8;
+        const sy = Math.sin(rad) * 8;
         return (
           <g key={i}>
-            <line x1="0" y1="0" x2={sx} y2={sy} stroke="#f8ad9d" strokeWidth="1" />
-            <circle cx={sx} cy={sy} r="1.3" fill="#e63946" />
+            <line x1="0" y1="0" x2={sx} y2={sy} stroke="#f8ad9d" strokeWidth="1.2" />
+            <circle cx={sx} cy={sy} r="1.4" fill="#e63946" />
           </g>
         );
       })}
-      <circle cx="0" cy="0" r="3.2" fill="#f8ad9d" />
+      <circle cx="0" cy="0" r="3.5" fill="#f8ad9d" stroke="#b7094c" strokeWidth="1" />
     </g>
   );
 }
 
-function RenderSingleFlowerSVG({ type, fx, fy, scale = 1 }) {
+function RenderSingleFlowerSVG({ type, fx, fy, scale = 1, rotation = 0 }) {
   switch (type) {
     case 'daisy':
-      return <RenderDaisySVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedDaisy fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'tulip':
-      return <RenderTulipSVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedTulip fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'rose':
-      return <RenderRoseSVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedRose fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'poppy':
-      return <RenderPoppySVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedPoppy fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'lily':
-      return <RenderLilySVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedLily fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'sunflower':
-      return <RenderSunflowerSVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedSunflower fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'lavender':
-      return <RenderLavenderSVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedLavender fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     case 'cherry_blossom':
-      return <RenderCherryBlossomSVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedCherryBlossom fx={fx} fy={fy} scale={scale} rotation={rotation} />;
     default:
-      return <RenderDaisySVG fx={fx} fy={fy} scale={scale} />;
+      return <IllustratedDaisy fx={fx} fy={fy} scale={scale} rotation={rotation} />;
   }
 }
 
 /** -------------------------------------------------------------
- *  LIVE BOUQUET SVG RENDERER (SHARED FOR PREVIEW & LETTER VIEW)
+ *  SHARED BOUQUET ILLUSTRATION COMPONENT (2D LAYERED STICKER)
  * ------------------------------------------------------------- */
 export function RenderBouquetSVG({ bouquet, width = 280, height = 300 }) {
   const selectedFlowers = bouquet?.flowers || [];
@@ -316,179 +331,200 @@ export function RenderBouquetSVG({ bouquet, width = 280, height = 300 }) {
   const wrapColor = wrap.color || '#d4a373';
   const ribbonColor = ribbon.color || '#e63946';
 
+  // Anchor Bundle Point: (140, 205) inside the paper wrap
+  const BUNDLE_X = 140;
+  const BUNDLE_Y = 205;
+
   return (
     <svg width={width} height={height} viewBox="0 0 280 300" style={{ background: bgColor, borderRadius: 16 }}>
       <defs>
-        {/* Soft Drop Shadow Filter for 3D Depth */}
-        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="1.5" dy="3" stdDeviation="2" floodColor="#1a0b2e" floodOpacity="0.28" />
+        {/* Soft 2D Drop Shadow Filter for Paper-Doll Layering */}
+        <filter id="dropShadow2D" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="1.5" dy="2.5" stdDeviation="2.2" floodColor="#2b2013" floodOpacity="0.32" />
         </filter>
 
-        {/* Petal & Flower Gradients */}
-        <linearGradient id="daisyPetalGrad" x1="0" y1="0" x2="0" y2="1">
+        {/* Linear & Radial Gradients for 2D Illustrated Shading */}
+        <linearGradient id="illDaisyPetal" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ffffff" />
           <stop offset="100%" stopColor="#f4f1de" />
         </linearGradient>
 
-        <radialGradient id="centerYellowGrad" cx="35%" cy="35%" r="65%">
+        <radialGradient id="illDaisyCenter" cx="35%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#ffee8c" />
           <stop offset="70%" stopColor="#ffb703" />
           <stop offset="100%" stopColor="#fb8500" />
         </radialGradient>
 
-        <linearGradient id="tulipOuterGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illTulipOuter" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff758f" />
           <stop offset="70%" stopColor="#e63946" />
           <stop offset="100%" stopColor="#800f2f" />
         </linearGradient>
 
-        <linearGradient id="tulipMidGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illTulipMid" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff4d6d" />
           <stop offset="100%" stopColor="#a4133c" />
         </linearGradient>
 
-        <linearGradient id="tulipInnerGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illTulipInner" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff8fa3" />
           <stop offset="100%" stopColor="#c9184a" />
         </linearGradient>
 
-        <radialGradient id="roseOuterGrad" cx="40%" cy="40%" r="60%">
+        <radialGradient id="illRoseOuter" cx="40%" cy="40%" r="60%">
           <stop offset="0%" stopColor="#ff4d6d" />
           <stop offset="70%" stopColor="#c9184a" />
           <stop offset="100%" stopColor="#590d22" />
         </radialGradient>
 
-        <radialGradient id="roseMidGrad" cx="40%" cy="40%" r="60%">
+        <radialGradient id="illRoseMid" cx="40%" cy="40%" r="60%">
           <stop offset="0%" stopColor="#ff758f" />
           <stop offset="100%" stopColor="#a4133c" />
         </radialGradient>
 
-        <linearGradient id="poppyPetalGrad" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="illPoppyPetal" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#ff7b00" />
           <stop offset="70%" stopColor="#ff5400" />
           <stop offset="100%" stopColor="#9e0059" />
         </linearGradient>
 
-        <linearGradient id="lilyPetalGradA" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illLilyA" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#fff0f3" />
           <stop offset="50%" stopColor="#ffb703" />
           <stop offset="100%" stopColor="#fb8500" />
         </linearGradient>
 
-        <linearGradient id="lilyPetalGradB" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illLilyB" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ffe5ec" />
           <stop offset="100%" stopColor="#ffb703" />
         </linearGradient>
 
-        <linearGradient id="sunflowerPetalGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="illSunPetal" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor="#ffea00" />
           <stop offset="70%" stopColor="#ffb703" />
           <stop offset="100%" stopColor="#d4a373" />
         </linearGradient>
 
-        <radialGradient id="centerBrownGrad" cx="35%" cy="35%" r="65%">
+        <radialGradient id="illSunCenter" cx="35%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#8c5a3c" />
           <stop offset="60%" stopColor="#5c381e" />
           <stop offset="100%" stopColor="#2b180d" />
         </radialGradient>
 
-        <linearGradient id="lavenderGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illLavenderFloret" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#c77dff" />
           <stop offset="100%" stopColor="#7b2cbf" />
         </linearGradient>
 
-        <linearGradient id="cherryPetalGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="illCherryPetal" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ffffff" />
           <stop offset="60%" stopColor="#ffb5a7" />
           <stop offset="100%" stopColor="#f72585" />
         </linearGradient>
 
-        {/* Paper Wrap Facet Gradients */}
-        <linearGradient id="wrapLeftGrad" x1="0" y1="0" x2="1" y2="0">
+        {/* Paper Wrap Cone Facet Gradients */}
+        <linearGradient id="illWrapLeft" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor={wrapColor} />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.3" />
         </linearGradient>
 
-        <linearGradient id="wrapRightGrad" x1="1" y1="0" x2="0" y2="0">
+        <linearGradient id="illWrapRight" x1="1" y1="0" x2="0" y2="0">
           <stop offset="0%" stopColor={wrapColor} />
-          <stop offset="100%" stopColor="#000000" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
         </linearGradient>
       </defs>
 
-      {/* Background Subtle Backdrop Glow */}
+      {/* 1. Background Card Backdrop */}
       <rect width="280" height="300" rx="16" fill={bgColor} />
       <circle cx="140" cy="140" r="115" fill="#ffffff" opacity="0.18" />
 
-      {/* Greenery Fan Behind Flowers */}
+      {/* 2. Paper Wrap Back Flap */}
+      <path d="M 75 160 Q 140 145 205 160 L 152 272 L 128 272 Z" fill="#e9d8a6" opacity="0.5" />
+
+      {/* 3. Greenery Fan & Connecting Stems (EVERY STEM CONNECTS TO BUNDLE ANCHOR 140,205) */}
       {selectedGreenery.map((g, idx) => {
         const angle = -45 + (idx * 30);
         const rad = (angle * Math.PI) / 180;
-        const gx = 140 + Math.cos(rad) * 65;
-        const gy = 120 + Math.sin(rad) * 45;
+        const gx = BUNDLE_X + Math.cos(rad) * 65;
+        const gy = BUNDLE_Y - 80 + Math.sin(rad) * 35;
+
         return (
-          <g key={`g-${idx}`} transform={`translate(${gx}, ${gy}) rotate(${angle})`} filter="url(#softShadow)">
-            <path d="M 0 0 Q -16 -38 0 -65 Q 16 -38 0 0" fill={g.color || '#38b000'} opacity="0.88" />
-            <line x1="0" y1="0" x2="0" y2="-60" stroke="#1c5200" strokeWidth="1.8" />
+          <g key={`g-${idx}`} filter="url(#dropShadow2D)">
+            {/* Greenery Stem Connecting Head to Bundle Point (140, 205) */}
+            <path d={`M ${gx} ${gy} Q ${gx * 0.6 + BUNDLE_X * 0.4} ${gy * 0.5 + BUNDLE_Y * 0.5} ${BUNDLE_X} ${BUNDLE_Y}`} stroke="#1c5200" strokeWidth="2.5" strokeLinecap="round" />
+            {/* Leaf Fan Head */}
+            <g transform={`translate(${gx}, ${gy}) rotate(${angle})`}>
+              <path d="M 0 0 Q -18 -38 0 -68 Q 18 -38 0 0" fill={g.color || '#38b000'} stroke="#1c5200" strokeWidth="1.5" />
+              <line x1="0" y1="0" x2="0" y2="-62" stroke="#ffffff" strokeWidth="1" opacity="0.4" />
+            </g>
           </g>
         );
       })}
 
-      {/* Bundled Flower Stems */}
-      <g>
-        {selectedFlowers.map((_, idx) => {
-          const spread = (idx - (selectedFlowers.length - 1) / 2) * 12;
-          return (
-            <line
-              key={`stem-${idx}`}
-              x1={140 + spread * 0.4}
-              y1="125"
-              x2={140 + spread * 0.15}
-              y2="215"
-              stroke="#2d6a4f"
-              strokeWidth="3.2"
-              strokeLinecap="round"
-            />
-          );
-        })}
-      </g>
-
-      {/* Layered Flower Heads (Background & Foreground) */}
+      {/* 4. Bundled Flower Stems (EVERY STEM CONNECTS TO BUNDLE ANCHOR 140,205) */}
       {selectedFlowers.map((f, idx) => {
         const count = selectedFlowers.length;
         const angle = ((idx - (count - 1) / 2) / (count || 1)) * 1.25;
-        const fx = 140 + Math.sin(angle) * 58;
+        const fx = BUNDLE_X + Math.sin(angle) * 58;
+        const fy = 98 + Math.cos(angle * 1.4) * 36;
+
+        return (
+          <path
+            key={`stem-${idx}`}
+            d={`M ${fx} ${fy} Q ${fx * 0.5 + BUNDLE_X * 0.5} ${fy * 0.5 + BUNDLE_Y * 0.5} ${BUNDLE_X} ${BUNDLE_Y}`}
+            stroke="#2d6a4f"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+          />
+        );
+      })}
+
+      {/* 5. Layered Flower Heads (Back Flowers First, Front Flowers Last) */}
+      {selectedFlowers.map((f, idx) => {
+        const count = selectedFlowers.length;
+        const angle = ((idx - (count - 1) / 2) / (count || 1)) * 1.25;
+        const fx = BUNDLE_X + Math.sin(angle) * 58;
         const fy = 98 + Math.cos(angle * 1.4) * 36;
         const isForeground = idx % 2 === 0;
         const scale = isForeground ? 1.08 : 0.88;
+        const rotation = (idx % 3 === 0 ? -10 : idx % 3 === 1 ? 12 : -4);
 
         return (
           <g key={`fl-${idx}-${f.id}`}>
-            <RenderSingleFlowerSVG type={f.type} fx={fx} fy={fy} scale={scale} />
+            <RenderSingleFlowerSVG type={f.type} fx={fx} fy={fy} scale={scale} rotation={rotation} />
           </g>
         );
       })}
 
-      {/* Paper Wrap Multi-Faceted Cone with Shading */}
-      <g filter="url(#softShadow)">
-        <polygon points="85,165 195,165 152,272 128,272" fill={wrapColor} stroke="#5c381e" strokeWidth="1.8" />
-        <polygon points="85,165 140,210 128,272" fill="url(#wrapLeftGrad)" />
-        <polygon points="195,165 140,210 152,272" fill="url(#wrapRightGrad)" />
-        <line x1="85" y1="165" x2="195" y2="165" stroke="#ffffff" strokeWidth="1.2" opacity="0.4" />
+      {/* 6. Paper Wrap Front Cone with Fold Lines & Soft Shadow */}
+      <g filter="url(#dropShadow2D)">
+        {/* Irregular Folded Top Edge Paper Cone */}
+        <polygon points="85,165 195,165 152,272 128,272" fill={wrapColor} stroke="#5c381e" strokeWidth="1.8" strokeLinejoin="round" />
+        <polygon points="85,165 140,210 128,272" fill="url(#illWrapLeft)" />
+        <polygon points="195,165 140,210 152,272" fill="url(#illWrapRight)" />
+        {/* Subtle Crease Fold Lines */}
+        <line x1="85" y1="165" x2="140" y2="210" stroke="#5c381e" strokeWidth="1.2" opacity="0.7" />
+        <line x1="195" y1="165" x2="140" y2="210" stroke="#5c381e" strokeWidth="1.2" opacity="0.7" />
+        <line x1="85" y1="165" x2="195" y2="165" stroke="#ffffff" strokeWidth="1.4" opacity="0.4" />
       </g>
 
-      {/* Ribbon & Bow with Shadow & Highlight */}
-      <g transform="translate(140, 208)" filter="url(#softShadow)">
-        <ellipse cx="0" cy="0" rx="28" ry="7.5" fill={ribbonColor} stroke="#2b2013" strokeWidth="0.8" />
+      {/* 7. Ribbon & Bow Wrapped Around Bundle Point (140, 205) */}
+      <g transform={`translate(${BUNDLE_X}, ${BUNDLE_Y})`} filter="url(#dropShadow2D)">
+        {/* Draped Ribbon Tails */}
+        <path d="M -6 4 Q -16 28 -22 45" fill="none" stroke={ribbonColor} strokeWidth="6" strokeLinecap="round" />
+        <path d="M 6 4 Q 16 28 22 45" fill="none" stroke={ribbonColor} strokeWidth="6" strokeLinecap="round" />
+        {/* Tied Knot Ellipse */}
+        <ellipse cx="0" cy="0" rx="28" ry="7.5" fill={ribbonColor} stroke="#2b2013" strokeWidth="1" />
         {/* Bow Loops */}
-        <path d="M 0 0 C -26 -22 -32 12 0 0" fill={ribbonColor} stroke="#2b2013" strokeWidth="1" />
-        <path d="M 0 0 C 26 -22 32 12 0 0" fill={ribbonColor} stroke="#2b2013" strokeWidth="1" />
+        <path d="M 0 0 C -26 -22 -32 12 0 0" fill={ribbonColor} stroke="#2b2013" strokeWidth="1.2" />
+        <path d="M 0 0 C 26 -22 32 12 0 0" fill={ribbonColor} stroke="#2b2013" strokeWidth="1.2" />
         <ellipse cx="0" cy="-2" rx="20" ry="2.5" fill="#ffffff" opacity="0.35" />
-        <circle cx="0" cy="0" r="5.5" fill="#ffffff" stroke="#2b2013" strokeWidth="0.8" />
+        <circle cx="0" cy="0" r="5.5" fill="#ffffff" stroke="#2b2013" strokeWidth="1" />
       </g>
 
-      {/* Attached Note Card */}
+      {/* 8. Attached Note Card Tucked inside Wrap (12° Angle) */}
       {card && (
-        <g transform="translate(165, 218) rotate(12)" filter="url(#softShadow)">
+        <g transform="translate(165, 218) rotate(12)" filter="url(#dropShadow2D)">
           <rect width="46" height="32" rx="4" fill={card.color || '#fffcf2'} stroke="#5c381e" strokeWidth="1.5" />
           <line x1="6" y1="10" x2="40" y2="10" stroke="#7a5c3e" strokeWidth="1" />
           <line x1="6" y1="18" x2="30" y2="18" stroke="#7a5c3e" strokeWidth="1" />
