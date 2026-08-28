@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Sparkles, Outlines } from '@react-three/drei';
 import * as THREE from 'three';
@@ -25,7 +25,6 @@ const OBSTACLES = [
 ];
 
 function sanitizePlayableTarget(x, z) {
-  // STRICT MATHEMATICAL CLAMPING: X: [-48.5, 48.5], Z: [-38.5, 38.5]
   let targetX = THREE.MathUtils.clamp(x, -48.5, 48.5);
   let targetZ = THREE.MathUtils.clamp(z, -38.5, 38.5);
 
@@ -40,11 +39,188 @@ function sanitizePlayableTarget(x, z) {
     }
   }
 
-  // Re-clamp after obstacle avoidance to ensure boundary is NEVER breached
   targetX = THREE.MathUtils.clamp(targetX, -48.5, 48.5);
   targetZ = THREE.MathUtils.clamp(targetZ, -38.5, 38.5);
 
   return [targetX, targetZ];
+}
+
+/** -------------------------------------------------------------
+ *  1. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS 🌊
+ * ------------------------------------------------------------- */
+function VillageLakeWithReeds() {
+  return (
+    <group position={[-18.0, -0.04, 12.0]}>
+      {/* Irregular Basin Water Plane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0.3]} receiveShadow>
+        <planeGeometry args={[14.0, 9.5]} />
+        <meshToonMaterial color="#2a9d8f" transparent opacity={0.92} />
+        <ToonOutline thickness={0.04} color="#1b4943" />
+      </mesh>
+
+      {/* Lily Pads */}
+      {[
+        [-3.2, 0.01, -1.8],
+        [-1.5, 0.01, 2.2],
+        [2.8, 0.01, -0.8],
+        [1.2, 0.01, 1.9],
+      ].map((p, idx) => (
+        <group key={idx} position={p}>
+          <mesh rotation={[-Math.PI / 2, 0, idx * 0.8]} castShadow>
+            <cylinderGeometry args={[0.45, 0.45, 0.02, 12]} />
+            <meshToonMaterial color="#52b788" />
+            <ToonOutline thickness={0.02} color="#1b4332" />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Edge Reeds */}
+      {[
+        [-5.5, 0, -2.5],
+        [-4.8, 0, 3.2],
+        [5.2, 0, -2.2],
+        [4.2, 0, 3.0],
+      ].map((pos, i) => (
+        <group key={i} position={pos}>
+          {[-0.2, 0, 0.2].map((off, j) => (
+            <mesh key={j} position={[off, 0.4, 0]} castShadow>
+              <cylinderGeometry args={[0.025, 0.03, 0.85, 6]} />
+              <meshToonMaterial color="#2d6a4f" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  2. TILLED FARM PLOTS WITH CROPS 🌾🌽
+ * ------------------------------------------------------------- */
+function TilledFarmPlots() {
+  return (
+    <group position={[16.0, 0, -8.0]}>
+      {/* Plot 1: Cabbage Row */}
+      <group position={[0, 0.01, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
+          <planeGeometry args={[7.5, 5.0]} />
+          <meshToonMaterial color="#5c381e" />
+          <ToonOutline thickness={0.03} color="#2b1a0e" />
+        </mesh>
+        {[-2.5, 0, 2.5].map((x, i) =>
+          [-1.5, 0, 1.5].map((z, j) => (
+            <mesh key={`${i}-${j}`} position={[x, 0.18, z]} castShadow>
+              <sphereGeometry args={[0.32, 10, 10]} />
+              <meshToonMaterial color="#38b000" />
+            </mesh>
+          ))
+        )}
+      </group>
+
+      {/* Plot 2: Wheat Stalks */}
+      <group position={[9.5, 0.01, 2.0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
+          <planeGeometry args={[7.5, 5.0]} />
+          <meshToonMaterial color="#6f4e37" />
+          <ToonOutline thickness={0.03} color="#2b1a0e" />
+        </mesh>
+        {[-2.5, 0, 2.5].map((x, i) =>
+          [-1.5, 0, 1.5].map((z, j) => (
+            <group key={`${i}-${j}`} position={[x, 0, z]}>
+              <mesh position={[0, 0.45, 0]} castShadow>
+                <cylinderGeometry args={[0.03, 0.04, 0.9, 6]} />
+                <meshToonMaterial color="#e9c46a" />
+              </mesh>
+              <mesh position={[0, 0.9, 0]}>
+                <sphereGeometry args={[0.15, 8, 8]} />
+                <meshToonMaterial color="#f4a261" />
+              </mesh>
+            </group>
+          ))
+        )}
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  3. SCATTERED FLOWER CLUSTERS 🌸🌼
+ * ------------------------------------------------------------- */
+function ScatteredFlowerClusters() {
+  const flowerClusters = useMemo(() => {
+    const list = [];
+    const colors = ['#ff4d6d', '#ffb703', '#7209b7', '#4cc9f0', '#ffffff', '#fb8500'];
+
+    // Clusters around lake edge, paths, and houses
+    const centers = [
+      [-12, 15], [-22, 9], [-10, 2], [12, -4], [22, -14],
+      [-5, -10], [8, 14], [-24, -18], [24, -26]
+    ];
+
+    centers.forEach((c, cIdx) => {
+      for (let i = 0; i < 5; i++) {
+        const x = c[0] + (Math.sin(i * 1.5) * 1.6);
+        const z = c[1] + (Math.cos(i * 1.5) * 1.6);
+        const color = colors[(cIdx + i) % colors.length];
+        list.push({ x, z, color });
+      }
+    });
+
+    return list;
+  }, []);
+
+  return (
+    <group>
+      {flowerClusters.map((f, idx) => (
+        <group key={idx} position={[f.x, 0, f.z]}>
+          <mesh position={[0, 0.12, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.24, 6]} />
+            <meshToonMaterial color="#38b000" />
+          </mesh>
+          <mesh position={[0, 0.24, 0]} castShadow>
+            <sphereGeometry args={[0.12, 10, 10]} />
+            <meshToonMaterial color={f.color} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  4. CLUSTERED TREE GROVES 🌲🌳
+ * ------------------------------------------------------------- */
+function ClusteredTreeGroves() {
+  const treeGroves = useMemo(() => [
+    { x: -28, z: 2, scale: 1.1, color: '#2d6a4f' },
+    { x: -30, z: -6, scale: 0.85, color: '#1b4332' },
+    { x: -25, z: -16, scale: 1.25, color: '#2d6a4f' },
+    { x: 26, z: -2, scale: 1.05, color: '#2d6a4f' },
+    { x: 30, z: -14, scale: 0.9, color: '#7209b7' },
+    { x: 22, z: 12, scale: 1.15, color: '#ffb5a7' },
+    { x: -8, z: 28, scale: 1.0, color: '#2d6a4f' },
+    { x: 8, z: 28, scale: 1.2, color: '#1b4332' },
+    { x: -30, z: 24, scale: 0.8, color: '#2d6a4f' },
+    { x: 30, z: 24, scale: 1.1, color: '#ffb5a7' },
+  ], []);
+
+  return (
+    <group>
+      {treeGroves.map((t, idx) => (
+        <group key={idx} position={[t.x, 0, t.z]} scale={t.scale}>
+          <mesh position={[0, 1.1, 0]} castShadow>
+            <cylinderGeometry args={[0.2, 0.32, 2.2, 8]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+          <mesh position={[0, 2.6, 0]} castShadow>
+            <sphereGeometry args={[1.35, 16, 16]} />
+            <meshToonMaterial color={t.color} />
+            <ToonOutline thickness={0.03} color="#10251b" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
 }
 
 /** -------------------------------------------------------------
@@ -66,7 +242,7 @@ function AnimatedBatMessenger() {
     <group ref={batRef} position={[0, 6.5, -15.0]} scale={0.85}>
       <mesh castShadow>
         <sphereGeometry args={[0.3, 12, 12]} />
-        <meshToonMaterial color="#2b1e3a" />
+        <meshToonMaterial color="#3d2b52" />
         <ToonOutline thickness={0.025} color="#12091f" />
       </mesh>
       <mesh position={[-0.45, 0, 0]} rotation={[0, 0.2, 0]}>
@@ -101,7 +277,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
     const rawTargetX = px - 0.75;
     const rawTargetZ = pz + 0.75;
 
-    // Strict boundary clamping for Cat
     const targetX = THREE.MathUtils.clamp(rawTargetX, -48.5, 48.5);
     const targetZ = THREE.MathUtils.clamp(rawTargetZ, -38.5, 38.5);
 
@@ -129,7 +304,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
         <ToonOutline thickness={0.025} />
       </mesh>
 
-      {/* Tabby Stripes */}
       {[-0.15, 0, 0.15].map((z, i) => (
         <mesh key={i} position={[0, 0.43, z]}>
           <boxGeometry args={[0.35, 0.02, 0.08]} />
@@ -137,7 +311,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
         </mesh>
       ))}
 
-      {/* Cat Head */}
       <group position={[0, 0.48, 0.38]}>
         <mesh castShadow>
           <boxGeometry args={[0.38, 0.32, 0.36]} />
@@ -174,7 +347,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
         </mesh>
       </group>
 
-      {/* 4 Paws */}
       {[
         [-0.12, 0.1, 0.22],
         [0.12, 0.1, 0.22],
@@ -264,7 +436,6 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
 function SteppedLowPolyTerrain({ onGroundClick }) {
   return (
     <group>
-      {/* 100 x 80 Playable Village Floor (X: [-50, 50], Z: [-40, 40]) */}
       <mesh
         position={[0, -0.06, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -313,21 +484,19 @@ function VillageWindingPaths() {
   );
 }
 
-/** -------------------------------------------------------------
- *  100+ DENSE FOREST BOUNDARY ENCLOSING THE 100x80 VILLAGE AREA
- * ------------------------------------------------------------- */
 function DenseMultiColorForestBoundary() {
-  const FOREST_TREES = [];
-
-  // Outer non-playable forest boundary surrounding X: [-50, 50], Z: [-40, 40]
-  for (let angle = 0; angle < Math.PI * 2; angle += 0.06) {
-    const rx = 52 + (Math.sin(angle * 6) * 3);
-    const rz = 42 + (Math.cos(angle * 6) * 3);
-    const x = Math.cos(angle) * rx;
-    const z = Math.sin(angle) * rz;
-    const type = Math.floor((Math.sin(x + z) + 1) * 2) % 4;
-    FOREST_TREES.push({ x, z, type });
-  }
+  const FOREST_TREES = useMemo(() => {
+    const trees = [];
+    for (let angle = 0; angle < Math.PI * 2; angle += 0.06) {
+      const rx = 52 + (Math.sin(angle * 6) * 3);
+      const rz = 42 + (Math.cos(angle * 6) * 3);
+      const x = Math.cos(angle) * rx;
+      const z = Math.sin(angle) * rz;
+      const type = Math.floor((Math.sin(x + z) + 1) * 2) % 4;
+      trees.push({ x, z, type });
+    }
+    return trees;
+  }, []);
 
   return (
     <group>
@@ -371,13 +540,9 @@ function DenseMultiColorForestBoundary() {
   );
 }
 
-/** -------------------------------------------------------------
- *  18-20% LARGE FLOWER FARM & VEGETABLE FARMS 🌽🌻
- * ------------------------------------------------------------- */
 function LargeCropFarms() {
   return (
     <group>
-      {/* 18-20% Large Flower Farm Plot */}
       <group position={[28, 0, 22]}>
         <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[18, 14]} />
@@ -399,7 +564,6 @@ function LargeCropFarms() {
         )}
       </group>
 
-      {/* Vegetable Farm Plot */}
       <group position={[-28, 0, 22]}>
         <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[18, 14]} />
@@ -535,11 +699,14 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
   );
 }
 
+/** -------------------------------------------------------------
+ *  BUG FIX — STORYBOOK HUMAN (BRIGHT TOON SHADING FIX) 🦇🖤
+ *  Prevents character mesh from rendering as a solid black silhouette
+ * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
 
-    // Strict boundary enforcement on player position
     const clampedX = THREE.MathUtils.clamp(targetPos[0], -48.5, 48.5);
     const clampedZ = THREE.MathUtils.clamp(targetPos[1], -38.5, 38.5);
 
@@ -560,53 +727,55 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
       }
     }
 
-    // Re-clamp
     groupRef.current.position.x = THREE.MathUtils.clamp(groupRef.current.position.x, -48.5, 48.5);
     groupRef.current.position.z = THREE.MathUtils.clamp(groupRef.current.position.z, -38.5, 38.5);
   });
 
   return (
     <group ref={groupRef} position={[-14.0, 0, -12.0]}>
-      {/* 1. OVERSIZED BLACK COWL HEAD (40-45% TOTAL HEIGHT) */}
+      {/* 1. OVERSIZED BATMAN COWL HEAD (RICH TOON DARK SLATE #2b2d42) */}
       <group position={[0, 0.96, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.38, 24, 24]} />
-          <meshToonMaterial color="#1c1c1e" />
-          <ToonOutline thickness={0.03} color="#0a0a0c" />
+          <meshToonMaterial color="#2b2d42" />
+          <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
 
+        {/* Pointed Cowl Ears */}
         <mesh position={[-0.18, 0.38, -0.05]} rotation={[-0.1, 0, -0.15]}>
           <coneGeometry args={[0.09, 0.32, 4]} />
-          <meshToonMaterial color="#1c1c1e" />
-          <ToonOutline thickness={0.025} color="#0a0a0c" />
+          <meshToonMaterial color="#2b2d42" />
+          <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
         <mesh position={[0.18, 0.38, -0.05]} rotation={[-0.1, 0, 0.15]}>
           <coneGeometry args={[0.09, 0.32, 4]} />
-          <meshToonMaterial color="#1c1c1e" />
-          <ToonOutline thickness={0.025} color="#0a0a0c" />
+          <meshToonMaterial color="#2b2d42" />
+          <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
 
+        {/* Pale Beige Face Cutout */}
         <mesh position={[0, -0.1, 0.22]}>
           <boxGeometry args={[0.32, 0.2, 0.12]} />
           <meshToonMaterial color="#fae1c5" />
         </mesh>
 
+        {/* Glowing White Eye Slits */}
         <mesh position={[-0.12, 0.06, 0.34]} rotation={[0, 0, -0.18]}>
           <boxGeometry args={[0.14, 0.035, 0.04]} />
-          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
         </mesh>
         <mesh position={[0.12, 0.06, 0.34]} rotation={[0, 0, 0.18]}>
           <boxGeometry args={[0.14, 0.035, 0.04]} />
-          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+          <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
         </mesh>
       </group>
 
-      {/* 2. CHUNKY GREY ARMOR & GOLD UTILITY BELT */}
+      {/* 2. CHUNKY ARMOR & GOLD UTILITY BELT (#3d405b / #c68a4c) */}
       <group position={[0, 0.46, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.38, 0.32]} />
-          <meshToonMaterial color="#4a4e69" />
-          <ToonOutline thickness={0.03} color="#0a0a0c" />
+          <meshToonMaterial color="#3d405b" />
+          <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
 
         <mesh position={[0, -0.14, 0]} castShadow>
@@ -624,35 +793,35 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         <group position={[0, 0.04, -0.18]} rotation={[0.2, 0, 0]}>
           <mesh castShadow>
             <boxGeometry args={[0.52, 0.58, 0.04]} />
-            <meshToonMaterial color="#1c1c1e" />
+            <meshToonMaterial color="#2b2d42" />
           </mesh>
         </group>
       </group>
 
-      {/* 3. ARMS & LEGS */}
+      {/* 3. ARMS & BOOTS */}
       <group position={[-0.28, 0.44, 0]} rotation={[0, 0, 0.25]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
-          <meshToonMaterial color="#1c1c1e" />
+          <meshToonMaterial color="#2b2d42" />
         </mesh>
       </group>
       <group position={[0.28, 0.44, 0]} rotation={[0, 0, -0.25]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
-          <meshToonMaterial color="#1c1c1e" />
+          <meshToonMaterial color="#2b2d42" />
         </mesh>
       </group>
 
       <group position={[-0.14, 0.12, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.16, 0.24, 0.2]} />
-          <meshToonMaterial color="#111113" />
+          <meshToonMaterial color="#1d1e2c" />
         </mesh>
       </group>
       <group position={[0.14, 0.12, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.16, 0.24, 0.2]} />
-          <meshToonMaterial color="#111113" />
+          <meshToonMaterial color="#1d1e2c" />
         </mesh>
       </group>
     </group>
@@ -671,8 +840,10 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <color attach="background" args={['#bfe8f7']} />
       <fog attach="fog" args={['#bfe8f7', 35, 140]} />
 
-      <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.9} />
-      <directionalLight position={[6, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
+      {/* 💡 BUG FIX: MULTI-LIGHT SETUP PREVENTS UNLIT BLACK SILHOUETTES */}
+      <ambientLight intensity={0.85} color="#ffffff" />
+      <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.8} />
+      <directionalLight position={[12, 18, 10]} intensity={1.6} castShadow shadow-mapSize={[2048, 2048]} />
 
       <CharacterCameraController
         playerGroupRef={playerGroupRef}
@@ -688,20 +859,32 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <DualWaterfallRiverValley />
       <VillageWindingPaths />
 
-      {/* 🌲🌸 DENSE MULTI-COLOR FOREST BOUNDARY ENCLOSING THE 100x80 PLAYABLE VILLAGE */}
+      {/* 🌊 1. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS */}
+      <VillageLakeWithReeds />
+
+      {/* 🌾 2. TILLED FARM PLOTS WITH CROPS */}
+      <TilledFarmPlots />
+
+      {/* 🌸 3. SCATTERED FLOWER CLUSTERS */}
+      <ScatteredFlowerClusters />
+
+      {/* 🌲 4. CLUSTERED TREE GROVES */}
+      <ClusteredTreeGroves />
+
+      {/* 🌲 DENSE MULTI-COLOR FOREST BOUNDARY ENCLOSING THE VILLAGE */}
       <DenseMultiColorForestBoundary />
 
       {/* 🦇 ANIMATED 3D BAT MESSENGER OVERHEAD */}
       <AnimatedBatMessenger />
 
-      {/* 🌽🌻 18-20% LARGE FLOWER FARM & VEGETABLE FARMS */}
+      {/* 🌽 18-20% LARGE FLOWER FARM & VEGETABLE FARMS */}
       <LargeCropFarms />
 
       <VillageSquare position={[0, 0, -22.0]} />
       <VillageHouses />
       <Villagers />
 
-      {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER */}
+      {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER (BRIGHT TOON SHADING FIX) */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
 
       {/* 🐴 HORSE PET COMPANION & MOUNT */}
