@@ -90,20 +90,25 @@ function LowPolyCottage({ position, rotation = 0, roofColor = '#e63946', wallCol
 
 export default function VillageHouses() {
   const HOUSES_CONFIG = [
-    { pos: [-16.0, 0, -18.0], rot: 0.3, roof: '#e63946', wall: '#f4f1de' }, // Red Roof
-    { pos: [-24.0, 0, -22.0], rot: 0.5, roof: '#457b9d', wall: '#f4f1de' }, // Blue Roof
-    { pos: [-28.0, 0, -32.0], rot: 0.2, roof: '#7209b7', wall: '#f4f1de' }, // Purple Roof
-    { pos: [16.0, 0, -18.0], rot: -0.3, roof: '#ffb703', wall: '#f4f1de' }, // Yellow Roof
-    { pos: [24.0, 0, -22.0], rot: -0.5, roof: '#2a9d8f', wall: '#f4f1de' }, // Sage Roof
-    { pos: [28.0, 0, -32.0], rot: -0.2, roof: '#e76f51', wall: '#f4f1de' }, // Orange Roof
-    { pos: [0.0, 0, -36.0], rot: 0.0, roof: '#e63946', wall: '#f4f1de' }, // North Red Roof
-    { pos: [-14.0, 0, -36.0], rot: 0.1, roof: '#457b9d', wall: '#f4f1de' }, // North West Blue Roof
-    { pos: [14.0, 0, -36.0], rot: -0.1, roof: '#7209b7', wall: '#f4f1de' }, // North East Purple Roof
-    { pos: [-36.0, 0, -10.0], rot: 0.8, roof: '#e76f51', wall: '#f4f1de' }, // West Orange Roof
-    { pos: [36.0, 0, -10.0], rot: -0.8, roof: '#2a9d8f', wall: '#f4f1de' }, // East Teal Roof
-    { pos: [-36.0, 0, 10.0], rot: 1.0, roof: '#ffb703', wall: '#f4f1de' }, // South West Yellow Roof
-    { pos: [36.0, 0, 10.0], rot: -1.0, roof: '#457b9d', wall: '#f4f1de' }, // South East Blue Roof
-    { pos: [0.0, 0, -12.0], rot: 0.0, roof: '#8c5a3c', wall: '#f4f1de' }, // Center Brown Roof
+    // North Zone (Z = +18 to +35)
+    { pos: [0.0, 0, 26.0], rot: Math.PI, roof: '#e63946', wall: '#f4f1de' }, // North Red Roof
+    { pos: [-14.0, 0, 28.0], rot: Math.PI + 0.2, roof: '#457b9d', wall: '#f4f1de' }, // North-West Blue Roof
+    { pos: [14.0, 0, 28.0], rot: Math.PI - 0.2, roof: '#7209b7', wall: '#f4f1de' }, // North-East Purple Roof
+
+    // South Zone (Z = -35 to -18)
+    { pos: [0.0, 0, -28.0], rot: 0.0, roof: '#ffb703', wall: '#f4f1de' }, // South Yellow Roof
+    { pos: [-14.0, 0, -28.0], rot: 0.2, roof: '#e76f51', wall: '#f4f1de' }, // South-West Orange Roof
+    { pos: [14.0, 0, -28.0], rot: -0.2, roof: '#2a9d8f', wall: '#f4f1de' }, // South-East Teal Roof
+
+    // East Zone (X = +22 to +42)
+    { pos: [30.0, 0, -10.0], rot: -Math.PI / 2, roof: '#457b9d', wall: '#f4f1de' }, // East Blue Roof
+    { pos: [32.0, 0, 0.0], rot: -Math.PI / 2, roof: '#e63946', wall: '#f4f1de' }, // East Red Roof
+    { pos: [30.0, 0, 10.0], rot: -Math.PI / 2, roof: '#7209b7', wall: '#f4f1de' }, // East Purple Roof
+
+    // West Zone (X = -42 to -22)
+    { pos: [-30.0, 0, -10.0], rot: Math.PI / 2, roof: '#2a9d8f', wall: '#f4f1de' }, // West Teal Roof
+    { pos: [-32.0, 0, 0.0], rot: Math.PI / 2, roof: '#ffb703', wall: '#f4f1de' }, // West Yellow Roof
+    { pos: [-30.0, 0, 10.0], rot: Math.PI / 2, roof: '#e76f51', wall: '#f4f1de' }, // West Orange Roof
   ];
 
   return (
