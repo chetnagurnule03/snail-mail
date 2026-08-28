@@ -46,19 +46,78 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
- *  1. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS 🌊
+ *  1. FRUIT ORCHARD WITH APPLE & ORANGE TREES 🍎🍊
+ * ------------------------------------------------------------- */
+function FruitOrchard() {
+  const fruitTrees = useMemo(() => [
+    { x: -32, z: -24, fruit: '#e63946' }, // Apple Tree
+    { x: -25, z: -28, fruit: '#fb8500' }, // Orange Tree
+    { x: -35, z: -32, fruit: '#e63946' }, // Apple Tree
+    { x: 32, z: -24, fruit: '#fb8500' },  // Orange Tree
+    { x: 25, z: -28, fruit: '#e63946' },  // Apple Tree
+    { x: 35, z: -32, fruit: '#fb8500' },  // Orange Tree
+  ], []);
+
+  return (
+    <group>
+      {fruitTrees.map((t, idx) => (
+        <group key={idx} position={[t.x, 0, t.z]}>
+          {/* Trunk */}
+          <mesh position={[0, 1.1, 0]} castShadow>
+            <cylinderGeometry args={[0.22, 0.35, 2.2, 8]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+
+          {/* Leafy Canopy */}
+          <mesh position={[0, 2.6, 0]} castShadow>
+            <sphereGeometry args={[1.4, 16, 16]} />
+            <meshToonMaterial color="#38b000" />
+            <ToonOutline thickness={0.03} color="#1b4332" />
+          </mesh>
+
+          {/* Hanging Fruits */}
+          {[
+            [-0.7, 2.3, 0.7],
+            [0.7, 2.5, 0.6],
+            [0.0, 2.8, 0.9],
+            [-0.6, 2.6, -0.6],
+            [0.6, 2.2, -0.7],
+          ].map((fp, fIdx) => (
+            <mesh key={fIdx} position={fp} castShadow>
+              <sphereGeometry args={[0.18, 10, 10]} />
+              <meshToonMaterial color={t.fruit} />
+            </mesh>
+          ))}
+
+          {/* Fruit Baskets Under Trees */}
+          <group position={[0.8, 0.15, 0.8]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.3, 0.24, 0.3, 8]} />
+              <meshToonMaterial color="#8a7e70" />
+            </mesh>
+            <mesh position={[0, 0.18, 0]}>
+              <sphereGeometry args={[0.22, 8, 8]} />
+              <meshToonMaterial color={t.fruit} />
+            </mesh>
+          </group>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  2. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS 🌊
  * ------------------------------------------------------------- */
 function VillageLakeWithReeds() {
   return (
     <group position={[-18.0, -0.04, 12.0]}>
-      {/* Irregular Basin Water Plane */}
       <mesh rotation={[-Math.PI / 2, 0, 0.3]} receiveShadow>
         <planeGeometry args={[14.0, 9.5]} />
         <meshToonMaterial color="#2a9d8f" transparent opacity={0.92} />
         <ToonOutline thickness={0.04} color="#1b4943" />
       </mesh>
 
-      {/* Lily Pads */}
       {[
         [-3.2, 0.01, -1.8],
         [-1.5, 0.01, 2.2],
@@ -74,7 +133,6 @@ function VillageLakeWithReeds() {
         </group>
       ))}
 
-      {/* Edge Reeds */}
       {[
         [-5.5, 0, -2.5],
         [-4.8, 0, 3.2],
@@ -95,12 +153,11 @@ function VillageLakeWithReeds() {
 }
 
 /** -------------------------------------------------------------
- *  2. TILLED FARM PLOTS WITH CROPS 🌾🌽
+ *  3. TILLED FARM PLOTS WITH CROPS 🌾🌽
  * ------------------------------------------------------------- */
 function TilledFarmPlots() {
   return (
     <group position={[16.0, 0, -8.0]}>
-      {/* Plot 1: Cabbage Row */}
       <group position={[0, 0.01, 0]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
           <planeGeometry args={[7.5, 5.0]} />
@@ -117,7 +174,6 @@ function TilledFarmPlots() {
         )}
       </group>
 
-      {/* Plot 2: Wheat Stalks */}
       <group position={[9.5, 0.01, 2.0]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
           <planeGeometry args={[7.5, 5.0]} />
@@ -144,14 +200,13 @@ function TilledFarmPlots() {
 }
 
 /** -------------------------------------------------------------
- *  3. SCATTERED FLOWER CLUSTERS 🌸🌼
+ *  4. SCATTERED FLOWER CLUSTERS 🌸🌼
  * ------------------------------------------------------------- */
 function ScatteredFlowerClusters() {
   const flowerClusters = useMemo(() => {
     const list = [];
     const colors = ['#ff4d6d', '#ffb703', '#7209b7', '#4cc9f0', '#ffffff', '#fb8500'];
 
-    // Clusters around lake edge, paths, and houses
     const centers = [
       [-12, 15], [-22, 9], [-10, 2], [12, -4], [22, -14],
       [-5, -10], [8, 14], [-24, -18], [24, -26]
@@ -188,7 +243,7 @@ function ScatteredFlowerClusters() {
 }
 
 /** -------------------------------------------------------------
- *  4. CLUSTERED TREE GROVES 🌲🌳
+ *  5. CLUSTERED TREE GROVES 🌲🌳
  * ------------------------------------------------------------- */
 function ClusteredTreeGroves() {
   const treeGroves = useMemo(() => [
@@ -699,10 +754,6 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
   );
 }
 
-/** -------------------------------------------------------------
- *  BUG FIX — STORYBOOK HUMAN (BRIGHT TOON SHADING FIX) 🦇🖤
- *  Prevents character mesh from rendering as a solid black silhouette
- * ------------------------------------------------------------- */
 function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
   useFrame((state) => {
     if (!groupRef.current || !targetPos) return;
@@ -733,7 +784,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 
   return (
     <group ref={groupRef} position={[-14.0, 0, -12.0]}>
-      {/* 1. OVERSIZED BATMAN COWL HEAD (RICH TOON DARK SLATE #2b2d42) */}
       <group position={[0, 0.96, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.38, 24, 24]} />
@@ -741,7 +791,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
 
-        {/* Pointed Cowl Ears */}
         <mesh position={[-0.18, 0.38, -0.05]} rotation={[-0.1, 0, -0.15]}>
           <coneGeometry args={[0.09, 0.32, 4]} />
           <meshToonMaterial color="#2b2d42" />
@@ -753,13 +802,11 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
           <ToonOutline thickness={0.025} color="#141521" />
         </mesh>
 
-        {/* Pale Beige Face Cutout */}
         <mesh position={[0, -0.1, 0.22]}>
           <boxGeometry args={[0.32, 0.2, 0.12]} />
           <meshToonMaterial color="#fae1c5" />
         </mesh>
 
-        {/* Glowing White Eye Slits */}
         <mesh position={[-0.12, 0.06, 0.34]} rotation={[0, 0, -0.18]}>
           <boxGeometry args={[0.14, 0.035, 0.04]} />
           <meshToonMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
@@ -770,7 +817,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </mesh>
       </group>
 
-      {/* 2. CHUNKY ARMOR & GOLD UTILITY BELT (#3d405b / #c68a4c) */}
       <group position={[0, 0.46, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.46, 0.38, 0.32]} />
@@ -798,7 +844,6 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
         </group>
       </group>
 
-      {/* 3. ARMS & BOOTS */}
       <group position={[-0.28, 0.44, 0]} rotation={[0, 0, 0.25]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.08, 0.09, 0.28, 10]} />
@@ -840,7 +885,6 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <color attach="background" args={['#bfe8f7']} />
       <fog attach="fog" args={['#bfe8f7', 35, 140]} />
 
-      {/* 💡 BUG FIX: MULTI-LIGHT SETUP PREVENTS UNLIT BLACK SILHOUETTES */}
       <ambientLight intensity={0.85} color="#ffffff" />
       <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.8} />
       <directionalLight position={[12, 18, 10]} intensity={1.6} castShadow shadow-mapSize={[2048, 2048]} />
@@ -859,16 +903,19 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <DualWaterfallRiverValley />
       <VillageWindingPaths />
 
-      {/* 🌊 1. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS */}
+      {/* 🍎🍊 1. FRUIT ORCHARD WITH APPLE & ORANGE TREES */}
+      <FruitOrchard />
+
+      {/* 🌊 2. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS */}
       <VillageLakeWithReeds />
 
-      {/* 🌾 2. TILLED FARM PLOTS WITH CROPS */}
+      {/* 🌾 3. TILLED FARM PLOTS WITH CROPS */}
       <TilledFarmPlots />
 
-      {/* 🌸 3. SCATTERED FLOWER CLUSTERS */}
+      {/* 🌸 4. SCATTERED FLOWER CLUSTERS */}
       <ScatteredFlowerClusters />
 
-      {/* 🌲 4. CLUSTERED TREE GROVES */}
+      {/* 🌲 5. CLUSTERED TREE GROVES */}
       <ClusteredTreeGroves />
 
       {/* 🌲 DENSE MULTI-COLOR FOREST BOUNDARY ENCLOSING THE VILLAGE */}
@@ -884,7 +931,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <VillageHouses />
       <Villagers />
 
-      {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER (BRIGHT TOON SHADING FIX) */}
+      {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} />
 
       {/* 🐴 HORSE PET COMPANION & MOUNT */}
