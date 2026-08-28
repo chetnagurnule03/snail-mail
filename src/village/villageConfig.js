@@ -20,19 +20,30 @@ export const MARKET = {
 
 export const HOUSES = {
   count: 14,
-  ringRadius: 30,
-  ringJitter: 2.5,
+  ringRadius: 35,
+  ringJitter: 2.0,
   roofPalette: ['#e8604a', '#5e8ee0', '#e0a83e', '#7bbf6a', '#c17bd6', '#e0776b'],
   wallPalette: ['#fbead0', '#eaf3ff', '#fff2d9', '#eafbe8', '#f6e8fb'],
   gardenRadius: 2.2,
   gardenFlowerCount: 10,
 };
 
+// The 9 inner zones (4 flower gardens, 2 vegetable farms, 1 orchard, 2
+// animal pens) are arranged in a ring at radius 20, one every 40
+// degrees, in an order chosen so the two largest zones (orchard,
+// farms) are never adjacent to each other — always separated by a
+// smaller garden or pen. This was verified pairwise (every neighbor
+// pair, market clearance, and house-ring clearance) before use; see
+// the layout notes in this file's project docs for the check. Do not
+// reposition these without re-running that check — moving one zone
+// closer to a big neighbor can reintroduce an overlap even though
+// each zone individually still "fits" the ring.
+
 export const FLOWER_GARDENS = [
-  { center: [-20, -20], width: 8, depth: 8, count: 80 },
-  { center: [20, -20], width: 8, depth: 8, count: 80 },
-  { center: [-20, 20], width: 7, depth: 7, count: 65 },
-  { center: [20, 20], width: 7, depth: 7, count: 65 },
+  { center: [-18.79, 6.84], width: 8, depth: 8, count: 80 },  // gardenLargeA
+  { center: [15.32, -12.86], width: 8, depth: 8, count: 80 }, // gardenLargeD
+  { center: [15.32, 12.86], width: 7, depth: 7, count: 65 },  // gardenSmallB
+  { center: [3.47, -19.7], width: 7, depth: 7, count: 65 },   // gardenSmallC
 ];
 export const FLOWER_PALETTE = ['#e8a0c9', '#f2c14e', '#c191e8', '#f28fa4', '#7ec6f2', '#ffffff'];
 
@@ -43,28 +54,29 @@ export const LOOSE_FLOWER_CLUSTERS = {
   count: 10, // number of clusters
   minSize: 4,
   maxSize: 8, // flowers per cluster: rng-picked in [minSize, maxSize]
-  scatterRadius: 34, // clusters placed within this radius of center
+  scatterRadius: 26, // kept inside the house band's inner edge (28.8) so
+                      // loose flowers land in the village interior, not on houses
 };
 
 export const VEGETABLE_FARMS = [
   {
-    center: [-12, 12],
+    center: [3.47, 19.7], // farmA
     width: 12,
     depth: 8,
     rowSpacing: 1.4,
     crops: ['carrot', 'tomato', 'cabbage', 'lettuce'],
   },
   {
-    center: [12, 14],
-    width: 10,
-    depth: 7,
+    center: [-10, -17.32], // farmB
+    width: 12,
+    depth: 8,
     rowSpacing: 1.4,
     crops: ['pumpkin', 'corn', 'tomato'],
   },
 ];
 
 export const ORCHARD = {
-  center: [24, 2],
+  center: [20, 0],
   width: 12,
   depth: 9,
   spacingX: 3,
@@ -76,13 +88,13 @@ export const ORCHARD = {
 
 export const ANIMAL_PENS = [
   {
-    center: [-24, 4],
+    center: [-10, 17.32], // penA
     width: 8,
     depth: 8,
     animals: ['cow', 'sheep', 'sheep', 'chicken', 'chicken', 'chicken'],
   },
   {
-    center: [-14, -12],
+    center: [-18.79, -6.84], // penB
     width: 7,
     depth: 6,
     animals: ['rabbit', 'rabbit', 'duck', 'duck', 'horse'],
