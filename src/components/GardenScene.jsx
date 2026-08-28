@@ -459,40 +459,227 @@ function VillageFountain({ position, radius = 1.5 }) {
 /** -------------------------------------------------------------
  *  CROPS & FARMS 🌽🥕🎃
  * ------------------------------------------------------------- */
-function CropItem({ position, type }) {
-  let color = '#38b000';
-  let isCone = false;
-  let isTall = false;
-
-  if (type === 'carrot') { color = '#fb8500'; isCone = true; }
-  else if (type === 'tomato') { color = '#e63946'; }
-  else if (type === 'pumpkin') { color = '#e76f51'; }
-  else if (type === 'corn') { color = '#ffb703'; isTall = true; }
-  else if (type === 'lettuce') { color = '#52b788'; }
-
+/** -------------------------------------------------------------
+ *  DETAILED 3D LOW-POLY CROPS & PLANTS 🌽🥕🎃🍅
+ * ------------------------------------------------------------- */
+function TomatoPlant() {
   return (
-    <group position={[position[0], 0, position[1]]} scale={1.2}>
-      {isCone ? (
-        <mesh position={[0, 0.2, 0]} castShadow>
-          <coneGeometry args={[0.18, 0.55, 6]} />
-          <meshToonMaterial color={color} />
+    <group position={[0, 0, 0]}>
+      {/* Branching Stem */}
+      <mesh position={[0, 0.22, 0]} castShadow>
+        <cylinderGeometry args={[0.02, 0.03, 0.45, 6]} />
+        <meshToonMaterial color="#2d6a4f" />
+      </mesh>
+
+      {/* Jagged Leaves */}
+      {[-0.12, 0.12].map((x, i) => (
+        <mesh key={i} position={[x, 0.18, (i % 2 === 0 ? 0.08 : -0.08)]} rotation={[0.2, 0, i % 2 === 0 ? 0.4 : -0.4]} castShadow>
+          <boxGeometry args={[0.18, 0.03, 0.1]} />
+          <meshToonMaterial color="#38b000" />
         </mesh>
-      ) : isTall ? (
-        <group position={[0, 0.55, 0]}>
+      ))}
+      {[-0.1, 0.1].map((x, i) => (
+        <mesh key={`l2-${i}`} position={[x, 0.32, (i % 2 === 0 ? -0.06 : 0.06)]} rotation={[-0.2, 0, i % 2 === 0 ? -0.4 : 0.4]} castShadow>
+          <boxGeometry args={[0.16, 0.03, 0.09]} />
+          <meshToonMaterial color="#38b000" />
+        </mesh>
+      ))}
+
+      {/* 3 Red Tomatoes with Calyx Cap */}
+      {[
+        [-0.08, 0.34, 0.06],
+        [0.08, 0.32, -0.06],
+        [0.02, 0.4, 0.08],
+      ].map((pos, idx) => (
+        <group key={idx} position={pos}>
           <mesh castShadow>
-            <cylinderGeometry args={[0.04, 0.05, 1.1, 6]} />
-            <meshToonMaterial color="#e9c46a" />
+            <sphereGeometry args={[0.08, 8, 8]} />
+            <meshToonMaterial color="#e63946" />
           </mesh>
-          <mesh position={[0, 0.55, 0]}>
-            <sphereGeometry args={[0.16, 8, 8]} />
-            <meshToonMaterial color={color} />
+          <mesh position={[0, 0.07, 0]}>
+            <coneGeometry args={[0.04, 0.02, 5]} />
+            <meshToonMaterial color="#38b000" />
           </mesh>
         </group>
-      ) : (
-        <mesh position={[0, 0.25, 0]} castShadow>
-          <sphereGeometry args={[0.3, 10, 10]} />
-          <meshToonMaterial color={color} />
+      ))}
+    </group>
+  );
+}
+
+function CarrotPlant() {
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Orange Carrot Soil Tip */}
+      <mesh position={[0, 0.05, 0]} rotation={[Math.PI, 0, 0]} castShadow>
+        <coneGeometry args={[0.065, 0.22, 6]} />
+        <meshToonMaterial color="#fb8500" />
+      </mesh>
+
+      {/* 6 Upright Feathery Leaves */}
+      {[0, 60, 120, 180, 240, 300].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const lx = Math.cos(rad) * 0.04;
+        const lz = Math.sin(rad) * 0.04;
+        return (
+          <mesh key={i} position={[lx, 0.22, lz]} rotation={[0.2, -rad, 0.15]} castShadow>
+            <coneGeometry args={[0.02, 0.38, 4]} />
+            <meshToonMaterial color="#38b000" />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+function CabbagePlant() {
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Rosette Overlapping Leaves */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const lx = Math.cos(rad) * 0.08;
+        const lz = Math.sin(rad) * 0.08;
+        return (
+          <mesh key={i} position={[lx, 0.08, lz]} rotation={[0.3, -rad, 0]} castShadow>
+            <sphereGeometry args={[0.16, 8, 8]} />
+            <meshToonMaterial color="#1b4332" />
+          </mesh>
+        );
+      })}
+      {/* Inner Rosette Core */}
+      <mesh position={[0, 0.12, 0]} castShadow>
+        <sphereGeometry args={[0.18, 10, 10]} />
+        <meshToonMaterial color="#74c69d" />
+      </mesh>
+    </group>
+  );
+}
+
+function BellPepperPlant() {
+  return (
+    <group position={[0, 0, 0]}>
+      <mesh position={[0, 0.18, 0]} castShadow>
+        <cylinderGeometry args={[0.03, 0.04, 0.36, 6]} />
+        <meshToonMaterial color="#2d6a4f" />
+      </mesh>
+      {[-0.1, 0.1].map((x, i) => (
+        <mesh key={i} position={[x, 0.24, 0]} rotation={[0.1, 0, i % 2 === 0 ? 0.3 : -0.3]} castShadow>
+          <boxGeometry args={[0.18, 0.03, 0.12]} />
+          <meshToonMaterial color="#1b4332" />
         </mesh>
+      ))}
+      <mesh position={[-0.07, 0.22, 0.08]} castShadow>
+        <dodecahedronGeometry args={[0.09, 0]} />
+        <meshToonMaterial color="#e63946" />
+      </mesh>
+      <mesh position={[0.07, 0.25, -0.06]} castShadow>
+        <dodecahedronGeometry args={[0.09, 0]} />
+        <meshToonMaterial color="#ffb703" />
+      </mesh>
+    </group>
+  );
+}
+
+function EggplantPlant() {
+  return (
+    <group position={[0, 0, 0]}>
+      <mesh position={[0, 0.2, 0]} castShadow>
+        <cylinderGeometry args={[0.04, 0.05, 0.4, 6]} />
+        <meshToonMaterial color="#3a0ca3" />
+      </mesh>
+      {[-0.1, 0.1].map((x, i) => (
+        <mesh key={i} position={[x, 0.22, 0]} rotation={[0.1, 0, i % 2 === 0 ? 0.3 : -0.3]} castShadow>
+          <boxGeometry args={[0.18, 0.03, 0.12]} />
+          <meshToonMaterial color="#2d6a4f" />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.16, 0.1]} scale={[0.85, 1.5, 0.85]} castShadow>
+        <sphereGeometry args={[0.08, 8, 8]} />
+        <meshToonMaterial color="#4a1259" />
+      </mesh>
+    </group>
+  );
+}
+
+function PumpkinPlant() {
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Low Sprawling Vine Leaves */}
+      {[0, 72, 144, 216, 288].map((ang, i) => {
+        const rad = (ang * Math.PI) / 180;
+        const lx = Math.cos(rad) * 0.16;
+        const lz = Math.sin(rad) * 0.16;
+        return (
+          <mesh key={i} position={[lx, 0.04, lz]} rotation={[0.15, -rad, 0]} castShadow>
+            <sphereGeometry args={[0.14, 8, 8]} />
+            <meshToonMaterial color="#2d6a4f" />
+          </mesh>
+        );
+      })}
+      {/* Ribbed Orange Pumpkin */}
+      <mesh position={[0, 0.18, 0]} scale={[1.15, 0.82, 1.15]} castShadow>
+        <sphereGeometry args={[0.26, 12, 10]} />
+        <meshToonMaterial color="#e76f51" />
+        <ToonOutline thickness={0.025} color="#4a1a0e" />
+      </mesh>
+      {/* Stem */}
+      <mesh position={[0, 0.34, 0]} castShadow>
+        <cylinderGeometry args={[0.03, 0.04, 0.08, 6]} />
+        <meshToonMaterial color="#2d6a4f" />
+      </mesh>
+    </group>
+  );
+}
+
+function CornPlant() {
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Tall Stalk */}
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <cylinderGeometry args={[0.035, 0.055, 0.9, 6]} />
+        <meshToonMaterial color="#38b000" />
+      </mesh>
+      {/* Alternating Blade Leaves */}
+      {[-0.1, 0.1].map((x, i) => (
+        <mesh key={i} position={[x, 0.35 + i * 0.2, 0]} rotation={[0.3, 0, i % 2 === 0 ? 0.5 : -0.5]} castShadow>
+          <boxGeometry args={[0.28, 0.02, 0.06]} />
+          <meshToonMaterial color="#2d6a4f" />
+        </mesh>
+      ))}
+      {/* 2 Corn Cobs with Husks */}
+      <group position={[0.06, 0.45, 0.04]} rotation={[0.2, 0, -0.3]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.06, 0.07, 0.26, 8]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+        <mesh position={[-0.03, -0.04, 0]} rotation={[0, 0, -0.2]}>
+          <coneGeometry args={[0.06, 0.22, 6]} />
+          <meshToonMaterial color="#38b000" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function CropItem({ position, type }) {
+  return (
+    <group position={[position[0], 0, position[1]]} scale={1.15}>
+      {type === 'tomato' ? (
+        <TomatoPlant />
+      ) : type === 'carrot' ? (
+        <CarrotPlant />
+      ) : type === 'cabbage' || type === 'lettuce' ? (
+        <CabbagePlant />
+      ) : type === 'pepper' ? (
+        <BellPepperPlant />
+      ) : type === 'eggplant' ? (
+        <EggplantPlant />
+      ) : type === 'pumpkin' ? (
+        <PumpkinPlant />
+      ) : type === 'corn' ? (
+        <CornPlant />
+      ) : (
+        <CarrotPlant />
       )}
     </group>
   );
