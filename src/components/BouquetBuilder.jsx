@@ -326,26 +326,36 @@ function RenderSingleFlowerSVG({ type, seed = 12345, fx, fy, scale = 1, rotation
 /** -------------------------------------------------------------
  *  SHARED BOUQUET ILLUSTRATION COMPONENT (TRUE PIXEL-ART FLOWERS)
  * ------------------------------------------------------------- */
-export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width = 280, height = 300 }) {
-  const selectedFlowers = bouquet?.flowers || [];
-  const selectedGreenery = bouquet?.greenery || [];
-  const wrap = bouquet?.wrap || WRAP_STYLES[0];
-  const ribbon = bouquet?.ribbon || RIBBON_STYLES[0];
-  const card = bouquet?.card || CARD_STYLES[0];
-  const bg = bouquet?.background || BACKGROUND_STYLES[0];
+export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width = 280, height = 360 }) {
+  let bouquetData = bouquet;
+  const isNightMode = bouquetData?.isNight ?? isNightProp;
 
-  const isNightMode = bouquet?.isNight ?? isNightProp;
-  const viewH = isNightMode ? 340 : 310;
+  // SAFE FALLBACK: If bouquet data is empty, null, or has no flowers, generate default bouquet
+  if (!bouquetData || !bouquetData.flowers || bouquetData.flowers.length === 0) {
+    bouquetData = generateDefaultBouquet(isNightMode);
+  }
+
+  const selectedFlowers = bouquetData.flowers || [];
+  const selectedGreenery = bouquetData.greenery || [GREENERY_TYPES[0]];
+  const wrap = bouquetData.wrap || WRAP_STYLES[0];
+  const ribbon = bouquetData.ribbon || RIBBON_STYLES[0];
+  const card = bouquetData.card || CARD_STYLES[0];
+  const bg = bouquetData.background || BACKGROUND_STYLES[0];
+
+  const viewH = isNightMode ? 380 : 350;
   const bgColor = isNightMode ? '#10061e' : bg.color || '#f4e9d8';
   const wrapColor = isNightMode ? '#3a0ca3' : wrap.color || '#d4a373';
   const ribbonColor = isNightMode ? '#7209b7' : ribbon.color || '#e63946';
 
-  // Anchor Bundle Point: (140, 215)
-  const BUNDLE_X = 140;
-  const BUNDLE_Y = 215;
+  // Anchor Bundle Point & Stem Convergence (140, 310)
+  const CX = 140;
+  const TY = 35;
+  const BY = 310;
+  const H = 275;
+  const W = 105;
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 280 ${viewH}`} style={{ background: bgColor, borderRadius: 16 }}>
+    <svg width={width} height={height} viewBox={`0 0 280 ${viewH}`} style={{ background: bgColor, borderRadius: 16, imageRendering: 'pixelated' }}>
       <defs>
         {/* Soft 2D Drop Shadow Filter for Paper-Doll Layering */}
         <filter id="dropShadow2D" x="-20%" y="-20%" width="140%" height="140%">
@@ -370,29 +380,30 @@ export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width 
 
       {/* Night Mode Subtle Pixel-Art Particles & Glow */}
       {isNightMode && (
-        <g opacity="0.65">
-          <rect x="40" y="35" width="3" height="3" fill="#ffd166" shapeRendering="crispEdges" />
+        <g opacity="0.75">
+          <rect x="40" y="35" width="4" height="4" fill="#ffd166" shapeRendering="crispEdges" />
           <rect x="230" y="50" width="4" height="4" fill="#c77dff" shapeRendering="crispEdges" />
           <rect x="65" y="110" width="3" height="3" fill="#e0aaff" shapeRendering="crispEdges" />
-          <rect x="215" y="125" width="3" height="3" fill="#ffd166" shapeRendering="crispEdges" />
-          <circle cx="140" cy="120" r="75" fill="#7209b7" opacity="0.15" />
+          <rect x="215" y="125" width="4" height="4" fill="#ffd166" shapeRendering="crispEdges" />
+          <rect x="180" y="30" width="3" height="3" fill="#ffffff" shapeRendering="crispEdges" />
+          <circle cx="140" cy="120" r="85" fill="#7209b7" opacity="0.16" />
         </g>
       )}
 
       {/* 2. Paper Wrap Back Flap */}
-      <path d="M 75 160 Q 140 145 205 160 L 152 272 L 128 272 Z" fill="#e9d8a6" opacity="0.5" />
+      <path d="M 65 170 Q 140 155 215 170 L 155 315 L 125 315 Z" fill="#e9d8a6" opacity="0.5" />
 
-      {/* 3. Greenery Fan & Connecting Stems (EVERY STEM CONNECTS TO BUNDLE ANCHOR 140,205) */}
+      {/* 3. Greenery Fan & Connecting Stems (EVERY STEM CONNECTS TO CONVERGENCE POINT CX, BY) */}
       {selectedGreenery.map((g, idx) => {
-        const angle = -45 + (idx * 30);
+        const angle = -50 + (idx * 28);
         const rad = (angle * Math.PI) / 180;
-        const gx = BUNDLE_X + Math.cos(rad) * 65;
-        const gy = BUNDLE_Y - 80 + Math.sin(rad) * 35;
+        const gx = CX + Math.cos(rad) * 75;
+        const gy = BY - 140 + Math.sin(rad) * 40;
 
         return (
           <g key={`g-${idx}`} filter="url(#dropShadow2D)">
-            {/* Greenery Stem Connecting Head to Bundle Point (140, 205) */}
-            <path d={`M ${gx} ${gy} Q ${gx * 0.6 + BUNDLE_X * 0.4} ${gy * 0.5 + BUNDLE_Y * 0.5} ${BUNDLE_X} ${BUNDLE_Y}`} stroke="#1c5200" strokeWidth="2.5" strokeLinecap="round" />
+            {/* Greenery Stem Connecting Head to Bottom Convergence */}
+            <path d={`M ${gx} ${gy} Q ${gx * 0.5 + CX * 0.5} ${gy * 0.4 + BY * 0.6} ${CX} ${BY}`} stroke="#1c5200" strokeWidth="2.5" strokeLinecap="round" />
             {/* Leaf Fan Head */}
             <g transform={`translate(${gx}, ${gy}) rotate(${angle})`}>
               <path d="M 0 0 Q -18 -38 0 -68 Q 18 -38 0 0" fill={g.color || '#38b000'} stroke="#1c5200" strokeWidth="1.5" />
@@ -402,19 +413,32 @@ export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width 
         );
       })}
 
-      {/* 4. Bundled Flower Stems (EVERY STEM CONNECTS TO BUNDLE ANCHOR 140,205) */}
+      {/* 4. Bundled Flower Stems (EVERY STEM GRADUALLY CONVERGES TOWARD X=0, Y=0.95-1.00) */}
       {selectedFlowers.map((f, idx) => {
-        const count = selectedFlowers.length;
-        const angle = ((idx - (count - 1) / 2) / (count || 1)) * 1.25;
-        const fx = BUNDLE_X + Math.sin(angle) * 58;
-        const fy = 98 + Math.cos(angle * 1.4) * 36;
+        const total = selectedFlowers.length;
+
+        // Normalized coordinate resolution
+        let xNorm = f.xNorm;
+        let yNorm = f.yNorm;
+        let scale = f.scale || 1.0;
+
+        if (xNorm == null || yNorm == null) {
+          const ratio = idx / Math.max(1, total - 1);
+          const fanAngle = (ratio - 0.5) * 1.3;
+          xNorm = Math.sin(fanAngle) * 0.65;
+          yNorm = 0.15 + Math.cos(fanAngle) * 0.35;
+          scale = idx % 2 === 0 ? 1.2 : 0.85;
+        }
+
+        const fx = CX + xNorm * W;
+        const fy = TY + yNorm * H;
 
         return (
           <path
             key={`stem-${idx}`}
-            d={`M ${fx} ${fy} Q ${fx * 0.5 + BUNDLE_X * 0.5} ${fy * 0.5 + BUNDLE_Y * 0.5} ${BUNDLE_X} ${BUNDLE_Y}`}
+            d={`M ${fx} ${fy} Q ${fx * 0.45 + CX * 0.55} ${fy * 0.35 + BY * 0.65} ${CX} ${BY}`}
             stroke="#2d6a4f"
-            strokeWidth="3.2"
+            strokeWidth={scale > 1.1 ? '3.5' : '2.5'}
             strokeLinecap="round"
           />
         );
@@ -422,41 +446,47 @@ export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width 
 
       {/* 5. Layered Flower Heads (Back Flowers First, Front Flowers Last) */}
       {selectedFlowers.map((f, idx) => {
-        const count = selectedFlowers.length;
-        const angle = ((idx - (count - 1) / 2) / (count || 1)) * 1.25;
-        const fx = BUNDLE_X + Math.sin(angle) * 58;
-        const fy = 98 + Math.cos(angle * 1.4) * 36;
-        const isForeground = idx % 2 === 0;
-        const scale = isForeground ? 1.08 : 0.88;
-        const rotation = (idx % 3 === 0 ? -10 : idx % 3 === 1 ? 12 : -4);
+        const total = selectedFlowers.length;
+
+        let xNorm = f.xNorm;
+        let yNorm = f.yNorm;
+        let scale = f.scale || 1.0;
+        let rotation = f.rotation || 0;
+
+        if (xNorm == null || yNorm == null) {
+          const ratio = idx / Math.max(1, total - 1);
+          const fanAngle = (ratio - 0.5) * 1.3;
+          xNorm = Math.sin(fanAngle) * 0.65;
+          yNorm = 0.15 + Math.cos(fanAngle) * 0.35;
+          scale = idx % 2 === 0 ? 1.2 : 0.85;
+          rotation = (idx % 3 === 0 ? -10 : idx % 3 === 1 ? 12 : -5);
+        }
+
+        const fx = CX + xNorm * W;
+        const fy = TY + yNorm * H;
 
         return (
-          <g key={`fl-${idx}-${f.id}`}>
-            <RenderSingleFlowerSVG type={f.type} fx={fx} fy={fy} scale={scale} rotation={rotation} />
+          <g key={`fl-${idx}-${f.id || idx}`}>
+            <RenderSingleFlowerSVG type={f.type || 'daisy'} seed={f.seed || idx * 100} fx={fx} fy={fy} scale={scale} rotation={rotation} />
           </g>
         );
       })}
 
       {/* 6. Paper Wrap Front Cone with Fold Lines & Soft Shadow */}
       <g filter="url(#dropShadow2D)">
-        {/* Irregular Folded Top Edge Paper Cone */}
-        <polygon points="85,165 195,165 152,272 128,272" fill={wrapColor} stroke="#5c381e" strokeWidth="1.8" strokeLinejoin="round" />
-        <polygon points="85,165 140,210 128,272" fill="url(#illWrapLeft)" />
-        <polygon points="195,165 140,210 152,272" fill="url(#illWrapRight)" />
-        {/* Subtle Crease Fold Lines */}
-        <line x1="85" y1="165" x2="140" y2="210" stroke="#5c381e" strokeWidth="1.2" opacity="0.7" />
-        <line x1="195" y1="165" x2="140" y2="210" stroke="#5c381e" strokeWidth="1.2" opacity="0.7" />
-        <line x1="85" y1="165" x2="195" y2="165" stroke="#ffffff" strokeWidth="1.4" opacity="0.4" />
+        <polygon points="75,185 205,185 155,315 125,315" fill={wrapColor} stroke="#5c381e" strokeWidth="1.8" strokeLinejoin="round" />
+        <polygon points="75,185 140,230 125,315" fill="url(#illWrapLeft)" />
+        <polygon points="205,185 140,230 155,315" fill="url(#illWrapRight)" />
+        <line x1="75" y1="185" x2="140" y2="230" stroke="#5c381e" strokeWidth="1.2" opacity="0.7" />
+        <line x1="205" y1="185" x2="140" y2="230" stroke="#5c381e" strokeWidth="1.2" opacity="0.7" />
+        <line x1="75" y1="185" x2="205" y2="185" stroke="#ffffff" strokeWidth="1.4" opacity="0.4" />
       </g>
 
-      {/* 7. Ribbon & Bow Wrapped Around Bundle Point (140, 205) */}
-      <g transform={`translate(${BUNDLE_X}, ${BUNDLE_Y})`} filter="url(#dropShadow2D)">
-        {/* Draped Ribbon Tails */}
+      {/* 7. Ribbon & Bow Wrapped Around Bundle Point (140, 230) */}
+      <g transform={`translate(${CX}, 230)`} filter="url(#dropShadow2D)">
         <path d="M -6 4 Q -16 28 -22 45" fill="none" stroke={ribbonColor} strokeWidth="6" strokeLinecap="round" />
         <path d="M 6 4 Q 16 28 22 45" fill="none" stroke={ribbonColor} strokeWidth="6" strokeLinecap="round" />
-        {/* Tied Knot Ellipse */}
         <ellipse cx="0" cy="0" rx="28" ry="7.5" fill={ribbonColor} stroke="#2b2013" strokeWidth="1" />
-        {/* Bow Loops */}
         <path d="M 0 0 C -26 -22 -32 12 0 0" fill={ribbonColor} stroke="#2b2013" strokeWidth="1.2" />
         <path d="M 0 0 C 26 -22 32 12 0 0" fill={ribbonColor} stroke="#2b2013" strokeWidth="1.2" />
         <ellipse cx="0" cy="-2" rx="20" ry="2.5" fill="#ffffff" opacity="0.35" />
@@ -465,7 +495,7 @@ export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width 
 
       {/* 8. Attached Note Card Tucked inside Wrap (12° Angle) */}
       {card && (
-        <g transform="translate(165, 218) rotate(12)" filter="url(#dropShadow2D)">
+        <g transform="translate(165, 240) rotate(12)" filter="url(#dropShadow2D)">
           <rect width="46" height="32" rx="4" fill={card.color || '#fffcf2'} stroke="#5c381e" strokeWidth="1.5" />
           <line x1="6" y1="10" x2="40" y2="10" stroke="#7a5c3e" strokeWidth="1" />
           <line x1="6" y1="18" x2="30" y2="18" stroke="#7a5c3e" strokeWidth="1" />
@@ -480,11 +510,14 @@ export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width 
  * ------------------------------------------------------------- */
 export default function BouquetBuilder({ isNight = false, onDone, onCancel }) {
   const [activeStep, setActiveStep] = useState(0); // 0: Flowers, 1: Greenery, 2: Wrap, 3: Card, 4: Background, 5: Preview
+  const defaultBouquet = useMemo(() => generateDefaultBouquet(isNight), [isNight]);
 
   const [selectedFlowers, setSelectedFlowers] = useState([
     { id: 'f-1', type: 'rose' },
-    { id: 'f-2', type: 'daisy' },
+    { id: 'f-2', type: 'sunflower' },
     { id: 'f-3', type: 'tulip' },
+    { id: 'f-4', type: 'daisy' },
+    { id: 'f-5', type: 'lavender' },
   ]);
   const [selectedGreenery, setSelectedGreenery] = useState([GREENERY_TYPES[0]]);
   const [selectedWrap, setSelectedWrap] = useState(WRAP_STYLES[0]);
@@ -515,8 +548,10 @@ export default function BouquetBuilder({ isNight = false, onDone, onCancel }) {
   const handleClearAll = () => {
     setSelectedFlowers([
       { id: 'f-1', type: 'rose' },
-      { id: 'f-2', type: 'daisy' },
+      { id: 'f-2', type: 'sunflower' },
       { id: 'f-3', type: 'tulip' },
+      { id: 'f-4', type: 'daisy' },
+      { id: 'f-5', type: 'lavender' },
     ]);
     setSelectedGreenery([GREENERY_TYPES[0]]);
     setSelectedWrap(WRAP_STYLES[0]);
@@ -526,7 +561,7 @@ export default function BouquetBuilder({ isNight = false, onDone, onCancel }) {
   };
 
   const currentBouquetData = {
-    flowers: selectedFlowers,
+    flowers: selectedFlowers.length > 0 ? selectedFlowers : defaultBouquet.flowers,
     greenery: selectedGreenery,
     wrap: selectedWrap,
     ribbon: selectedRibbon,

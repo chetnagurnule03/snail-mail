@@ -292,13 +292,153 @@ export function generatePixelFlower(type = 'daisy', seed = 12345) {
       break;
     }
 
+    case 'wildflower': {
+      const flowerShades = ['#ffc6ff', '#b8c0ff', '#e7c6ff', '#ffd6ff', '#a0c4ff'];
+      const cx = CENTER;
+      const cy = 5;
+
+      // Small 3-5 pixel cluster head
+      setPixel(cx, cy, pickShade(flowerShades));
+      setPixel(cx - 1, cy, pickShade(flowerShades));
+      setPixel(cx + 1, cy, pickShade(flowerShades));
+      setPixel(cx, cy - 1, pickShade(flowerShades));
+      setPixel(cx, cy + 1, pickShade(flowerShades));
+      setPixel(cx, cy, '#ffff3f'); // tiny center dot
+
+      // Thin stem & leaf
+      drawStemAndLeaves(cy + 2, 1, 1, '#2d6a4f', '#38b000');
+      break;
+    }
+
     default: {
-      drawStemAndLeaves(6, 1, 2, '#2d6a4f', '#38b000');
+      // Fallback daisy-like bloom
+      const petalShades = ['#ffffff', '#f4f1de'];
+      const cx = CENTER;
+      const cy = 6;
+      for (let i = 0; i < 8; i++) {
+        const ang = (i * 45) * (Math.PI / 180);
+        setPixel(cx + Math.cos(ang) * 3, cy + Math.sin(ang) * 3, pickShade(petalShades));
+      }
+      setPixel(cx, cy, '#ffb703');
+      drawStemAndLeaves(cy + 3, 1, 2, '#2d6a4f', '#38b000');
       break;
     }
   }
 
   return { grid: GRID, pixels, meta: { type, seed } };
+}
+
+/**
+ * Generates a complete default bouquet composition (Day/Night) as a safe fallback.
+ */
+export function generateDefaultBouquet(isNight = false) {
+  const seedRng = makeRng(isNight ? 99999 : 12345);
+  const types = isNight
+    ? ['lavender', 'rose', 'lily', 'tulip', 'daisy', 'wildflower']
+    : ['rose', 'sunflower', 'tulip', 'daisy', 'lily', 'poppy', 'lavender', 'wildflower'];
+
+  const flowers = [];
+
+  // Large flowers (6)
+  const largePositions = [
+    { xNorm: 0.0, yNorm: 0.10 },
+    { xNorm: -0.28, yNorm: 0.15 },
+    { xNorm: 0.28, yNorm: 0.15 },
+    { xNorm: -0.40, yNorm: 0.28 },
+    { xNorm: 0.40, yNorm: 0.28 },
+    { xNorm: 0.0, yNorm: 0.28 },
+  ];
+  largePositions.forEach((pos, i) => {
+    flowers.push({
+      id: `def-l-${i}`,
+      type: types[i % types.length],
+      sizeClass: 'large',
+      xNorm: pos.xNorm,
+      yNorm: pos.yNorm,
+      scale: 1.35 + (seedRng() * 0.15 - 0.07),
+      rotation: Math.floor(seedRng() * 24 - 12),
+      seed: Math.floor(seedRng() * 100000),
+    });
+  });
+
+  // Medium flowers (8)
+  const medPositions = [
+    { xNorm: -0.52, yNorm: 0.35 },
+    { xNorm: 0.52, yNorm: 0.35 },
+    { xNorm: -0.22, yNorm: 0.42 },
+    { xNorm: 0.22, yNorm: 0.42 },
+    { xNorm: -0.58, yNorm: 0.48 },
+    { xNorm: 0.58, yNorm: 0.48 },
+    { xNorm: 0.0, yNorm: 0.45 },
+    { xNorm: -0.35, yNorm: 0.52 },
+  ];
+  medPositions.forEach((pos, i) => {
+    flowers.push({
+      id: `def-m-${i}`,
+      type: types[(i + 2) % types.length],
+      sizeClass: 'medium',
+      xNorm: pos.xNorm,
+      yNorm: pos.yNorm,
+      scale: 1.0 + (seedRng() * 0.25 - 0.12),
+      rotation: Math.floor(seedRng() * 36 - 18),
+      seed: Math.floor(seedRng() * 100000),
+    });
+  });
+
+  // Small flowers (10)
+  const smallPositions = [
+    { xNorm: -0.65, yNorm: 0.55 },
+    { xNorm: 0.65, yNorm: 0.55 },
+    { xNorm: -0.38, yNorm: 0.60 },
+    { xNorm: 0.38, yNorm: 0.60 },
+    { xNorm: -0.15, yNorm: 0.64 },
+    { xNorm: 0.15, yNorm: 0.64 },
+    { xNorm: -0.68, yNorm: 0.65 },
+    { xNorm: 0.68, yNorm: 0.65 },
+    { xNorm: -0.48, yNorm: 0.68 },
+    { xNorm: 0.48, yNorm: 0.68 },
+  ];
+  smallPositions.forEach((pos, i) => {
+    flowers.push({
+      id: `def-s-${i}`,
+      type: types[(i + 4) % types.length],
+      sizeClass: 'small',
+      xNorm: pos.xNorm,
+      yNorm: pos.yNorm,
+      scale: 0.68 + (seedRng() * 0.25 - 0.12),
+      rotation: Math.floor(seedRng() * 50 - 25),
+      seed: Math.floor(seedRng() * 100000),
+    });
+  });
+
+  // Filler flowers (8)
+  const fillerPositions = [
+    { xNorm: -0.74, yNorm: 0.30 },
+    { xNorm: 0.74, yNorm: 0.30 },
+    { xNorm: -0.72, yNorm: 0.45 },
+    { xNorm: 0.72, yNorm: 0.45 },
+    { xNorm: -0.75, yNorm: 0.60 },
+    { xNorm: 0.75, yNorm: 0.60 },
+    { xNorm: -0.55, yNorm: 0.73 },
+    { xNorm: 0.55, yNorm: 0.73 },
+  ];
+  fillerPositions.forEach((pos, i) => {
+    flowers.push({
+      id: `def-f-${i}`,
+      type: 'wildflower',
+      sizeClass: 'filler',
+      xNorm: pos.xNorm,
+      yNorm: pos.yNorm,
+      scale: 0.48 + (seedRng() * 0.2 - 0.1),
+      rotation: Math.floor(seedRng() * 70 - 35),
+      seed: Math.floor(seedRng() * 100000),
+    });
+  });
+
+  return {
+    flowers,
+    isNight,
+  };
 }
 
 /**
