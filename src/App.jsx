@@ -28,6 +28,9 @@ export default function App() {
   const [nearVillager, setNearVillager] = useState(null);
   const [activeDialogueVillager, setActiveDialogueVillager] = useState(null);
 
+  // Day/Night Cycle State
+  const [isNight, setIsNight] = useState(false);
+
   // Check URL for Shared Letter Link on startup
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -80,8 +83,6 @@ export default function App() {
   if (charLoading || !character) {
     return <Centered>Waking up your village world…</Centered>;
   }
-
-  const [isNight, setIsNight] = useState(false);
 
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
