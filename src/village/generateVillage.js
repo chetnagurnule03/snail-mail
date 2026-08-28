@@ -4,7 +4,7 @@ import {
   jitteredGrid,
   scatterInCircle,
   clampToBounds,
-} from './placement';
+} from './placement.js';
 import {
   BOUNDS,
   CENTER,
@@ -19,7 +19,7 @@ import {
   FOREST_CLUSTERS,
   WATER,
   VILLAGER_COUNT,
-} from './villageConfig';
+} from './villageConfig.js';
 
 /**
  * Turns the data-only village config into flat arrays of plain

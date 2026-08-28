@@ -2,7 +2,8 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Sparkles, Outlines } from '@react-three/drei';
 import * as THREE from 'three';
-import { generateVillage } from '../village/generateVillage';
+import { generateVillage } from '../village/generateVillage.js';
+import Villagers, { VILLAGERS_DATA } from './Villagers';
 
 /** -------------------------------------------------------------
  *  TOON OUTLINE FOR HERO MODELS
