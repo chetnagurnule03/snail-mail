@@ -28,7 +28,6 @@ function sanitizePlayableTarget(x, z, bounds) {
 
 /** -------------------------------------------------------------
  *  THIN LOW-POLY WOODEN FENCE OUTLINE COMPONENT 🪵
- *  Renders 4 corner posts + 4 thin perimeter rail bars (NO solid platforms)
  * ------------------------------------------------------------- */
 function FenceOutline({ center = [0, 0], width = 6, depth = 6 }) {
   const safeW = (typeof width === 'number' && !isNaN(width)) ? width : 6;
@@ -39,10 +38,10 @@ function FenceOutline({ center = [0, 0], width = 6, depth = 6 }) {
   const hd = safeD / 2;
 
   const fenceColor = '#7a4a2b';
-  const postRadius = 0.08;
-  const postHeight = 0.55;
-  const railSize = 0.06;
-  const railY = 0.35;
+  const postRadius = 0.09;
+  const postHeight = 0.65;
+  const railSize = 0.07;
+  const railY = 0.4;
 
   return (
     <group>
@@ -60,23 +59,23 @@ function FenceOutline({ center = [0, 0], width = 6, depth = 6 }) {
         </mesh>
       ))}
 
-      {/* Top & Bottom Horizontal Rail Bars (along Width) */}
+      {/* Horizontal Rail Bars */}
       <mesh position={[cx, railY, cz - hd]} castShadow>
-        <boxGeometry args={[width, railSize, railSize]} />
+        <boxGeometry args={[safeW, railSize, railSize]} />
         <meshToonMaterial color={fenceColor} />
       </mesh>
       <mesh position={[cx, railY, cz + hd]} castShadow>
-        <boxGeometry args={[width, railSize, railSize]} />
+        <boxGeometry args={[safeW, railSize, railSize]} />
         <meshToonMaterial color={fenceColor} />
       </mesh>
 
-      {/* Left & Right Vertical Rail Bars (along Depth) */}
+      {/* Vertical Rail Bars */}
       <mesh position={[cx - hw, railY, cz]} castShadow>
-        <boxGeometry args={[railSize, railSize, depth]} />
+        <boxGeometry args={[railSize, railSize, safeD]} />
         <meshToonMaterial color={fenceColor} />
       </mesh>
       <mesh position={[cx + hw, railY, cz]} castShadow>
-        <boxGeometry args={[railSize, railSize, depth]} />
+        <boxGeometry args={[railSize, railSize, safeD]} />
         <meshToonMaterial color={fenceColor} />
       </mesh>
     </group>
@@ -100,18 +99,10 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
   }, [petalCount]);
 
   return (
-    <group position={[position[0], 0, position[1]]} scale={0.65}>
+    <group position={[position[0], 0, position[1]]} scale={0.75}>
       <mesh position={[0, 0.5, 0]} castShadow>
         <cylinderGeometry args={[0.04, 0.05, 1.0, 8]} />
         <meshToonMaterial color="#38b000" />
-      </mesh>
-      <mesh position={[-0.18, 0.4, 0]} rotation={[0, 0, -0.4]}>
-        <boxGeometry args={[0.35, 0.02, 0.15]} />
-        <meshToonMaterial color="#2b9348" />
-      </mesh>
-      <mesh position={[0.18, 0.4, 0]} rotation={[0, 0, 0.4]}>
-        <boxGeometry args={[0.35, 0.02, 0.15]} />
-        <meshToonMaterial color="#2b9348" />
       </mesh>
       <group position={[0, 1.0, 0]}>
         <mesh castShadow>
@@ -130,47 +121,104 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
 }
 
 /** -------------------------------------------------------------
- *  LOW-POLY COTTAGE & MAILBOX 🏡📮
+ *  2X SCALED DETAILED LOW-POLY COTTAGE 🏡📮
+ *  Prominent 3D structure with stone foundation, roof overhang,
+ *  framed door, 3 glass windows, and brick chimney
  * ------------------------------------------------------------- */
-function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallColor = '#fbead0', mailboxOffset = [1.4, 1.4] }) {
+function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallColor = '#fbead0', mailboxOffset = [2.2, 2.2] }) {
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 0.75, 0]} castShadow receiveShadow>
-        <boxGeometry args={[2.2, 1.5, 1.8]} />
-        <meshToonMaterial color={wallColor} />
+      {/* Stone Foundation Base */}
+      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[4.7, 0.4, 3.8]} />
+        <meshToonMaterial color="#6c757d" />
         <ToonOutline thickness={0.03} />
       </mesh>
 
-      <group position={[0, 1.5, 0]}>
+      {/* Main Cottage Walls */}
+      <mesh position={[0, 1.6, 0]} castShadow receiveShadow>
+        <boxGeometry args={[4.4, 2.4, 3.5]} />
+        <meshToonMaterial color={wallColor} />
+        <ToonOutline thickness={0.035} />
+      </mesh>
+
+      {/* Gabled Roof with Overhang */}
+      <group position={[0, 2.8, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
-          <coneGeometry args={[1.85, 1.0, 4]} />
+          <coneGeometry args={[3.8, 2.2, 4]} />
           <meshToonMaterial color={roofColor} />
-          <ToonOutline thickness={0.03} />
+          <ToonOutline thickness={0.035} />
         </mesh>
       </group>
 
-      <mesh position={[0, 0.45, 0.91]} castShadow>
-        <boxGeometry args={[0.45, 0.85, 0.06]} />
-        <meshToonMaterial color="#5c381e" />
+      {/* Brick Chimney */}
+      <mesh position={[1.3, 3.4, -0.6]} castShadow>
+        <boxGeometry args={[0.6, 1.8, 0.6]} />
+        <meshToonMaterial color="#a53860" />
+        <ToonOutline thickness={0.03} />
       </mesh>
 
-      <mesh position={[-0.65, 0.85, 0.91]} castShadow>
-        <boxGeometry args={[0.35, 0.35, 0.06]} />
-        <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
-      </mesh>
-      <mesh position={[0.65, 0.85, 0.91]} castShadow>
-        <boxGeometry args={[0.35, 0.35, 0.06]} />
-        <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
-      </mesh>
+      {/* Framed Wooden Door */}
+      <group position={[0, 1.0, 1.76]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.95, 1.65, 0.08]} />
+          <meshToonMaterial color="#4a2c11" />
+        </mesh>
+        <mesh position={[0, 0, 0.04]} castShadow>
+          <boxGeometry args={[0.8, 1.5, 0.08]} />
+          <meshToonMaterial color="#7a4a2b" />
+        </mesh>
+        <mesh position={[0.3, 0, 0.09]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+      </group>
 
+      {/* 3 Glass Windows with Frames */}
+      <group position={[-1.3, 1.8, 1.76]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.75, 0.75, 0.08]} />
+          <meshToonMaterial color="#4a2c11" />
+        </mesh>
+        <mesh position={[0, 0, 0.04]} castShadow>
+          <boxGeometry args={[0.6, 0.6, 0.08]} />
+          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+        </mesh>
+      </group>
+
+      <group position={[1.3, 1.8, 1.76]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.75, 0.75, 0.08]} />
+          <meshToonMaterial color="#4a2c11" />
+        </mesh>
+        <mesh position={[0, 0, 0.04]} castShadow>
+          <boxGeometry args={[0.6, 0.6, 0.08]} />
+          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+        </mesh>
+      </group>
+
+      {/* Side Window */}
+      <group position={[2.21, 1.8, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.75, 0.75, 0.08]} />
+          <meshToonMaterial color="#4a2c11" />
+        </mesh>
+        <mesh position={[0, 0, 0.04]} castShadow>
+          <boxGeometry args={[0.6, 0.6, 0.08]} />
+          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+        </mesh>
+      </group>
+
+      {/* Mailbox 📮 */}
       <group position={[mailboxOffset[0], 0, mailboxOffset[1]]}>
-        <mesh position={[0, 0.35, 0]} castShadow>
-          <cylinderGeometry args={[0.035, 0.035, 0.7, 8]} />
+        <mesh position={[0, 0.45, 0]} castShadow>
+          <cylinderGeometry args={[0.05, 0.05, 0.9, 8]} />
           <meshToonMaterial color="#5c381e" />
         </mesh>
-        <mesh position={[0, 0.75, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.28, 0.38]} />
+        <mesh position={[0, 0.95, 0]} castShadow>
+          <boxGeometry args={[0.36, 0.38, 0.52]} />
           <meshToonMaterial color="#e07a5f" />
+          <ToonOutline thickness={0.025} />
         </mesh>
       </group>
     </group>
@@ -183,34 +231,34 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
 function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods = 'flowers' }) {
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.6, 0.7, 0.9]} />
+      <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.0, 0.8, 1.1]} />
         <meshToonMaterial color="#8c5a3c" />
-        <ToonOutline thickness={0.025} />
+        <ToonOutline thickness={0.03} />
       </mesh>
-      {[-0.72, 0.72].map((x, i) =>
-        [-0.38, 0.38].map((z, j) => (
-          <mesh key={`${i}-${j}`} position={[x, 1.15, z]} castShadow>
-            <cylinderGeometry args={[0.035, 0.035, 1.4, 8]} />
+      {[-0.9, 0.9].map((x, i) =>
+        [-0.45, 0.45].map((z, j) => (
+          <mesh key={`${i}-${j}`} position={[x, 1.3, z]} castShadow>
+            <cylinderGeometry args={[0.04, 0.04, 1.6, 8]} />
             <meshToonMaterial color="#5c381e" />
           </mesh>
         ))
       )}
-      <group position={[0, 1.85, 0]}>
+      <group position={[0, 2.1, 0]}>
         <mesh castShadow>
-          <boxGeometry args={[1.75, 0.14, 1.1]} />
+          <boxGeometry args={[2.2, 0.16, 1.3]} />
           <meshToonMaterial color={awningColor} />
-          <ToonOutline thickness={0.025} />
+          <ToonOutline thickness={0.03} />
         </mesh>
       </group>
 
-      <group position={[0, 0.85, 0]}>
+      <group position={[0, 0.95, 0]}>
         <mesh castShadow>
-          <boxGeometry args={[0.4, 0.16, 0.3]} />
+          <boxGeometry args={[0.6, 0.2, 0.4]} />
           <meshToonMaterial color="#a8763e" />
         </mesh>
-        <mesh position={[0, 0.12, 0]} castShadow>
-          <sphereGeometry args={[0.12, 8, 8]} />
+        <mesh position={[0, 0.15, 0]} castShadow>
+          <sphereGeometry args={[0.16, 8, 8]} />
           <meshToonMaterial color={goods === 'fruit' ? '#e63946' : goods === 'vegetables' ? '#38b000' : '#ffb703'} />
         </mesh>
       </group>
@@ -221,37 +269,37 @@ function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods =
 function WoodenBench({ position, rotationY = 0 }) {
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 0.28, 0]} castShadow>
-        <boxGeometry args={[1.3, 0.08, 0.45]} />
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <boxGeometry args={[1.6, 0.1, 0.55]} />
         <meshToonMaterial color="#6b4c35" />
         <ToonOutline thickness={0.025} />
       </mesh>
-      <mesh position={[-0.55, 0.14, 0]} castShadow>
-        <boxGeometry args={[0.08, 0.28, 0.4]} />
+      <mesh position={[-0.7, 0.18, 0]} castShadow>
+        <boxGeometry args={[0.1, 0.35, 0.5]} />
         <meshToonMaterial color="#4a2c11" />
       </mesh>
-      <mesh position={[0.55, 0.14, 0]} castShadow>
-        <boxGeometry args={[0.08, 0.28, 0.4]} />
+      <mesh position={[0.7, 0.18, 0]} castShadow>
+        <boxGeometry args={[0.1, 0.35, 0.5]} />
         <meshToonMaterial color="#4a2c11" />
       </mesh>
     </group>
   );
 }
 
-function VillageFountain({ position, radius = 1.4 }) {
+function VillageFountain({ position, radius = 1.5 }) {
   return (
     <group position={[position[0], 0, position[1]]}>
-      <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[radius, radius * 0.95, 0.7, 16]} />
+      <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[radius, radius * 0.95, 0.8, 16]} />
         <meshToonMaterial color="#8a7e70" />
-        <ToonOutline thickness={0.03} />
+        <ToonOutline thickness={0.035} />
       </mesh>
-      <mesh position={[0, 0.71, 0]}>
+      <mesh position={[0, 0.81, 0]}>
         <cylinderGeometry args={[radius * 0.85, radius * 0.85, 0.04, 16]} />
         <meshToonMaterial color="#2a9d8f" transparent opacity={0.88} />
       </mesh>
-      <mesh position={[0, 0.9, 0]} castShadow>
-        <cylinderGeometry args={[0.2, 0.25, 0.8, 8]} />
+      <mesh position={[0, 1.1, 0]} castShadow>
+        <cylinderGeometry args={[0.25, 0.3, 1.0, 8]} />
         <meshToonMaterial color="#8a7e70" />
       </mesh>
     </group>
@@ -273,26 +321,26 @@ function CropItem({ position, type }) {
   else if (type === 'lettuce') { color = '#52b788'; }
 
   return (
-    <group position={[position[0], 0, position[1]]}>
+    <group position={[position[0], 0, position[1]]} scale={1.2}>
       {isCone ? (
-        <mesh position={[0, 0.15, 0]} castShadow>
-          <coneGeometry args={[0.15, 0.45, 6]} />
+        <mesh position={[0, 0.2, 0]} castShadow>
+          <coneGeometry args={[0.18, 0.55, 6]} />
           <meshToonMaterial color={color} />
         </mesh>
       ) : isTall ? (
-        <group position={[0, 0.45, 0]}>
+        <group position={[0, 0.55, 0]}>
           <mesh castShadow>
-            <cylinderGeometry args={[0.03, 0.04, 0.9, 6]} />
+            <cylinderGeometry args={[0.04, 0.05, 1.1, 6]} />
             <meshToonMaterial color="#e9c46a" />
           </mesh>
-          <mesh position={[0, 0.45, 0]}>
-            <sphereGeometry args={[0.12, 8, 8]} />
+          <mesh position={[0, 0.55, 0]}>
+            <sphereGeometry args={[0.16, 8, 8]} />
             <meshToonMaterial color={color} />
           </mesh>
         </group>
       ) : (
-        <mesh position={[0, 0.2, 0]} castShadow>
-          <sphereGeometry args={[0.24, 10, 10]} />
+        <mesh position={[0, 0.25, 0]} castShadow>
+          <sphereGeometry args={[0.3, 10, 10]} />
           <meshToonMaterial color={color} />
         </mesh>
       )}
@@ -301,32 +349,32 @@ function CropItem({ position, type }) {
 }
 
 /** -------------------------------------------------------------
- *  FRUIT TREE & ANIMAL COMPONENTS 🍎🐮🐑
+ *  FRUIT TREE COMPONENT 🍎
  * ------------------------------------------------------------- */
 function FruitTree({ position, fruitType = 'apple' }) {
   const fruitColor = fruitType === 'apple' ? '#e63946' : '#fb8500';
 
   return (
-    <group position={[position[0], 0, position[1]]} scale={0.9}>
-      <mesh position={[0, 1.0, 0]} castShadow>
-        <cylinderGeometry args={[0.18, 0.28, 2.0, 8]} />
+    <group position={[position[0], 0, position[1]]} scale={1.1}>
+      <mesh position={[0, 1.2, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.32, 2.4, 8]} />
         <meshToonMaterial color="#5c381e" />
       </mesh>
-      <mesh position={[0, 2.3, 0]} castShadow>
-        <sphereGeometry args={[1.2, 14, 14]} />
+      <mesh position={[0, 2.7, 0]} castShadow>
+        <sphereGeometry args={[1.4, 14, 14]} />
         <meshToonMaterial color="#38b000" />
         <ToonOutline thickness={0.03} color="#1b4332" />
       </mesh>
 
       {[
-        [-0.5, 2.1, 0.5],
-        [0.5, 2.2, 0.4],
-        [0.0, 2.4, 0.7],
-        [-0.5, 2.3, -0.5],
-        [0.5, 2.0, -0.6],
+        [-0.6, 2.5, 0.6],
+        [0.6, 2.6, 0.5],
+        [0.0, 2.8, 0.8],
+        [-0.6, 2.7, -0.6],
+        [0.6, 2.4, -0.7],
       ].map((fp, fIdx) => (
         <mesh key={fIdx} position={fp} castShadow>
-          <sphereGeometry args={[0.15, 8, 8]} />
+          <sphereGeometry args={[0.18, 8, 8]} />
           <meshToonMaterial color={fruitColor} />
         </mesh>
       ))}
@@ -334,69 +382,145 @@ function FruitTree({ position, fruitType = 'apple' }) {
   );
 }
 
+/** -------------------------------------------------------------
+ *  2.5X SCALED 3D ANIMAL COMPONENT 🐮🐑🐔
+ *  Reads clearly from high overhead camera views
+ * ------------------------------------------------------------- */
 function Animal({ position, type }) {
   let bodyColor = '#ffffff';
-  let size = 0.35;
+  let bodyRadius = 0.9;
+  let height = 0.9;
 
-  if (type === 'cow') { bodyColor = '#f4f1de'; size = 0.55; }
-  else if (type === 'sheep') { bodyColor = '#ffffff'; size = 0.45; }
-  else if (type === 'chicken') { bodyColor = '#f4a261'; size = 0.22; }
-  else if (type === 'rabbit') { bodyColor = '#e0a96d'; size = 0.2; }
-  else if (type === 'duck') { bodyColor = '#ffb703'; size = 0.22; }
-  else if (type === 'horse') { bodyColor = '#c68a4c'; size = 0.65; }
+  if (type === 'cow') { bodyColor = '#f4f1de'; bodyRadius = 1.25; height = 1.1; }
+  else if (type === 'sheep') { bodyColor = '#ffffff'; bodyRadius = 0.95; height = 0.9; }
+  else if (type === 'chicken') { bodyColor = '#f4a261'; bodyRadius = 0.55; height = 0.55; }
+  else if (type === 'rabbit') { bodyColor = '#e0a96d'; bodyRadius = 0.5; height = 0.5; }
+  else if (type === 'duck') { bodyColor = '#ffb703'; bodyRadius = 0.55; height = 0.55; }
+  else if (type === 'horse') { bodyColor = '#c68a4c'; bodyRadius = 1.3; height = 1.35; }
 
   return (
     <group position={[position[0], 0, position[1]]}>
-      <mesh position={[0, size, 0]} castShadow>
-        <sphereGeometry args={[size, 10, 10]} />
-        <meshToonMaterial color={bodyColor} />
-        <ToonOutline thickness={0.025} />
-      </mesh>
+      {type === 'horse' ? (
+        <group position={[0, 0.9, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.9, 0.95, 1.6]} />
+            <meshToonMaterial color={bodyColor} />
+            <ToonOutline thickness={0.035} />
+          </mesh>
+          <mesh position={[0, 0.65, 0.7]} rotation={[0.4, 0, 0]} castShadow>
+            <boxGeometry args={[0.5, 0.8, 0.5]} />
+            <meshToonMaterial color={bodyColor} />
+          </mesh>
+        </group>
+      ) : (
+        <group position={[0, height, 0]}>
+          <mesh castShadow>
+            <sphereGeometry args={[bodyRadius, 12, 12]} />
+            <meshToonMaterial color={bodyColor} />
+            <ToonOutline thickness={0.035} />
+          </mesh>
+          {type === 'cow' && (
+            <mesh position={[0, bodyRadius * 0.4, bodyRadius * 0.7]} castShadow>
+              <sphereGeometry args={[bodyRadius * 0.45, 10, 10]} />
+              <meshToonMaterial color="#e76f51" />
+            </mesh>
+          )}
+          {type === 'chicken' && (
+            <mesh position={[0, bodyRadius * 0.8, 0]} castShadow>
+              <coneGeometry args={[0.15, 0.35, 6]} />
+              <meshToonMaterial color="#e63946" />
+            </mesh>
+          )}
+          {type === 'rabbit' && (
+            <mesh position={[0, bodyRadius * 0.9, 0]} castShadow>
+              <boxGeometry args={[0.15, 0.65, 0.12]} />
+              <meshToonMaterial color="#e0a96d" />
+            </mesh>
+          )}
+        </group>
+      )}
     </group>
   );
 }
 
 function ForestTree({ position, scale = 1, rotationY = 0, kind = 'round' }) {
   return (
-    <group position={[position[0], 0, position[1]]} scale={scale} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 0.9, 0]} castShadow>
-        <cylinderGeometry args={[0.18, 0.28, 1.8, 8]} />
+    <group position={[position[0], 0, position[1]]} scale={scale * 1.25} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 1.1, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.32, 2.2, 8]} />
         <meshToonMaterial color="#5c381e" />
       </mesh>
 
       {kind === 'pine' ? (
-        <mesh position={[0, 2.0, 0]} castShadow>
-          <coneGeometry args={[1.0, 2.3, 8]} />
+        <mesh position={[0, 2.4, 0]} castShadow>
+          <coneGeometry args={[1.25, 2.8, 8]} />
           <meshToonMaterial color="#1b4332" />
+          <ToonOutline thickness={0.03} color="#0b1b14" />
         </mesh>
       ) : (
-        <mesh position={[0, 2.1, 0]} castShadow>
-          <sphereGeometry args={[1.15, 14, 14]} />
+        <mesh position={[0, 2.5, 0]} castShadow>
+          <sphereGeometry args={[1.4, 14, 14]} />
           <meshToonMaterial color="#2d6a4f" />
-          <ToonOutline thickness={0.03} color="#10251b" />
+          <ToonOutline thickness={0.035} color="#10251b" />
         </mesh>
       )}
     </group>
   );
 }
 
+/** -------------------------------------------------------------
+ *  2.2X SCALED VILLAGER NPC COMPONENT 👤
+ * ------------------------------------------------------------- */
 function VillagerNPC({ position, outfitColor = '#c9a7e0', hairColor = '#3a2e22', skinTone = '#f2c9a0' }) {
   return (
     <group position={[position[0], 0, position[1]]}>
-      <mesh position={[0, 0.85, 0]} castShadow>
-        <sphereGeometry args={[0.3, 14, 14]} />
+      <mesh position={[0, 1.3, 0]} castShadow>
+        <sphereGeometry args={[0.55, 14, 14]} />
         <meshToonMaterial color={skinTone} />
-        <ToonOutline thickness={0.025} />
+        <ToonOutline thickness={0.03} />
       </mesh>
-      <mesh position={[0, 1.1, 0]}>
-        <sphereGeometry args={[0.32, 12, 12]} />
+      <mesh position={[0, 1.65, 0]}>
+        <sphereGeometry args={[0.58, 12, 12]} />
         <meshToonMaterial color={hairColor} />
       </mesh>
-      <mesh position={[0, 0.4, 0]} castShadow>
-        <cylinderGeometry args={[0.22, 0.32, 0.65, 10]} />
+      <mesh position={[0, 0.6, 0]} castShadow>
+        <cylinderGeometry args={[0.38, 0.52, 1.0, 10]} />
         <meshToonMaterial color={outfitColor} />
+        <ToonOutline thickness={0.03} />
       </mesh>
     </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  FILLER PROPS (ROCKS, BUSHES, STEPPING STONES) 🪨🌿🐾
+ * ------------------------------------------------------------- */
+function FillerRock({ position, scale = 1 }) {
+  return (
+    <mesh position={[position[0], scale * 0.25, position[1]]} scale={scale} castShadow receiveShadow>
+      <dodecahedronGeometry args={[0.55, 1]} />
+      <meshToonMaterial color="#8d99ae" />
+      <ToonOutline thickness={0.02} color="#3d405b" />
+    </mesh>
+  );
+}
+
+function FillerBush({ position, scale = 1 }) {
+  return (
+    <mesh position={[position[0], scale * 0.45, position[1]]} scale={scale} castShadow receiveShadow>
+      <sphereGeometry args={[0.65, 10, 10]} />
+      <meshToonMaterial color="#40916c" />
+      <ToonOutline thickness={0.025} color="#1b4332" />
+    </mesh>
+  );
+}
+
+function SteppingStone({ position, scale = 1 }) {
+  return (
+    <mesh position={[position[0], 0.01, position[1]]} scale={scale} receiveShadow>
+      <cylinderGeometry args={[0.45, 0.45, 0.03, 8]} />
+      <meshToonMaterial color="#b0bb9e" />
+    </mesh>
   );
 }
 
@@ -418,11 +542,11 @@ function RiverWaterFeature({ segments, lilyPads }) {
               <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
             </mesh>
             {seg.hasBridge && (
-              <group position={[0, 0.35, 0]}>
+              <group position={[0, 0.45, 0]}>
                 <mesh castShadow receiveShadow>
-                  <boxGeometry args={[seg.width + 1.2, 0.3, 3.2]} />
+                  <boxGeometry args={[seg.width + 1.4, 0.35, 3.8]} />
                   <meshToonMaterial color="#8a7e70" />
-                  <ToonOutline thickness={0.03} color="#2b1a0e" />
+                  <ToonOutline thickness={0.035} color="#2b1a0e" />
                 </mesh>
               </group>
             )}
@@ -432,7 +556,7 @@ function RiverWaterFeature({ segments, lilyPads }) {
 
       {lilyPads.map((pad) => (
         <mesh key={pad.id} position={[pad.position[0], 0.02, pad.position[1]]} rotation={[-Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.35, 0.35, 0.02, 10]} />
+          <cylinderGeometry args={[0.4, 0.4, 0.02, 10]} />
           <meshToonMaterial color="#52b788" />
         </mesh>
       ))}
@@ -448,28 +572,24 @@ function AnimatedBatMessenger() {
     const clock = state.clock.getElapsedTime();
     batRef.current.position.x = Math.sin(clock * 0.8) * 18.0;
     batRef.current.position.z = Math.cos(clock * 0.8) * 14.0 - 15.0;
-    batRef.current.position.y = 6.5 + Math.sin(clock * 4.0) * 0.5;
+    batRef.current.position.y = 8.5 + Math.sin(clock * 4.0) * 0.5;
     batRef.current.rotation.y = clock * 0.8 + Math.PI / 2;
   });
 
   return (
-    <group ref={batRef} position={[0, 6.5, -15.0]} scale={0.85}>
+    <group ref={batRef} position={[0, 8.5, -15.0]} scale={1.1}>
       <mesh castShadow>
-        <sphereGeometry args={[0.3, 12, 12]} />
+        <sphereGeometry args={[0.38, 12, 12]} />
         <meshToonMaterial color="#3d2b52" />
         <ToonOutline thickness={0.025} color="#12091f" />
       </mesh>
-      <mesh position={[-0.45, 0, 0]} rotation={[0, 0.2, 0]}>
-        <boxGeometry args={[0.8, 0.04, 0.4]} />
+      <mesh position={[-0.55, 0, 0]} rotation={[0, 0.2, 0]}>
+        <boxGeometry args={[1.0, 0.05, 0.5]} />
         <meshToonMaterial color="#7209b7" />
       </mesh>
-      <mesh position={[0.45, 0, 0]} rotation={[0, -0.2, 0]}>
-        <boxGeometry args={[0.8, 0.04, 0.4]} />
+      <mesh position={[0.55, 0, 0]} rotation={[0, -0.2, 0]}>
+        <boxGeometry args={[1.0, 0.05, 0.5]} />
         <meshToonMaterial color="#7209b7" />
-      </mesh>
-      <mesh position={[0, -0.22, 0.1]}>
-        <boxGeometry args={[0.32, 0.2, 0.04]} />
-        <meshToonMaterial color="#f4f1de" />
       </mesh>
     </group>
   );
@@ -507,23 +627,15 @@ function OrangeCatPet({ targetGroupRef, activePet, bounds }) {
   if (activePet !== 'cat') return null;
 
   return (
-    <group ref={catRef} position={[0, 0, 0]} scale={0.7}>
-      <mesh position={[0, 0.28, 0]} castShadow>
-        <boxGeometry args={[0.34, 0.28, 0.65]} />
+    <group ref={catRef} position={[0, 0, 0]} scale={0.9}>
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <boxGeometry args={[0.42, 0.35, 0.8]} />
         <meshToonMaterial color="#f4a261" />
         <ToonOutline thickness={0.025} />
       </mesh>
-
-      {[-0.15, 0, 0.15].map((z, i) => (
-        <mesh key={i} position={[0, 0.43, z]}>
-          <boxGeometry args={[0.35, 0.02, 0.08]} />
-          <meshToonMaterial color="#e76f51" />
-        </mesh>
-      ))}
-
-      <group position={[0, 0.48, 0.38]}>
+      <group position={[0, 0.6, 0.45]}>
         <mesh castShadow>
-          <boxGeometry args={[0.38, 0.32, 0.36]} />
+          <boxGeometry args={[0.48, 0.4, 0.45]} />
           <meshToonMaterial color="#f4a261" />
           <ToonOutline thickness={0.025} />
         </mesh>
@@ -547,10 +659,10 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
   if (activePet !== 'horse' && !isMounted) return null;
 
   return (
-    <group ref={horseRef} position={[0, 0, 0]} scale={1.15}>
-      <group position={[0, 0.75, 0]}>
+    <group ref={horseRef} position={[0, 0, 0]} scale={1.35}>
+      <group position={[0, 0.85, 0]}>
         <mesh castShadow>
-          <boxGeometry args={[0.72, 0.74, 1.25]} />
+          <boxGeometry args={[0.85, 0.85, 1.45]} />
           <meshToonMaterial color="#c68a4c" />
           <ToonOutline thickness={0.03} />
         </mesh>
@@ -559,6 +671,9 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
   );
 }
 
+/** -------------------------------------------------------------
+ *  AXIS-ALIGNED FLAT RECTANGLE TERRAIN (X: -40 to 40, Z: -40 to 40)
+ * ------------------------------------------------------------- */
 function SteppedLowPolyTerrain({ onGroundClick, bounds }) {
   return (
     <mesh
@@ -573,7 +688,7 @@ function SteppedLowPolyTerrain({ onGroundClick, bounds }) {
         onGroundClick(sanitized);
       }}
     >
-      <planeGeometry args={[100, 80]} />
+      <planeGeometry args={[80, 80]} />
       <meshToonMaterial color="#94c77d" />
     </mesh>
   );
@@ -599,7 +714,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
             const dx = px - v.pos[0];
             const dz = pz - v.pos[2];
             const dist = Math.sqrt(dx * dx + dz * dz);
-            if (dist < 2.5) {
+            if (dist < 3.0) {
               onOpenDialogue(v);
               return;
             }
@@ -632,7 +747,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
         const dx = px - v.pos[0];
         const dz = pz - v.pos[2];
         const dist = Math.sqrt(dx * dx + dz * dz);
-        if (dist < 2.5) {
+        if (dist < 3.0) {
           foundVillager = v;
           break;
         }
@@ -677,7 +792,7 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
 
     if (orbitRef.current) {
       orbitRef.current.target.x = THREE.MathUtils.lerp(orbitRef.current.target.x, px, 0.1);
-      orbitRef.current.target.y = THREE.MathUtils.lerp(orbitRef.current.target.y, playerGroupRef.current.position.y + (isMounted ? 1.25 : 0.85), 0.1);
+      orbitRef.current.target.y = THREE.MathUtils.lerp(orbitRef.current.target.y, playerGroupRef.current.position.y + (isMounted ? 1.4 : 1.0), 0.1);
       orbitRef.current.target.z = THREE.MathUtils.lerp(orbitRef.current.target.z, pz, 0.1);
       orbitRef.current.update();
     }
@@ -710,7 +825,7 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted, bounds }) {
     const clock = state.clock.getElapsedTime();
 
     if (isMounted) {
-      groupRef.current.position.y = 0.95;
+      groupRef.current.position.y = 1.1;
     } else {
       if (dist > 0.06) {
         groupRef.current.position.x += dx * 0.085;
@@ -787,7 +902,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   const playerGroupRef = useRef();
 
   return (
-    <Canvas shadows camera={{ position: [0.0, 45.0, 55.0], fov: 50 }}>
+    <Canvas shadows camera={{ position: [0.0, 48.0, 58.0], fov: 48 }}>
       <color attach="background" args={[isNight ? '#1a0b2e' : '#bfe8f7']} />
       <fog attach="fog" args={[isNight ? '#1a0b2e' : '#bfe8f7', 45, 160]} />
 
@@ -806,12 +921,28 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         bounds={village.bounds}
       />
 
+      {/* Axis-Aligned Rectangle Terrain */}
       <SteppedLowPolyTerrain onGroundClick={setTargetPos} bounds={village.bounds} />
+
+      {/* Filler Stepping Stones */}
+      {village.steppingStones?.map((st) => (
+        <SteppingStone key={st.id} position={st.position} scale={st.scale} />
+      ))}
+
+      {/* Filler Rocks */}
+      {village.fillerRocks?.map((rock) => (
+        <FillerRock key={rock.id} position={rock.position} scale={rock.scale} />
+      ))}
+
+      {/* Filler Bushes */}
+      {village.fillerBushes?.map((bush) => (
+        <FillerBush key={bush.id} position={bush.position} scale={bush.scale} />
+      ))}
 
       {/* River & Bridges */}
       <RiverWaterFeature segments={village.river.segments} lilyPads={village.river.lilyPads} />
 
-      {/* Houses & House Gardens */}
+      {/* 2x Detailed Cottages & House Gardens */}
       {village.houses.map((h) => (
         <LowPolyCottage
           key={h.id}
@@ -826,7 +957,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
       ))}
 
-      {/* Market Square (Stalls, Fountain, Benches) */}
+      {/* Market Square */}
       <VillageFountain position={village.market.fountainCenter} radius={village.market.fountainRadius} />
       {village.market.stalls.map((s) => (
         <MarketStall key={s.id} position={s.position} rotationY={s.rotationY} awningColor={s.awningColor} goods={s.goods} />
@@ -835,7 +966,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <WoodenBench key={b.id} position={b.position} rotationY={b.rotationY} />
       ))}
 
-      {/* Flower Gardens with Perimeter Fence Rails */}
+      {/* Flower Gardens */}
       {village.flowerGardens.map((g) => (
         <group key={g.id}>
           <FenceOutline center={g.fence.center} width={g.fence.width} depth={g.fence.depth} />
@@ -845,7 +976,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         </group>
       ))}
 
-      {/* Vegetable Farms with Perimeter Fence Rails */}
+      {/* Vegetable Farms */}
       {village.vegetableFarms.map((farm) => (
         <group key={farm.id}>
           <mesh position={[farm.fence.center[0], 0.01, farm.fence.center[1]]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -864,7 +995,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <FruitTree key={tree.id} position={tree.position} fruitType={tree.fruitType} />
       ))}
 
-      {/* Animal Pens with Perimeter Fence Rails */}
+      {/* 2.5x Scaled Animal Pens */}
       {village.animalPens.map((pen) => (
         <group key={pen.id}>
           <FenceOutline center={pen.fence.center} width={pen.fence.width} depth={pen.fence.depth} />
@@ -879,21 +1010,21 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <ForestTree key={tree.id} position={tree.position} scale={tree.scale} rotationY={tree.rotationY} kind={tree.kind} />
       ))}
 
-      {/* Villagers */}
+      {/* 2.2x Scaled Villager NPCs */}
       {village.villagers.map((v) => (
         <VillagerNPC key={v.id} position={v.position} outfitColor={v.outfitColor} hairColor={v.hairColor} skinTone={v.skinTone} />
       ))}
 
-      {/* 🦇 ANIMATED 3D BAT MESSENGER OVERHEAD */}
+      {/* 🦇 ANIMATED 3D BAT MESSENGER */}
       <AnimatedBatMessenger />
 
       {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER */}
       <StorybookHuman character={character} targetPos={targetPos} groupRef={playerGroupRef} isMounted={isMounted} bounds={village.bounds} />
 
-      {/* 🐴 HORSE PET COMPANION & MOUNT */}
+      {/* 🐴 HORSE PET COMPANION */}
       <StorybookHorse isMounted={isMounted} playerGroupRef={playerGroupRef} activePet={activePet} />
 
-      {/* 🐱 3D ORANGE CAT PET COMPANION */}
+      {/* 🐱 3D ORANGE CAT PET */}
       <OrangeCatPet targetGroupRef={playerGroupRef} activePet={activePet} bounds={village.bounds} />
 
       {isNight ? (

@@ -17,21 +17,22 @@ import {
   ORCHARD,
   ANIMAL_PENS,
   FOREST_CLUSTERS,
+  FILLER_ROCKS,
+  FILLER_BUSHES,
+  STEPPING_STONES,
   WATER,
   VILLAGER_COUNT,
 } from './villageConfig.js';
 
 /**
  * Turns the data-only village config into flat arrays of plain
- * objects ready to .map() onto actual components. Nothing here
- * touches React/three — it's pure layout math, which makes it cheap
- * to unit-test or tweak independent of rendering.
+ * objects ready to .map() onto actual components.
  */
 export function generateVillage() {
   const rng = makeRng(SEED);
   const pick = (arr) => arr[Math.floor(rng() * arr.length)];
 
-  // --- Houses, ringed around the village, each with its own garden ---
+  // --- Houses ---
   const housePlacements = ringPlacement({
     center: CENTER,
     radius: HOUSES.ringRadius,
@@ -46,12 +47,12 @@ export function generateVillage() {
     rotationY: h.facingAngle,
     wallColor: pick(HOUSES.wallPalette),
     roofColor: pick(HOUSES.roofPalette),
-    mailboxOffset: [Math.cos(h.facingAngle) * 1.4, Math.sin(h.facingAngle) * 1.4],
+    mailboxOffset: [Math.cos(h.facingAngle) * 2.2, Math.sin(h.facingAngle) * 2.2],
   }));
 
   const houseGardenFlowers = houses.flatMap((house, i) => {
     const pts = scatterInCircle({
-      center: [house.position[0] - 2.0, house.position[1]],
+      center: [house.position[0] - 2.5, house.position[1]],
       radius: HOUSES.gardenRadius,
       count: HOUSES.gardenFlowerCount,
       minDist: 0.35,
@@ -64,7 +65,7 @@ export function generateVillage() {
     }));
   });
 
-  // --- Market: ring of stalls + fountain + benches around center ---
+  // --- Market ---
   const stalls = Array.from({ length: MARKET.stallCount }).map((_, i) => {
     const angle = (i / MARKET.stallCount) * Math.PI * 2;
     return {
@@ -91,7 +92,7 @@ export function generateVillage() {
     };
   });
 
-  // --- Flower gardens: fenced plots filled with a jittered grid ---
+  // --- Flower gardens ---
   const flowerGardens = FLOWER_GARDENS.map((garden, gi) => {
     const grid = jitteredGrid({
       center: garden.center,
@@ -114,7 +115,7 @@ export function generateVillage() {
     };
   });
 
-  // --- Vegetable farms: fenced plots with crop rows ---
+  // --- Vegetable farms ---
   const vegetableFarms = VEGETABLE_FARMS.map((farm, fi) => {
     const rows = jitteredGrid({
       center: farm.center,
@@ -136,7 +137,7 @@ export function generateVillage() {
     };
   });
 
-  // --- Orchard: grid of fruit trees ---
+  // --- Orchard ---
   const orchardTrees = jitteredGrid({
     center: ORCHARD.center,
     width: ORCHARD.width,
@@ -194,12 +195,52 @@ export function generateVillage() {
     });
   });
 
-  // --- Villagers: scattered near market + farms + paths ---
+  // --- Filler Rocks, Bushes, and Stepping Stones ---
+  const rockSpots = scatterInCircle({
+    center: CENTER,
+    radius: FILLER_ROCKS.maxRadius,
+    count: FILLER_ROCKS.count,
+    minDist: 2.2,
+    rng,
+  });
+  const fillerRocks = rockSpots.map((p, i) => ({
+    id: `rock-${i}`,
+    position: p.position,
+    scale: 0.4 + rng() * 0.5,
+  }));
+
+  const bushSpots = scatterInCircle({
+    center: CENTER,
+    radius: FILLER_BUSHES.maxRadius,
+    count: FILLER_BUSHES.count,
+    minDist: 2.0,
+    rng,
+  });
+  const fillerBushes = bushSpots.map((p, i) => ({
+    id: `bush-${i}`,
+    position: p.position,
+    scale: 0.5 + rng() * 0.4,
+  }));
+
+  const stoneSpots = scatterInCircle({
+    center: CENTER,
+    radius: STEPPING_STONES.maxRadius,
+    count: STEPPING_STONES.count,
+    minDist: 1.8,
+    rng,
+  });
+  const steppingStones = stoneSpots.map((p, i) => ({
+    id: `stone-${i}`,
+    position: p.position,
+    scale: 0.35 + rng() * 0.3,
+  }));
+
+  // --- Villagers ---
   const villagerSpots = scatterInCircle({
     center: CENTER,
-    radius: 24,
+    radius: 22,
     count: VILLAGER_COUNT,
-    minDist: 3,
+    minDist: 3.5,
     rng,
   });
   const villagers = villagerSpots.map((p, i) => ({
@@ -210,7 +251,7 @@ export function generateVillage() {
     skinTone: pick(['#f2c9a0', '#e0a878', '#c98a5c']),
   }));
 
-  // --- Water: river polyline + bridges + lily pads ---
+  // --- Water ---
   const riverSegments = WATER.points.slice(0, -1).map((p, i) => ({
     id: `river-seg-${i}`,
     from: p,
@@ -236,6 +277,9 @@ export function generateVillage() {
     orchardTrees,
     animalPens,
     forestTrees,
+    fillerRocks,
+    fillerBushes,
+    steppingStones,
     villagers,
     river: { segments: riverSegments, lilyPads },
   };
