@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CornerFlourishes, AmbientBackgroundFlourishes } from './LeafFlourish';
 
 /** -------------------------------------------------------------
  *  BOUQUET OPTIONS DATA (NO EMOJI - ALL CUSTOM SVG ILLUSTRATIONS)
@@ -596,9 +597,12 @@ export default function BouquetBuilder({ onDone, onCancel }) {
   const isValidFlowers = selectedFlowers.length >= 3 && selectedFlowers.length <= 8;
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, position: 'relative' }}>
+      <AmbientBackgroundFlourishes />
+      <CornerFlourishes variantLeft={1} variantRight={2} size={44} offset={8} />
+
       {/* Header */}
-      <div style={styles.header}>
+      <div style={{ ...styles.header, position: 'relative', zIndex: 3 }}>
         <h2 style={styles.title}>Custom Bouquet Builder</h2>
         <button style={styles.closeBtn} onClick={onCancel}>✕</button>
       </div>

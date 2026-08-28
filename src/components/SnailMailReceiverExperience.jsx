@@ -4,6 +4,7 @@ import { OrbitControls, Outlines, Sparkles, ContactShadows } from '@react-three/
 import * as THREE from 'three';
 import { letterService } from '../lib/supabase';
 import { RenderBouquetSVG } from './BouquetBuilder';
+import { CornerFlourishes } from './LeafFlourish';
 
 function ToonOutline({ thickness = 0.03, color = '#1a0b2e' }) {
   return <Outlines thickness={thickness} color={color} screenspace={false} />;
@@ -340,7 +341,8 @@ export default function SnailMailReceiverExperience({ letterId }) {
           </div>
         ) : (
           /* Opened Letter View */
-          <div style={styles.openedLetterCard}>
+          <div style={{ ...styles.openedLetterCard, position: 'relative' }}>
+            <CornerFlourishes variantLeft={3} variantRight={1} size={42} offset={6} />
             <div style={styles.letterStamp}>
               {isBat ? '🦇' : '🐌'}
             </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Send, Clock, Sparkles, Shield, Check, Copy, Eye, Bell } from 'lucide-react';
 import { letterService } from '../lib/supabase';
 import BouquetBuilder, { RenderBouquetSVG } from './BouquetBuilder';
+import { CornerFlourishes } from './LeafFlourish';
 
 const STAMPS = [
   { id: 'royal_snail', name: 'Royal Snail', icon: '🐌', color: 'from-amber-600 to-yellow-500' },
@@ -87,7 +88,8 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
           onCancel={() => setIsBouquetBuilderOpen(false)}
         />
       ) : !shareModalData ? (
-        <form onSubmit={handleSend} style={styles.form}>
+        <form onSubmit={handleSend} style={{ ...styles.form, position: 'relative' }}>
+          <CornerFlourishes variantLeft={1} variantRight={2} size={40} offset={6} />
           {/* Dual Delivery Method Selector */}
           <div style={styles.fieldGroup}>
             <label style={styles.label}>Choose Express Delivery Method</label>
