@@ -27,6 +27,61 @@ function sanitizePlayableTarget(x, z, bounds) {
 }
 
 /** -------------------------------------------------------------
+ *  THIN LOW-POLY WOODEN FENCE OUTLINE COMPONENT 🪵
+ *  Renders 4 corner posts + 4 thin perimeter rail bars (NO solid platforms)
+ * ------------------------------------------------------------- */
+function FenceOutline({ center, width, depth }) {
+  const cx = center[0];
+  const cz = center[1];
+  const hw = width / 2;
+  const hd = depth / 2;
+
+  const fenceColor = '#7a4a2b';
+  const postRadius = 0.08;
+  const postHeight = 0.55;
+  const railSize = 0.06;
+  const railY = 0.35;
+
+  return (
+    <group>
+      {/* 4 Corner Posts */}
+      {[
+        [cx - hw, cz - hd],
+        [cx + hw, cz - hd],
+        [cx - hw, cz + hd],
+        [cx + hw, cz + hd],
+      ].map((pos, idx) => (
+        <mesh key={idx} position={[pos[0], postHeight / 2, pos[1]]} castShadow>
+          <boxGeometry args={[postRadius * 2, postHeight, postRadius * 2]} />
+          <meshToonMaterial color={fenceColor} />
+          <ToonOutline thickness={0.02} color="#2b1a0e" />
+        </mesh>
+      ))}
+
+      {/* Top & Bottom Horizontal Rail Bars (along Width) */}
+      <mesh position={[cx, railY, cz - hd]} castShadow>
+        <boxGeometry args={[width, railSize, railSize]} />
+        <meshToonMaterial color={fenceColor} />
+      </mesh>
+      <mesh position={[cx, railY, cz + hd]} castShadow>
+        <boxGeometry args={[width, railSize, railSize]} />
+        <meshToonMaterial color={fenceColor} />
+      </mesh>
+
+      {/* Left & Right Vertical Rail Bars (along Depth) */}
+      <mesh position={[cx - hw, railY, cz]} castShadow>
+        <boxGeometry args={[railSize, railSize, depth]} />
+        <meshToonMaterial color={fenceColor} />
+      </mesh>
+      <mesh position={[cx + hw, railY, cz]} castShadow>
+        <boxGeometry args={[railSize, railSize, depth]} />
+        <meshToonMaterial color={fenceColor} />
+      </mesh>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
  *  PROPORTIONAL PETAL FLOWER COMPONENT 🌸🌼
  * ------------------------------------------------------------- */
 function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) {
@@ -78,14 +133,12 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
 function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallColor = '#fbead0', mailboxOffset = [1.4, 1.4] }) {
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
-      {/* Base & Walls */}
       <mesh position={[0, 0.75, 0]} castShadow receiveShadow>
         <boxGeometry args={[2.2, 1.5, 1.8]} />
         <meshToonMaterial color={wallColor} />
         <ToonOutline thickness={0.03} />
       </mesh>
 
-      {/* Hip Roof */}
       <group position={[0, 1.5, 0]}>
         <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
           <coneGeometry args={[1.85, 1.0, 4]} />
@@ -94,13 +147,11 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         </mesh>
       </group>
 
-      {/* Wooden Door */}
       <mesh position={[0, 0.45, 0.91]} castShadow>
         <boxGeometry args={[0.45, 0.85, 0.06]} />
         <meshToonMaterial color="#5c381e" />
       </mesh>
 
-      {/* Glass Windows */}
       <mesh position={[-0.65, 0.85, 0.91]} castShadow>
         <boxGeometry args={[0.35, 0.35, 0.06]} />
         <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
@@ -110,7 +161,6 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.6} />
       </mesh>
 
-      {/* Mailbox 📮 */}
       <group position={[mailboxOffset[0], 0, mailboxOffset[1]]}>
         <mesh position={[0, 0.35, 0]} castShadow>
           <cylinderGeometry args={[0.035, 0.035, 0.7, 8]} />
@@ -152,7 +202,6 @@ function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods =
         </mesh>
       </group>
 
-      {/* Goods Crates */}
       <group position={[0, 0.85, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.4, 0.16, 0.3]} />
@@ -637,8 +686,8 @@ function CharacterCameraController({ playerGroupRef, targetPos, setTargetPos, is
       ref={orbitRef}
       enablePan={false}
       enableZoom={true}
-      minDistance={3.0}
-      maxDistance={18.0}
+      minDistance={5.0}
+      maxDistance={120.0}
       minPolarAngle={Math.PI * 0.12}
       maxPolarAngle={Math.PI * 0.46}
       rotateSpeed={0.6}
@@ -736,13 +785,13 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   const playerGroupRef = useRef();
 
   return (
-    <Canvas shadows camera={{ position: [0.0, 4.5, 8.0], fov: 42 }}>
+    <Canvas shadows camera={{ position: [0.0, 45.0, 55.0], fov: 50 }}>
       <color attach="background" args={[isNight ? '#1a0b2e' : '#bfe8f7']} />
-      <fog attach="fog" args={[isNight ? '#1a0b2e' : '#bfe8f7', 35, 140]} />
+      <fog attach="fog" args={[isNight ? '#1a0b2e' : '#bfe8f7', 45, 160]} />
 
       <ambientLight intensity={isNight ? 0.35 : 0.85} color={isNight ? '#8338ec' : '#ffffff'} />
       <hemisphereLight skyColor={isNight ? '#3a0ca3' : '#bfe8f7'} groundColor="#94c77d" intensity={isNight ? 0.4 : 0.8} />
-      <directionalLight position={[12, 18, 10]} intensity={isNight ? 0.45 : 1.6} color={isNight ? '#4cc9f0' : '#ffffff'} castShadow shadow-mapSize={[2048, 2048]} />
+      <directionalLight position={[12, 28, 20]} intensity={isNight ? 0.45 : 1.6} color={isNight ? '#4cc9f0' : '#ffffff'} castShadow shadow-mapSize={[2048, 2048]} />
 
       <CharacterCameraController
         playerGroupRef={playerGroupRef}
@@ -784,26 +833,24 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <WoodenBench key={b.id} position={b.position} rotationY={b.rotationY} />
       ))}
 
-      {/* Flower Gardens */}
+      {/* Flower Gardens with Perimeter Fence Rails */}
       {village.flowerGardens.map((g) => (
         <group key={g.id}>
-          <mesh position={[g.fence.center[0], 0.2, g.fence.center[1]]}>
-            <boxGeometry args={[g.fence.width + 0.4, 0.4, g.fence.depth + 0.4]} />
-            <meshToonMaterial color="#7a4a2b" wireframe />
-          </mesh>
+          <FenceOutline center={g.fence.center} width={g.fence.width} depth={g.fence.depth} />
           {g.flowers.map((f) => (
             <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
           ))}
         </group>
       ))}
 
-      {/* Vegetable Farms */}
+      {/* Vegetable Farms with Perimeter Fence Rails */}
       {village.vegetableFarms.map((farm) => (
         <group key={farm.id}>
           <mesh position={[farm.fence.center[0], 0.01, farm.fence.center[1]]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[farm.fence.width, farm.fence.depth]} />
             <meshToonMaterial color="#5c381e" />
           </mesh>
+          <FenceOutline center={farm.fence.center} width={farm.fence.width} depth={farm.fence.depth} />
           {farm.crops.map((crop) => (
             <CropItem key={crop.id} position={crop.position} type={crop.type} />
           ))}
@@ -815,13 +862,10 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <FruitTree key={tree.id} position={tree.position} fruitType={tree.fruitType} />
       ))}
 
-      {/* Animal Pens */}
+      {/* Animal Pens with Perimeter Fence Rails */}
       {village.animalPens.map((pen) => (
         <group key={pen.id}>
-          <mesh position={[pen.fence.center[0], 0.2, pen.fence.center[1]]}>
-            <boxGeometry args={[pen.fence.width + 0.4, 0.4, pen.fence.depth + 0.4]} />
-            <meshToonMaterial color="#7a4a2b" wireframe />
-          </mesh>
+          <FenceOutline center={pen.fence.center} width={pen.width} depth={pen.depth} />
           {pen.animals.map((animal) => (
             <Animal key={animal.id} position={animal.position} type={animal.type} />
           ))}
