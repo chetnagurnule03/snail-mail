@@ -676,7 +676,76 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
 }
 
 /** -------------------------------------------------------------
- *  AXIS-ALIGNED FLAT RECTANGLE TERRAIN (X: -40 to 40, Z: -40 to 40)
+ *  DISTANT COUNTRYSIDE BACKGROUND SCENERY ⛰️🌲
+ *  Rolling hill mounds & distant trees dotting the outer world
+ * ------------------------------------------------------------- */
+function BackgroundScenery() {
+  const hills = useMemo(() => {
+    const arr = [];
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + (i % 2 === 0 ? 0.15 : -0.15);
+      const radius = 62 + (i % 3) * 16;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const radiusX = 16 + (i % 4) * 5;
+      const height = 4.5 + (i % 3) * 2.5;
+      arr.push({ id: `hill-${i}`, x, z, radiusX, height, isCone: i % 2 === 0 });
+    }
+    return arr;
+  }, []);
+
+  const distantTrees = useMemo(() => {
+    const arr = [];
+    const count = 45;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + ((i * 17) % 10) * 0.1;
+      const radius = 50 + ((i * 13) % 45);
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const scale = 1.0 + (i % 3) * 0.4;
+      arr.push({ id: `dist-tree-${i}`, x, z, scale, isPine: i % 3 === 0 });
+    }
+    return arr;
+  }, []);
+
+  return (
+    <group>
+      {/* Distant Hills */}
+      {hills.map((h) => (
+        <mesh key={h.id} position={[h.x, h.height / 2 - 0.2, h.z]} receiveShadow>
+          {h.isCone ? (
+            <coneGeometry args={[h.radiusX, h.height, 8]} />
+          ) : (
+            <sphereGeometry args={[h.radiusX, 10, 10]} />
+          )}
+          <meshToonMaterial color={h.isCone ? '#76a05e' : '#88b56f'} />
+        </mesh>
+      ))}
+
+      {/* Distant Background Trees */}
+      {distantTrees.map((t) => (
+        <group key={t.id} position={[t.x, 0, t.z]} scale={t.scale}>
+          <mesh position={[0, 1.0, 0]} castShadow>
+            <cylinderGeometry args={[0.2, 0.3, 2.0, 6]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+          <mesh position={[0, 2.3, 0]} castShadow>
+            {t.isPine ? (
+              <coneGeometry args={[1.3, 2.6, 6]} />
+            ) : (
+              <sphereGeometry args={[1.3, 10, 10]} />
+            )}
+            <meshToonMaterial color={t.isPine ? '#1e4d35' : '#306e50'} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  AXIS-ALIGNED FLAT RECTANGLE TERRAIN (250x250 EXTENDED)
  * ------------------------------------------------------------- */
 function SteppedLowPolyTerrain({ onGroundClick, bounds }) {
   return (
@@ -692,7 +761,7 @@ function SteppedLowPolyTerrain({ onGroundClick, bounds }) {
         onGroundClick(sanitized);
       }}
     >
-      <planeGeometry args={[80, 80]} />
+      <planeGeometry args={[250, 250]} />
       <meshToonMaterial color="#94c77d" />
     </mesh>
   );
@@ -906,7 +975,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   const playerGroupRef = useRef();
 
   return (
-    <Canvas shadows camera={{ position: [0.0, 48.0, 58.0], fov: 48 }}>
+    <Canvas shadows camera={{ position: [0.0, 42.0, 52.0], fov: 46 }}>
       <color attach="background" args={[isNight ? '#1a0b2e' : '#bfe8f7']} />
       <fog attach="fog" args={[isNight ? '#1a0b2e' : '#bfe8f7', 45, 160]} />
 
@@ -925,8 +994,11 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         bounds={village.bounds}
       />
 
-      {/* Axis-Aligned Rectangle Terrain */}
+      {/* Extended Visual Ground Terrain (250x250) */}
       <SteppedLowPolyTerrain onGroundClick={setTargetPos} bounds={village.bounds} />
+
+      {/* Distant Countryside Background Hills & Trees */}
+      <BackgroundScenery />
 
       {/* Filler Stepping Stones */}
       {village.steppingStones?.map((st) => (
