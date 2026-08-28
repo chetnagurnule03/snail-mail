@@ -83,6 +83,48 @@ function FenceOutline({ center = [0, 0], width = 6, depth = 6 }) {
 }
 
 /** -------------------------------------------------------------
+ *  LIT LAMP POST COMPONENT WITH POINT LIGHT 🏮
+ * ------------------------------------------------------------- */
+function LampPost({ position, isNight = false }) {
+  return (
+    <group position={[position[0], 0, position[1]]}>
+      {/* Iron Pole */}
+      <mesh position={[0, 1.1, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.09, 2.2, 8]} />
+        <meshToonMaterial color="#2b2d42" />
+        <ToonOutline thickness={0.025} color="#10111a" />
+      </mesh>
+
+      {/* Lantern Housing */}
+      <group position={[0, 2.3, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.34, 0.42, 0.34]} />
+          <meshToonMaterial color="#1d1e2c" />
+        </mesh>
+
+        {/* Glowing Lantern Core */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[0.26, 0.32, 0.26]} />
+          <meshToonMaterial
+            color="#ffb703"
+            emissive="#ffb703"
+            emissiveIntensity={isNight ? 2.2 : 0.8}
+          />
+        </mesh>
+
+        {/* Soft Warm Point Light */}
+        <pointLight
+          color="#ffb703"
+          intensity={isNight ? 2.0 : 0.4}
+          distance={10.0}
+          decay={2}
+        />
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
  *  PROPORTIONAL PETAL FLOWER COMPONENT 🌸🌼
  * ------------------------------------------------------------- */
 function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) {
@@ -121,11 +163,12 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
 }
 
 /** -------------------------------------------------------------
- *  2X SCALED DETAILED LOW-POLY COTTAGE 🏡📮
- *  Prominent 3D structure with stone foundation, roof overhang,
- *  framed door, 3 glass windows, and brick chimney
+ *  2X SCALED DETAILED LOW-POLY COTTAGE WITH VARIED ROOFS 🏡📮
  * ------------------------------------------------------------- */
-function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallColor = '#fbead0', mailboxOffset = [2.2, 2.2] }) {
+function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallColor = '#fbead0', mailboxOffset = [2.2, 2.2], id = '0', isNight = false }) {
+  const houseIdx = parseInt(id.replace('house-', ''), 10) || 0;
+  const isGableRoof = houseIdx % 2 === 1;
+
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
       {/* Stone Foundation Base */}
@@ -142,13 +185,23 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         <ToonOutline thickness={0.035} />
       </mesh>
 
-      {/* Gabled Roof with Overhang */}
+      {/* Varied Roof Styles */}
       <group position={[0, 2.8, 0]}>
-        <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
-          <coneGeometry args={[3.8, 2.2, 4]} />
-          <meshToonMaterial color={roofColor} />
-          <ToonOutline thickness={0.035} />
-        </mesh>
+        {isGableRoof ? (
+          <group>
+            <mesh rotation={[0, 0, Math.PI / 4]} position={[0, 0.4, 0]} castShadow>
+              <boxGeometry args={[3.4, 3.4, 3.8]} />
+              <meshToonMaterial color={roofColor} />
+              <ToonOutline thickness={0.035} />
+            </mesh>
+          </group>
+        ) : (
+          <mesh rotation={[0, Math.PI / 4, 0]} castShadow>
+            <coneGeometry args={[3.8, 2.2, 4]} />
+            <meshToonMaterial color={roofColor} />
+            <ToonOutline thickness={0.035} />
+          </mesh>
+        )}
       </group>
 
       {/* Brick Chimney */}
@@ -174,7 +227,7 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         </mesh>
       </group>
 
-      {/* 3 Glass Windows with Frames */}
+      {/* 3 Glass Windows with Warm Night Emissive Glow */}
       <group position={[-1.3, 1.8, 1.76]}>
         <mesh castShadow>
           <boxGeometry args={[0.75, 0.75, 0.08]} />
@@ -182,7 +235,11 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         </mesh>
         <mesh position={[0, 0, 0.04]} castShadow>
           <boxGeometry args={[0.6, 0.6, 0.08]} />
-          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+          <meshToonMaterial
+            color="#ffb703"
+            emissive="#ffb703"
+            emissiveIntensity={isNight ? 2.0 : 0.6}
+          />
         </mesh>
       </group>
 
@@ -193,11 +250,14 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         </mesh>
         <mesh position={[0, 0, 0.04]} castShadow>
           <boxGeometry args={[0.6, 0.6, 0.08]} />
-          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+          <meshToonMaterial
+            color="#ffb703"
+            emissive="#ffb703"
+            emissiveIntensity={isNight ? 2.0 : 0.6}
+          />
         </mesh>
       </group>
 
-      {/* Side Window */}
       <group position={[2.21, 1.8, 0]} rotation={[0, Math.PI / 2, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.75, 0.75, 0.08]} />
@@ -205,7 +265,11 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
         </mesh>
         <mesh position={[0, 0, 0.04]} castShadow>
           <boxGeometry args={[0.6, 0.6, 0.08]} />
-          <meshToonMaterial color="#ffb703" emissive="#ffb703" emissiveIntensity={0.8} />
+          <meshToonMaterial
+            color="#ffb703"
+            emissive="#ffb703"
+            emissiveIntensity={isNight ? 2.0 : 0.6}
+          />
         </mesh>
       </group>
 
@@ -226,11 +290,12 @@ function LowPolyCottage({ position, rotationY = 0, roofColor = '#e8604a', wallCo
 }
 
 /** -------------------------------------------------------------
- *  MARKET STALL, BENCH & FOUNTAIN 🏪⛲
+ *  DETAILED MARKET STALL WITH STOCKED 3D GOODS 🏪
  * ------------------------------------------------------------- */
 function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods = 'flowers' }) {
   return (
     <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]}>
+      {/* Stall Counter & Poles */}
       <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
         <boxGeometry args={[2.0, 0.8, 1.1]} />
         <meshToonMaterial color="#8c5a3c" />
@@ -252,15 +317,81 @@ function MarketStall({ position, rotationY = 0, awningColor = '#e8604a', goods =
         </mesh>
       </group>
 
+      {/* Stocked 3D Goods Crates */}
       <group position={[0, 0.95, 0]}>
         <mesh castShadow>
-          <boxGeometry args={[0.6, 0.2, 0.4]} />
+          <boxGeometry args={[0.7, 0.2, 0.45]} />
           <meshToonMaterial color="#a8763e" />
         </mesh>
-        <mesh position={[0, 0.15, 0]} castShadow>
-          <sphereGeometry args={[0.16, 8, 8]} />
-          <meshToonMaterial color={goods === 'fruit' ? '#e63946' : goods === 'vegetables' ? '#38b000' : '#ffb703'} />
-        </mesh>
+
+        {goods === 'fruit' ? (
+          <group position={[0, 0.16, 0]}>
+            <mesh position={[-0.18, 0, -0.08]} castShadow>
+              <sphereGeometry args={[0.12, 8, 8]} />
+              <meshToonMaterial color="#e63946" />
+            </mesh>
+            <mesh position={[0.18, 0, -0.08]} castShadow>
+              <sphereGeometry args={[0.12, 8, 8]} />
+              <meshToonMaterial color="#fb8500" />
+            </mesh>
+            <mesh position={[0, 0.12, 0.08]} castShadow>
+              <sphereGeometry args={[0.11, 8, 8]} />
+              <meshToonMaterial color="#e63946" />
+            </mesh>
+          </group>
+        ) : goods === 'vegetables' ? (
+          <group position={[0, 0.16, 0]}>
+            <mesh position={[-0.18, 0, 0]} castShadow>
+              <sphereGeometry args={[0.13, 8, 8]} />
+              <meshToonMaterial color="#38b000" />
+            </mesh>
+            <mesh position={[0.18, 0.08, 0]} rotation={[0, 0, 0.4]} castShadow>
+              <coneGeometry args={[0.08, 0.28, 6]} />
+              <meshToonMaterial color="#fb8500" />
+            </mesh>
+          </group>
+        ) : goods === 'flowers' ? (
+          <group position={[0, 0.16, 0]}>
+            <mesh position={[-0.18, 0.08, 0]}>
+              <cylinderGeometry args={[0.1, 0.08, 0.2, 8]} />
+              <meshToonMaterial color="#ffb703" />
+            </mesh>
+            <mesh position={[-0.18, 0.22, 0]}>
+              <sphereGeometry args={[0.12, 8, 8]} />
+              <meshToonMaterial color="#e8a0c9" />
+            </mesh>
+            <mesh position={[0.18, 0.08, 0]}>
+              <cylinderGeometry args={[0.1, 0.08, 0.2, 8]} />
+              <meshToonMaterial color="#ffb703" />
+            </mesh>
+            <mesh position={[0.18, 0.22, 0]}>
+              <sphereGeometry args={[0.12, 8, 8]} />
+              <meshToonMaterial color="#7ec6f2" />
+            </mesh>
+          </group>
+        ) : goods === 'plants' ? (
+          <group position={[0, 0.16, 0]}>
+            <mesh position={[0, 0.1, 0]}>
+              <cylinderGeometry args={[0.12, 0.09, 0.22, 8]} />
+              <meshToonMaterial color="#6c584c" />
+            </mesh>
+            <mesh position={[0, 0.26, 0]}>
+              <sphereGeometry args={[0.15, 8, 8]} />
+              <meshToonMaterial color="#2b9348" />
+            </mesh>
+          </group>
+        ) : (
+          <group position={[0, 0.16, 0]}>
+            <mesh position={[-0.15, 0.12, 0]}>
+              <cylinderGeometry args={[0.1, 0.12, 0.26, 8]} />
+              <meshToonMaterial color="#b08968" />
+            </mesh>
+            <mesh position={[0.15, 0.1, 0]}>
+              <cylinderGeometry args={[0.11, 0.09, 0.2, 8]} />
+              <meshToonMaterial color="#ddb892" />
+            </mesh>
+          </group>
+        )}
       </group>
     </group>
   );
@@ -388,7 +519,6 @@ function FruitTree({ position, fruitType = 'apple', fruitOffsets = [] }) {
 
 /** -------------------------------------------------------------
  *  2.5X SCALED 3D ANIMAL COMPONENT 🐮🐑🐔
- *  Reads clearly from high overhead camera views
  * ------------------------------------------------------------- */
 function Animal({ position, type }) {
   let bodyColor = '#ffffff';
@@ -677,20 +807,22 @@ function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
 
 /** -------------------------------------------------------------
  *  DISTANT COUNTRYSIDE BACKGROUND SCENERY ⛰️🌲
- *  Rolling hill mounds & distant trees dotting the outer world
+ *  Gentle, low rolling hill mounds with 4 green toon shades
  * ------------------------------------------------------------- */
 function BackgroundScenery() {
   const hills = useMemo(() => {
     const arr = [];
-    const count = 18;
+    const count = 22;
+    const colors = ['#6a9955', '#588b48', '#78a562', '#4d7a3e'];
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2 + (i % 2 === 0 ? 0.15 : -0.15);
-      const radius = 62 + (i % 3) * 16;
+      const angle = (i / count) * Math.PI * 2 + (i % 2 === 0 ? 0.1 : -0.1);
+      const radius = 62 + (i % 4) * 14;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
-      const radiusX = 16 + (i % 4) * 5;
-      const height = 4.5 + (i % 3) * 2.5;
-      arr.push({ id: `hill-${i}`, x, z, radiusX, height, isCone: i % 2 === 0 });
+      const radiusX = 14 + (i % 3) * 6;
+      const height = 2.2 + (i % 3) * 1.2;
+      const color = colors[i % colors.length];
+      arr.push({ id: `hill-${i}`, x, z, radiusX, height, color });
     }
     return arr;
   }, []);
@@ -711,16 +843,14 @@ function BackgroundScenery() {
 
   return (
     <group>
-      {/* Distant Hills */}
+      {/* Gentle Flattened Rolling Hills */}
       {hills.map((h) => (
-        <mesh key={h.id} position={[h.x, h.height / 2 - 0.2, h.z]} receiveShadow>
-          {h.isCone ? (
-            <coneGeometry args={[h.radiusX, h.height, 8]} />
-          ) : (
+        <group key={h.id} position={[h.x, 0, h.z]}>
+          <mesh position={[0, h.height * 0.4, 0]} scale={[1, 0.22, 1]} receiveShadow>
             <sphereGeometry args={[h.radiusX, 10, 10]} />
-          )}
-          <meshToonMaterial color={h.isCone ? '#76a05e' : '#88b56f'} />
-        </mesh>
+            <meshToonMaterial color={h.color} />
+          </mesh>
+        </group>
       ))}
 
       {/* Distant Background Trees */}
@@ -974,14 +1104,20 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
   const [targetPos, setTargetPos] = useState([0.0, 0.0]);
   const playerGroupRef = useRef();
 
+  // Lamp Post Positions along Village Paths
+  const lampPostPositions = useMemo(() => [
+    [-10, 0], [10, 0], [0, -12], [0, 12],
+    [-22, 10], [22, 10], [-22, -10], [22, -10],
+  ], []);
+
   return (
     <Canvas shadows camera={{ position: [0.0, 42.0, 52.0], fov: 46 }}>
-      <color attach="background" args={[isNight ? '#1a0b2e' : '#bfe8f7']} />
-      <fog attach="fog" args={[isNight ? '#1a0b2e' : '#bfe8f7', 45, 160]} />
+      <color attach="background" args={[isNight ? '#10061e' : '#bfe8f7']} />
+      <fog attach="fog" args={[isNight ? '#10061e' : '#bfe8f7', 45, 160]} />
 
-      <ambientLight intensity={isNight ? 0.35 : 0.85} color={isNight ? '#8338ec' : '#ffffff'} />
-      <hemisphereLight skyColor={isNight ? '#3a0ca3' : '#bfe8f7'} groundColor="#94c77d" intensity={isNight ? 0.4 : 0.8} />
-      <directionalLight position={[12, 28, 20]} intensity={isNight ? 0.45 : 1.6} color={isNight ? '#4cc9f0' : '#ffffff'} castShadow shadow-mapSize={[2048, 2048]} />
+      <ambientLight intensity={isNight ? 0.25 : 0.85} color={isNight ? '#8338ec' : '#ffffff'} />
+      <hemisphereLight skyColor={isNight ? '#3a0ca3' : '#bfe8f7'} groundColor="#94c77d" intensity={isNight ? 0.3 : 0.8} />
+      <directionalLight position={[12, 28, 20]} intensity={isNight ? 0.35 : 1.6} color={isNight ? '#4cc9f0' : '#ffffff'} castShadow shadow-mapSize={[2048, 2048]} />
 
       <CharacterCameraController
         playerGroupRef={playerGroupRef}
@@ -999,6 +1135,11 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
 
       {/* Distant Countryside Background Hills & Trees */}
       <BackgroundScenery />
+
+      {/* Lit Lamp Posts with Point Lights */}
+      {lampPostPositions.map((pos, i) => (
+        <LampPost key={`lamp-${i}`} position={pos} isNight={isNight} />
+      ))}
 
       {/* Filler Stepping Stones */}
       {village.steppingStones?.map((st) => (
@@ -1022,11 +1163,13 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {village.houses.map((h) => (
         <LowPolyCottage
           key={h.id}
+          id={h.id}
           position={h.position}
           rotationY={h.rotationY}
           roofColor={h.roofColor}
           wallColor={h.wallColor}
           mailboxOffset={h.mailboxOffset}
+          isNight={isNight}
         />
       ))}
       {village.houseGardenFlowers.map((f) => (
@@ -1052,6 +1195,13 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         </group>
       ))}
 
+      {/* Loose Flower Clusters */}
+      {village.looseFlowerClusters?.map((cluster) =>
+        cluster.flowers.map((f) => (
+          <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+        ))
+      )}
+
       {/* Vegetable Farms */}
       {village.vegetableFarms.map((farm) => (
         <group key={farm.id}>
@@ -1065,13 +1215,6 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
           ))}
         </group>
       ))}
-
-      {/* Loose Flower Clusters */}
-      {village.looseFlowerClusters?.map((cluster) =>
-        cluster.flowers.map((f) => (
-          <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
-        ))
-      )}
 
       {/* Orchard Trees */}
       {village.orchardTrees.map((tree) => (
@@ -1117,14 +1260,20 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
 
       {isNight ? (
         <>
-          <Sparkles count={200} scale={70} size={4} speed={0.2} color="#ffffff" />
-          <Sparkles count={80} scale={40} size={4.5} speed={0.6} color="#ffee93" />
+          <Sparkles count={250} scale={70} size={4} speed={0.2} color="#ffffff" />
+          <Sparkles count={90} scale={40} size={4.5} speed={0.6} color="#ffee93" />
         </>
       ) : (
         <Sparkles count={120} scale={60} size={3.5} speed={0.4} color="#ffe5ec" />
       )}
 
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={60} blur={2.5} />
+      {/* Soft Ground Contact Shadows */}
+      <ContactShadows
+        position={[0, 0, 0]}
+        opacity={isNight ? 0.55 : 0.45}
+        scale={90}
+        blur={2.0}
+      />
     </Canvas>
   );
 }
