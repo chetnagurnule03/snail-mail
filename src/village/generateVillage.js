@@ -163,6 +163,8 @@ export function generateVillage() {
     return {
       id: `pen-${pi}`,
       fence: { center: pen.center, width: pen.width, depth: pen.depth },
+      width: pen.width,
+      depth: pen.depth,
       animals: pen.animals.map((type, i) => ({
         id: `pen-${pi}-animal-${i}`,
         type,

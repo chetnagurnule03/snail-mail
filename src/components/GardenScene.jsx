@@ -30,11 +30,13 @@ function sanitizePlayableTarget(x, z, bounds) {
  *  THIN LOW-POLY WOODEN FENCE OUTLINE COMPONENT 🪵
  *  Renders 4 corner posts + 4 thin perimeter rail bars (NO solid platforms)
  * ------------------------------------------------------------- */
-function FenceOutline({ center, width, depth }) {
-  const cx = center[0];
-  const cz = center[1];
-  const hw = width / 2;
-  const hd = depth / 2;
+function FenceOutline({ center = [0, 0], width = 6, depth = 6 }) {
+  const safeW = (typeof width === 'number' && !isNaN(width)) ? width : 6;
+  const safeD = (typeof depth === 'number' && !isNaN(depth)) ? depth : 6;
+  const cx = center[0] || 0;
+  const cz = center[1] || 0;
+  const hw = safeW / 2;
+  const hd = safeD / 2;
 
   const fenceColor = '#7a4a2b';
   const postRadius = 0.08;
@@ -865,7 +867,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {/* Animal Pens with Perimeter Fence Rails */}
       {village.animalPens.map((pen) => (
         <group key={pen.id}>
-          <FenceOutline center={pen.fence.center} width={pen.width} depth={pen.depth} />
+          <FenceOutline center={pen.fence.center} width={pen.fence.width} depth={pen.fence.depth} />
           {pen.animals.map((animal) => (
             <Animal key={animal.id} position={animal.position} type={animal.type} />
           ))}
