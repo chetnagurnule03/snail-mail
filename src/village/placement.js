@@ -99,3 +99,37 @@ export function scatterInCircle({ center, radius, count, minDist = 0.6, rng, max
 export function waypointChain(points) {
   return points.map(([x, z]) => [x, z]);
 }
+
+/**
+ * Places `count` fruit on the surface of a foliage sphere of the given
+ * radius, biased toward the outer/lower hemisphere (where fruit
+ * actually hangs on a real tree) rather than uniformly over the whole
+ * sphere.
+ *
+ * theta_i = (2*PI*i)/N + jitter                    (angle around the trunk)
+ * phi_i   = acos(1 - rng() * 0.6)                  (angle from top pole,
+ *                                                    clamped to the outer
+ *                                                    0.6 of the sphere so
+ *                                                    fruit stays out of
+ *                                                    the very top/inside)
+ * x = R * 0.92 * sin(phi) * cos(theta)
+ * y = R * 0.92 * cos(phi)
+ * z = R * 0.92 * sin(phi) * sin(theta)
+ *
+ * Returns points relative to the foliage sphere's own center, so the
+ * caller just adds its own foliage position offset.
+ */
+export function fruitOnFoliageSphere({ radius, count, rng }) {
+  const points = [];
+  for (let i = 0; i < count; i++) {
+    const theta = (2 * Math.PI * i) / count + (rng() - 0.5) * 0.4;
+    const phi = Math.acos(1 - rng() * 0.6);
+    const r = radius * 0.92;
+    points.push([
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta),
+    ]);
+  }
+  return points;
+}

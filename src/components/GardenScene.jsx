@@ -351,30 +351,34 @@ function CropItem({ position, type }) {
 /** -------------------------------------------------------------
  *  FRUIT TREE COMPONENT 🍎
  * ------------------------------------------------------------- */
-function FruitTree({ position, fruitType = 'apple' }) {
+function FruitTree({ position, fruitType = 'apple', fruitOffsets = [] }) {
   const fruitColor = fruitType === 'apple' ? '#e63946' : '#fb8500';
+  const foliageCenter = [0, 2.2, 0];
+  const foliageRadius = 0.55;
 
   return (
-    <group position={[position[0], 0, position[1]]} scale={1.1}>
-      <mesh position={[0, 1.2, 0]} castShadow>
-        <cylinderGeometry args={[0.22, 0.32, 2.4, 8]} />
+    <group position={[position[0], 0, position[1]]}>
+      <mesh position={[0, 0.9, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.28, 1.8, 8]} />
         <meshToonMaterial color="#5c381e" />
       </mesh>
-      <mesh position={[0, 2.7, 0]} castShadow>
-        <sphereGeometry args={[1.4, 14, 14]} />
+      <mesh position={foliageCenter} castShadow>
+        <sphereGeometry args={[foliageRadius, 14, 14]} />
         <meshToonMaterial color="#38b000" />
         <ToonOutline thickness={0.03} color="#1b4332" />
       </mesh>
 
-      {[
-        [-0.6, 2.5, 0.6],
-        [0.6, 2.6, 0.5],
-        [0.0, 2.8, 0.8],
-        [-0.6, 2.7, -0.6],
-        [0.6, 2.4, -0.7],
-      ].map((fp, fIdx) => (
-        <mesh key={fIdx} position={fp} castShadow>
-          <sphereGeometry args={[0.18, 8, 8]} />
+      {fruitOffsets.map((offset, fIdx) => (
+        <mesh
+          key={fIdx}
+          position={[
+            foliageCenter[0] + offset[0],
+            foliageCenter[1] + offset[1],
+            foliageCenter[2] + offset[2],
+          ]}
+          castShadow
+        >
+          <sphereGeometry args={[0.11, 8, 8]} />
           <meshToonMaterial color={fruitColor} />
         </mesh>
       ))}
@@ -990,9 +994,21 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         </group>
       ))}
 
+      {/* Loose Flower Clusters */}
+      {village.looseFlowerClusters?.map((cluster) =>
+        cluster.flowers.map((f) => (
+          <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+        ))
+      )}
+
       {/* Orchard Trees */}
       {village.orchardTrees.map((tree) => (
-        <FruitTree key={tree.id} position={tree.position} fruitType={tree.fruitType} />
+        <FruitTree
+          key={tree.id}
+          position={tree.position}
+          fruitType={tree.fruitType}
+          fruitOffsets={tree.fruitOffsets}
+        />
       ))}
 
       {/* 2.5x Scaled Animal Pens */}
