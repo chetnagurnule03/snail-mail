@@ -61,11 +61,13 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
 
   return (
     <group position={position} scale={0.65}>
+      {/* Green Stem */}
       <mesh position={[0, 0.5, 0]} castShadow>
         <cylinderGeometry args={[0.04, 0.05, 1.0, 8]} />
         <meshToonMaterial color="#38b000" />
       </mesh>
 
+      {/* Two Green Leaves */}
       <mesh position={[-0.18, 0.4, 0]} rotation={[0, 0, -0.4]}>
         <boxGeometry args={[0.35, 0.02, 0.15]} />
         <meshToonMaterial color="#2b9348" />
@@ -75,6 +77,7 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
         <meshToonMaterial color="#2b9348" />
       </mesh>
 
+      {/* Flower Head Group at Top of Stem (y: 1.0) */}
       <group position={[0, 1.0, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.16, 12, 12]} />
@@ -93,44 +96,46 @@ function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) 
 }
 
 /** -------------------------------------------------------------
- *  PROPORTIONAL FRUIT ORCHARD (ALTERNATNIG ROWS & ATTACHED FRUIT) 🍎🍊
+ *  2. LARGE DENSE FLOWER GARDEN PLOTS (40-100 FLOWERS PER PLOT) 🌸🌼
  * ------------------------------------------------------------- */
-function FruitOrchard() {
-  const fruitTrees = useMemo(() => [
-    { x: -18, z: 20, fruit: '#e63946' },
-    { x: -12, z: 20, fruit: '#fb8500' },
-    { x: -6, z: 20, fruit: '#ffb703' },
-    { x: 6, z: 20, fruit: '#7209b7' },
-    { x: 12, z: 20, fruit: '#e63946' },
-    { x: 18, z: 20, fruit: '#fb8500' },
-  ], []);
+function LargeDenseFlowerPlots() {
+  const plots = useMemo(() => {
+    const list = [];
+    const plotCenters = [
+      { cx: -20, cz: -18, rows: 7, cols: 7, width: 8, depth: 8 },
+      { cx: 20, cz: -18, rows: 7, cols: 7, width: 8, depth: 8 },
+      { cx: -20, cz: 18, rows: 7, cols: 7, width: 8, depth: 8 },
+      { cx: 20, cz: 18, rows: 7, cols: 7, width: 8, depth: 8 },
+    ];
+    const colors = ['#ff4d6d', '#e63946', '#ffb703', '#4cc9f0', '#7209b7', '#ffffff'];
+
+    plotCenters.forEach((p, pIdx) => {
+      const flowers = [];
+      for (let r = 0; r < p.rows; r++) {
+        for (let c = 0; c < p.cols; c++) {
+          const fx = p.cx - p.width / 2 + (c * (p.width / (p.cols - 1))) + (Math.sin(r * 3 + c) * 0.2);
+          const fz = p.cz - p.depth / 2 + (r * (p.depth / (p.rows - 1))) + (Math.cos(r + c * 3) * 0.2);
+          const color = colors[(pIdx * 13 + r * 7 + c) % colors.length];
+          flowers.push({ x: fx, z: fz, color, petals: 6 + ((r + c) % 3) });
+        }
+      }
+      list.push({ ...p, flowers });
+    });
+
+    return list;
+  }, []);
 
   return (
     <group>
-      {fruitTrees.map((t, idx) => (
-        <group key={idx} position={[t.x, 0, t.z]} scale={0.9}>
-          <mesh position={[0, 1.0, 0]} castShadow>
-            <cylinderGeometry args={[0.18, 0.28, 2.0, 8]} />
-            <meshToonMaterial color="#5c381e" />
+      {plots.map((plot, pIdx) => (
+        <group key={pIdx}>
+          {/* Wooden Fence Perimeter */}
+          <mesh position={[plot.cx, 0.25, plot.cz]} receiveShadow>
+            <boxGeometry args={[plot.width + 0.6, 0.45, plot.depth + 0.6]} />
+            <meshToonMaterial color="#7a4a2b" wireframe />
           </mesh>
-
-          <mesh position={[0, 2.3, 0]} castShadow>
-            <sphereGeometry args={[1.2, 14, 14]} />
-            <meshToonMaterial color="#38b000" />
-            <ToonOutline thickness={0.03} color="#1b4332" />
-          </mesh>
-
-          {[
-            [-0.5, 2.1, 0.5],
-            [0.5, 2.2, 0.4],
-            [0.0, 2.4, 0.7],
-            [-0.5, 2.3, -0.5],
-            [0.5, 2.0, -0.6],
-          ].map((fp, fIdx) => (
-            <mesh key={fIdx} position={fp} castShadow>
-              <sphereGeometry args={[0.15, 8, 8]} />
-              <meshToonMaterial color={t.fruit} />
-            </mesh>
+          {plot.flowers.map((f, fIdx) => (
+            <AnatomicalPetalFlower key={fIdx} position={[f.x, 0, f.z]} color={f.color} petalCount={f.petals} />
           ))}
         </group>
       ))}
@@ -139,11 +144,7 @@ function FruitOrchard() {
 }
 
 /** -------------------------------------------------------------
- *  4 QUADRANT MATHEMATICAL FARM FIELDS (SECTION 4)
- *  1. Southwest: X = -38 to -26, Z = -30 to -22
- *  2. Southeast: X = +26 to +38, Z = -30 to -22
- *  3. Northwest: X = -38 to -26, Z = +22 to +30
- *  4. Northeast: X = +26 to +38, Z = +22 to +30
+ *  3. VEGETABLE FARMS WITH CROP ROWS & PROPS 🌽🥕🎃
  * ------------------------------------------------------------- */
 function FourMathematicalFarms() {
   return (
@@ -162,6 +163,11 @@ function FourMathematicalFarms() {
             </mesh>
           ))
         )}
+        {/* Watering Can & Tool Props */}
+        <mesh position={[5.2, 0.2, 3.2]} castShadow>
+          <cylinderGeometry args={[0.2, 0.2, 0.35, 8]} />
+          <meshToonMaterial color="#457b9d" />
+        </mesh>
       </group>
 
       {/* 2. Southeast Farm (+32, 0, -26) */}
@@ -217,6 +223,154 @@ function FourMathematicalFarms() {
   );
 }
 
+/** -------------------------------------------------------------
+ *  4. FRUIT TREE ORCHARDS & BASKETS 🍎🍊🍋
+ * ------------------------------------------------------------- */
+function FruitOrchard() {
+  const fruitTrees = useMemo(() => [
+    { x: -18, z: 20, fruit: '#e63946' }, // Red Apple
+    { x: -12, z: 20, fruit: '#fb8500' }, // Orange
+    { x: -6, z: 20, fruit: '#ffb703' },  // Yellow Lemon
+    { x: 6, z: 20, fruit: '#7209b7' },   // Purple Plum
+    { x: 12, z: 20, fruit: '#e63946' },  // Red Apple
+    { x: 18, z: 20, fruit: '#fb8500' },  // Orange
+  ], []);
+
+  return (
+    <group>
+      {fruitTrees.map((t, idx) => (
+        <group key={idx} position={[t.x, 0, t.z]} scale={0.9}>
+          <mesh position={[0, 1.0, 0]} castShadow>
+            <cylinderGeometry args={[0.18, 0.28, 2.0, 8]} />
+            <meshToonMaterial color="#5c381e" />
+          </mesh>
+
+          <mesh position={[0, 2.3, 0]} castShadow>
+            <sphereGeometry args={[1.2, 14, 14]} />
+            <meshToonMaterial color="#38b000" />
+            <ToonOutline thickness={0.03} color="#1b4332" />
+          </mesh>
+
+          {[
+            [-0.5, 2.1, 0.5],
+            [0.5, 2.2, 0.4],
+            [0.0, 2.4, 0.7],
+            [-0.5, 2.3, -0.5],
+            [0.5, 2.0, -0.6],
+          ].map((fp, fIdx) => (
+            <mesh key={fIdx} position={fp} castShadow>
+              <sphereGeometry args={[0.15, 8, 8]} />
+              <meshToonMaterial color={t.fruit} />
+            </mesh>
+          ))}
+
+          {/* Fruit Basket Under Tree */}
+          <group position={[0.7, 0.12, 0.7]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.26, 0.2, 0.25, 8]} />
+              <meshToonMaterial color="#8a7e70" />
+            </mesh>
+            <mesh position={[0, 0.15, 0]}>
+              <sphereGeometry args={[0.18, 8, 8]} />
+              <meshToonMaterial color={t.fruit} />
+            </mesh>
+          </group>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  8. CURVING RIVER STREAM & 2 WOODEN BRIDGES 🌊🌉
+ * ------------------------------------------------------------- */
+function CurvingStreamWithBridges() {
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Curving Blue Water Stream */}
+      <mesh position={[-2.0, 0.005, 0.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
+        <planeGeometry args={[3.8, 75.0]} />
+        <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
+      </mesh>
+
+      {/* Wooden Arch Bridge 1 (North) */}
+      <group position={[-6.0, 0.35, -14.0]} rotation={[0, 0.4, 0]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[3.4, 0.35, 5.2]} />
+          <meshToonMaterial color="#8a7e70" />
+          <ToonOutline thickness={0.03} color="#2b1a0e" />
+        </mesh>
+      </group>
+
+      {/* Wooden Arch Bridge 2 (South) */}
+      <group position={[2.0, 0.35, 14.0]} rotation={[0, 0.4, 0]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[3.4, 0.35, 5.2]} />
+          <meshToonMaterial color="#8a7e70" />
+          <ToonOutline thickness={0.03} color="#2b1a0e" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
+ *  9. FENCED ANIMAL PASTURES (COWS, SHEEP, CHICKENS, HORSES) 🐮🐑
+ * ------------------------------------------------------------- */
+function FencedAnimalPastures() {
+  return (
+    <group>
+      {/* Animal Pen 1: Cows & Sheep (-20, 0, -32) */}
+      <group position={[-20, 0, -32]}>
+        <mesh position={[0, 0.25, 0]}>
+          <boxGeometry args={[10, 0.5, 8]} />
+          <meshToonMaterial color="#7a4a2b" wireframe />
+        </mesh>
+
+        {/* Spotty Cow 1 */}
+        <group position={[-2.5, 0.55, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.85, 0.75, 1.3]} />
+            <meshToonMaterial color="#f4f1de" />
+          </mesh>
+          <mesh position={[0.2, 0.2, 0.2]}>
+            <boxGeometry args={[0.3, 0.3, 0.3]} />
+            <meshToonMaterial color="#2b2d42" />
+          </mesh>
+        </group>
+
+        {/* Fluffy Sheep 1 */}
+        <group position={[2.2, 0.45, 1.2]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.52, 12, 12]} />
+            <meshToonMaterial color="#ffffff" />
+          </mesh>
+          <mesh position={[0, 0.1, 0.45]}>
+            <sphereGeometry args={[0.25, 10, 10]} />
+            <meshToonMaterial color="#2b2d42" />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Animal Pen 2: Chickens & Ducks (20, 0, -32) */}
+      <group position={[20, 0, -32]}>
+        <mesh position={[0, 0.25, 0]}>
+          <boxGeometry args={[10, 0.5, 8]} />
+          <meshToonMaterial color="#7a4a2b" wireframe />
+        </mesh>
+
+        {/* Chickens */}
+        {[-2, 0, 2].map((x, i) => (
+          <mesh key={i} position={[x, 0.25, 0]} castShadow>
+            <sphereGeometry args={[0.2, 8, 8]} />
+            <meshToonMaterial color="#f4a261" />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 function SmallBushesAndEnvironmentalDetails() {
   const bushes = useMemo(() => [
     { x: -10, z: -12, scale: 0.8 },
@@ -240,82 +394,17 @@ function SmallBushesAndEnvironmentalDetails() {
   );
 }
 
-function VillageLakeWithReeds() {
+function VillageWindingPaths() {
   return (
-    <group position={[-18.0, -0.04, 12.0]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0.3]} receiveShadow>
-        <planeGeometry args={[14.0, 9.5]} />
-        <meshToonMaterial color="#2a9d8f" transparent opacity={0.92} />
-        <ToonOutline thickness={0.04} color="#1b4943" />
+    <group position={[0, 0.015, 0]}>
+      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[5.0, 75.0]} />
+        <meshToonMaterial color="#cbb994" />
       </mesh>
-
-      {[
-        [-3.2, 0.01, -1.8],
-        [-1.5, 0.01, 2.2],
-        [2.8, 0.01, -0.8],
-        [1.2, 0.01, 1.9],
-      ].map((p, idx) => (
-        <group key={idx} position={p}>
-          <mesh rotation={[-Math.PI / 2, 0, idx * 0.8]} castShadow>
-            <cylinderGeometry args={[0.45, 0.45, 0.02, 12]} />
-            <meshToonMaterial color="#52b788" />
-            <ToonOutline thickness={0.02} color="#1b4332" />
-          </mesh>
-        </group>
-      ))}
-
-      {[
-        [-5.5, 0, -2.5],
-        [-4.8, 0, 3.2],
-        [5.2, 0, -2.2],
-        [4.2, 0, 3.0],
-      ].map((pos, i) => (
-        <group key={i} position={pos}>
-          {[-0.2, 0, 0.2].map((off, j) => (
-            <mesh key={j} position={[off, 0.4, 0]} castShadow>
-              <cylinderGeometry args={[0.025, 0.03, 0.85, 6]} />
-              <meshToonMaterial color="#2d6a4f" />
-            </mesh>
-          ))}
-        </group>
-      ))}
     </group>
   );
 }
 
-function ScatteredFlowerClusters() {
-  const flowerClusters = useMemo(() => {
-    const list = [];
-    const colors = ['#ff4d6d', '#ffb703', '#7209b7', '#4cc9f0', '#ffffff', '#fb8500'];
-    const centers = [
-      [-12, 15], [-22, 9], [-10, 2], [12, -4], [22, -14],
-      [-5, -10], [8, 14], [-24, -18], [24, -26]
-    ];
-
-    centers.forEach((c, cIdx) => {
-      for (let i = 0; i < 5; i++) {
-        const x = c[0] + (Math.sin(i * 1.5) * 1.6);
-        const z = c[1] + (Math.cos(i * 1.5) * 1.6);
-        const color = colors[(cIdx + i) % colors.length];
-        list.push({ x, z, color, petals: 6 + (i % 3) });
-      }
-    });
-
-    return list;
-  }, []);
-
-  return (
-    <group>
-      {flowerClusters.map((f, idx) => (
-        <AnatomicalPetalFlower key={idx} position={[f.x, 0, f.z]} color={f.color} petalCount={f.petals} />
-      ))}
-    </group>
-  );
-}
-
-/** -------------------------------------------------------------
- *  PROPORTIONAL BOUNDARY TREES (ROUND & PINE TYPES) 🌲
- * ------------------------------------------------------------- */
 function DenseMultiColorForestBoundary() {
   const FOREST_TREES = useMemo(() => {
     const trees = [];
@@ -575,35 +664,6 @@ function SteppedLowPolyTerrain({ onGroundClick }) {
       >
         <planeGeometry args={[100, 80]} />
         <meshToonMaterial color="#94c77d" />
-      </mesh>
-    </group>
-  );
-}
-
-function DualWaterfallRiverValley() {
-  return (
-    <group position={[0, 0, 0]}>
-      <mesh position={[-2.0, 0.005, -10.0]} rotation={[-Math.PI / 2, 0, 0.4]}>
-        <planeGeometry args={[3.8, 65.0]} />
-        <meshToonMaterial color="#3a86c8" transparent opacity={0.88} />
-      </mesh>
-
-      <group position={[-2.0, 0.35, -10.0]} rotation={[0, 0.4, 0]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[2.4, 0.45, 4.4]} />
-          <meshToonMaterial color="#8a7e70" />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-function VillageWindingPaths() {
-  return (
-    <group position={[0, 0.015, 0]}>
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[5.0, 75.0]} />
-        <meshToonMaterial color="#cbb994" />
       </mesh>
     </group>
   );
@@ -872,35 +932,40 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       />
 
       <SteppedLowPolyTerrain onGroundClick={setTargetPos} />
-      <DualWaterfallRiverValley />
+      
+      {/* 8. CURVING STREAM WITH 2 WOODEN BRIDGES */}
+      <CurvingStreamWithBridges />
+
       <VillageWindingPaths />
 
       {/* 🌿 SMALL ENVIRONMENTAL BUSHES & DETAILS */}
       <SmallBushesAndEnvironmentalDetails />
 
-      {/* 🍎🍊 FRUIT ORCHARD */}
+      {/* 🍎🍊 4. FRUIT TREE ORCHARDS */}
       <FruitOrchard />
 
-      {/* 🌊 LAKE WITH LILY PADS */}
-      <VillageLakeWithReeds />
+      {/* 🌸 2. LARGE DENSE FLOWER GARDEN PLOTS (40-100 FLOWERS PER PLOT) */}
+      <LargeDenseFlowerPlots />
 
-      {/* 🌾 4 QUADRANT MATHEMATICAL FARM FIELDS */}
+      {/* 🌾 3. VEGETABLE FARMS WITH CROP ROWS */}
       <FourMathematicalFarms />
 
-      {/* 🌸 RADIAL 5-8 PETAL FLOWER CLUSTERS */}
-      <ScatteredFlowerClusters />
+      {/* 🐮🐑 9. FENCED ANIMAL PASTURES */}
+      <FencedAnimalPastures />
 
-      {/* 🌲 PROPORTIONAL BOUNDARY TREES */}
+      {/* 🌲 11. SOFT TOON FOREST BOUNDARY */}
       <DenseMultiColorForestBoundary />
 
       {/* 🦇 ANIMATED 3D BAT MESSENGER OVERHEAD */}
       <AnimatedBatMessenger />
 
-      {/* CENTRAL MARKET SQUARE & FOUNTAIN (X: -20 to +20, Z: -15 to +15) */}
+      {/* 6. CENTRAL MARKET SQUARE & FOUNTAIN */}
       <VillageSquare position={[0, 0, 0]} />
 
-      {/* 4 MATHEMATICAL VILLAGE HOUSING ZONES */}
+      {/* 5. 14 COZY HOUSES WITH MAILBOXES & GARDENS */}
       <VillageHouses />
+      
+      {/* 10. VILLAGERS DISTRIBUTED THROUGHOUT SCENE */}
       <Villagers />
 
       {/* 🦇🖤 CHIBI DARK KNIGHT MAIN PLAYER */}
