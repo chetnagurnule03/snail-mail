@@ -46,36 +46,88 @@ function sanitizePlayableTarget(x, z) {
 }
 
 /** -------------------------------------------------------------
+ *  RADIAL 6-8 PETAL LOW-POLY FLOWER GEOMETRY 🌸🌼
+ *  Stem height: 1.0, 6-8 Petals placed radially: x = cx + r*cos(a)
+ * ------------------------------------------------------------- */
+function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) {
+  const petals = useMemo(() => {
+    const arr = [];
+    const radius = 0.24;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = i * ((Math.PI * 2) / petalCount);
+      const px = Math.cos(angle) * radius;
+      const pz = Math.sin(angle) * radius;
+      arr.push({ px, pz, angle });
+    }
+    return arr;
+  }, [petalCount]);
+
+  return (
+    <group position={position} scale={0.65}>
+      {/* Green Stem */}
+      <mesh position={[0, 0.5, 0]} castShadow>
+        <cylinderGeometry args={[0.04, 0.05, 1.0, 8]} />
+        <meshToonMaterial color="#38b000" />
+      </mesh>
+
+      {/* Two Green Leaves */}
+      <mesh position={[-0.18, 0.4, 0]} rotation={[0, 0, -0.4]}>
+        <boxGeometry args={[0.35, 0.02, 0.15]} />
+        <meshToonMaterial color="#2b9348" />
+      </mesh>
+      <mesh position={[0.18, 0.4, 0]} rotation={[0, 0, 0.4]}>
+        <boxGeometry args={[0.35, 0.02, 0.15]} />
+        <meshToonMaterial color="#2b9348" />
+      </mesh>
+
+      {/* Flower Head Group at Top of Stem (y: 1.0) */}
+      <group position={[0, 1.0, 0]}>
+        {/* Center Yellow Disc */}
+        <mesh castShadow>
+          <sphereGeometry args={[0.18, 12, 12]} />
+          <meshToonMaterial color="#ffb703" />
+        </mesh>
+
+        {/* 6-8 Radial Petals */}
+        {petals.map((p, idx) => (
+          <mesh key={idx} position={[p.px, 0, p.pz]} rotation={[0, -p.angle, 0]} castShadow>
+            <sphereGeometry args={[0.14, 10, 10]} />
+            <meshToonMaterial color={color} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+/** -------------------------------------------------------------
  *  1. FRUIT ORCHARD WITH APPLE & ORANGE TREES 🍎🍊
  * ------------------------------------------------------------- */
 function FruitOrchard() {
   const fruitTrees = useMemo(() => [
-    { x: -32, z: -24, fruit: '#e63946' }, // Apple Tree
-    { x: -25, z: -28, fruit: '#fb8500' }, // Orange Tree
-    { x: -35, z: -32, fruit: '#e63946' }, // Apple Tree
-    { x: 32, z: -24, fruit: '#fb8500' },  // Orange Tree
-    { x: 25, z: -28, fruit: '#e63946' },  // Apple Tree
-    { x: 35, z: -32, fruit: '#fb8500' },  // Orange Tree
+    { x: -32, z: -24, fruit: '#e63946' },
+    { x: -25, z: -28, fruit: '#fb8500' },
+    { x: -35, z: -32, fruit: '#e63946' },
+    { x: 32, z: -24, fruit: '#fb8500' },
+    { x: 25, z: -28, fruit: '#e63946' },
+    { x: 35, z: -32, fruit: '#fb8500' },
   ], []);
 
   return (
     <group>
       {fruitTrees.map((t, idx) => (
         <group key={idx} position={[t.x, 0, t.z]}>
-          {/* Trunk */}
           <mesh position={[0, 1.1, 0]} castShadow>
             <cylinderGeometry args={[0.22, 0.35, 2.2, 8]} />
             <meshToonMaterial color="#5c381e" />
           </mesh>
 
-          {/* Leafy Canopy */}
           <mesh position={[0, 2.6, 0]} castShadow>
             <sphereGeometry args={[1.4, 16, 16]} />
             <meshToonMaterial color="#38b000" />
             <ToonOutline thickness={0.03} color="#1b4332" />
           </mesh>
 
-          {/* Hanging Fruits */}
           {[
             [-0.7, 2.3, 0.7],
             [0.7, 2.5, 0.6],
@@ -89,7 +141,6 @@ function FruitOrchard() {
             </mesh>
           ))}
 
-          {/* Fruit Baskets Under Trees */}
           <group position={[0.8, 0.15, 0.8]}>
             <mesh castShadow>
               <cylinderGeometry args={[0.3, 0.24, 0.3, 8]} />
@@ -106,9 +157,6 @@ function FruitOrchard() {
   );
 }
 
-/** -------------------------------------------------------------
- *  2. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS 🌊
- * ------------------------------------------------------------- */
 function VillageLakeWithReeds() {
   return (
     <group position={[-18.0, -0.04, 12.0]}>
@@ -152,9 +200,6 @@ function VillageLakeWithReeds() {
   );
 }
 
-/** -------------------------------------------------------------
- *  3. TILLED FARM PLOTS WITH CROPS 🌾🌽
- * ------------------------------------------------------------- */
 function TilledFarmPlots() {
   return (
     <group position={[16.0, 0, -8.0]}>
@@ -199,14 +244,10 @@ function TilledFarmPlots() {
   );
 }
 
-/** -------------------------------------------------------------
- *  4. SCATTERED FLOWER CLUSTERS 🌸🌼
- * ------------------------------------------------------------- */
 function ScatteredFlowerClusters() {
   const flowerClusters = useMemo(() => {
     const list = [];
     const colors = ['#ff4d6d', '#ffb703', '#7209b7', '#4cc9f0', '#ffffff', '#fb8500'];
-
     const centers = [
       [-12, 15], [-22, 9], [-10, 2], [12, -4], [22, -14],
       [-5, -10], [8, 14], [-24, -18], [24, -26]
@@ -217,7 +258,7 @@ function ScatteredFlowerClusters() {
         const x = c[0] + (Math.sin(i * 1.5) * 1.6);
         const z = c[1] + (Math.cos(i * 1.5) * 1.6);
         const color = colors[(cIdx + i) % colors.length];
-        list.push({ x, z, color });
+        list.push({ x, z, color, petals: 6 + (i % 3) });
       }
     });
 
@@ -227,24 +268,12 @@ function ScatteredFlowerClusters() {
   return (
     <group>
       {flowerClusters.map((f, idx) => (
-        <group key={idx} position={[f.x, 0, f.z]}>
-          <mesh position={[0, 0.12, 0]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.24, 6]} />
-            <meshToonMaterial color="#38b000" />
-          </mesh>
-          <mesh position={[0, 0.24, 0]} castShadow>
-            <sphereGeometry args={[0.12, 10, 10]} />
-            <meshToonMaterial color={f.color} />
-          </mesh>
-        </group>
+        <AnatomicalPetalFlower key={idx} position={[f.x, 0, f.z]} color={f.color} petalCount={f.petals} />
       ))}
     </group>
   );
 }
 
-/** -------------------------------------------------------------
- *  5. CLUSTERED TREE GROVES 🌲🌳
- * ------------------------------------------------------------- */
 function ClusteredTreeGroves() {
   const treeGroves = useMemo(() => [
     { x: -28, z: 2, scale: 1.1, color: '#2d6a4f' },
@@ -278,9 +307,6 @@ function ClusteredTreeGroves() {
   );
 }
 
-/** -------------------------------------------------------------
- *  ANIMATED 3D BAT MESSENGER OVERHEAD 🦇
- * ------------------------------------------------------------- */
 function AnimatedBatMessenger() {
   const batRef = useRef();
 
@@ -316,9 +342,6 @@ function AnimatedBatMessenger() {
   );
 }
 
-/** -------------------------------------------------------------
- *  DETAILED CUTE 3D ORANGE CAT PET 🐱
- * ------------------------------------------------------------- */
 function OrangeCatPet({ targetGroupRef, activePet }) {
   const catRef = useRef();
 
@@ -424,9 +447,6 @@ function OrangeCatPet({ targetGroupRef, activePet }) {
   );
 }
 
-/** -------------------------------------------------------------
- *  STYLIZED LOW-POLY HORSE COMPANION & MOUNT 🐴
- * ------------------------------------------------------------- */
 function StorybookHorse({ isMounted, playerGroupRef, activePet }) {
   const horseRef = useRef();
 
@@ -874,20 +894,22 @@ function StorybookHuman({ character, targetPos, groupRef, isMounted }) {
 }
 
 /** -------------------------------------------------------------
- *  MAIN GARDEN SCENE
+ *  MAIN GARDEN SCENE (DYNAMIC DAY / NIGHT CYCLE SUPPORT)
  * ------------------------------------------------------------- */
-export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue, activePet = 'none' }) {
+export default function GardenScene({ character, resetCameraSignal, isMounted, toggleMount, setNearVillager, onOpenDialogue, activePet = 'none', isNight = false }) {
   const [targetPos, setTargetPos] = useState([-14.0, -12.0]);
   const playerGroupRef = useRef();
 
   return (
     <Canvas shadows camera={{ position: [-14.0, 4.5, -5.0], fov: 42 }}>
-      <color attach="background" args={['#bfe8f7']} />
-      <fog attach="fog" args={['#bfe8f7', 35, 140]} />
+      {/* Dynamic Sky Background Color */}
+      <color attach="background" args={[isNight ? '#1a0b2e' : '#bfe8f7']} />
+      <fog attach="fog" args={[isNight ? '#1a0b2e' : '#bfe8f7', 35, 140]} />
 
-      <ambientLight intensity={0.85} color="#ffffff" />
-      <hemisphereLight skyColor="#bfe8f7" groundColor="#94c77d" intensity={0.8} />
-      <directionalLight position={[12, 18, 10]} intensity={1.6} castShadow shadow-mapSize={[2048, 2048]} />
+      {/* Dynamic Lighting System */}
+      <ambientLight intensity={isNight ? 0.35 : 0.85} color={isNight ? '#8338ec' : '#ffffff'} />
+      <hemisphereLight skyColor={isNight ? '#3a0ca3' : '#bfe8f7'} groundColor="#94c77d" intensity={isNight ? 0.4 : 0.8} />
+      <directionalLight position={[12, 18, 10]} intensity={isNight ? 0.45 : 1.6} color={isNight ? '#4cc9f0' : '#ffffff'} castShadow shadow-mapSize={[2048, 2048]} />
 
       <CharacterCameraController
         playerGroupRef={playerGroupRef}
@@ -903,28 +925,28 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       <DualWaterfallRiverValley />
       <VillageWindingPaths />
 
-      {/* 🍎🍊 1. FRUIT ORCHARD WITH APPLE & ORANGE TREES */}
+      {/* 🍎🍊 FRUIT ORCHARD */}
       <FruitOrchard />
 
-      {/* 🌊 2. IRREGULAR BASIN LAKE WITH LILY PADS & REEDS */}
+      {/* 🌊 LAKE WITH LILY PADS */}
       <VillageLakeWithReeds />
 
-      {/* 🌾 3. TILLED FARM PLOTS WITH CROPS */}
+      {/* 🌾 TILLED FARM PLOTS */}
       <TilledFarmPlots />
 
-      {/* 🌸 4. SCATTERED FLOWER CLUSTERS */}
+      {/* 🌸 RADIAL 6-8 PETAL FLOWER CLUSTERS */}
       <ScatteredFlowerClusters />
 
-      {/* 🌲 5. CLUSTERED TREE GROVES */}
+      {/* 🌲 CLUSTERED TREE GROVES */}
       <ClusteredTreeGroves />
 
-      {/* 🌲 DENSE MULTI-COLOR FOREST BOUNDARY ENCLOSING THE VILLAGE */}
+      {/* 🌲 DENSE FOREST BOUNDARY */}
       <DenseMultiColorForestBoundary />
 
       {/* 🦇 ANIMATED 3D BAT MESSENGER OVERHEAD */}
       <AnimatedBatMessenger />
 
-      {/* 🌽 18-20% LARGE FLOWER FARM & VEGETABLE FARMS */}
+      {/* 🌽 LARGE FLOWER FARM & VEGETABLE FARMS */}
       <LargeCropFarms />
 
       <VillageSquare position={[0, 0, -22.0]} />
@@ -940,7 +962,16 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {/* 🐱 3D ORANGE CAT PET COMPANION */}
       <OrangeCatPet targetGroupRef={playerGroupRef} activePet={activePet} />
 
-      <Sparkles count={120} scale={60} size={3.5} speed={0.4} color="#ffe5ec" />
+      {/* Nighttime Stars & Floating Fireflies */}
+      {isNight ? (
+        <>
+          <Sparkles count={200} scale={70} size={4} speed={0.2} color="#ffffff" />
+          <Sparkles count={80} scale={40} size={4.5} speed={0.6} color="#ffee93" />
+        </>
+      ) : (
+        <Sparkles count={120} scale={60} size={3.5} speed={0.4} color="#ffe5ec" />
+      )}
+
       <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={60} blur={2.5} />
     </Canvas>
   );

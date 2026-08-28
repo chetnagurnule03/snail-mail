@@ -81,6 +81,8 @@ export default function App() {
     return <Centered>Waking up your village world…</Centered>;
   }
 
+  const [isNight, setIsNight] = useState(false);
+
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
       {/* 3D Storybook World Canvas */}
@@ -92,6 +94,7 @@ export default function App() {
         setNearVillager={setNearVillager}
         onOpenDialogue={setActiveDialogueVillager}
         activePet={activePet}
+        isNight={isNight}
       />
 
       {/* Top HUD Bar */}
@@ -100,6 +103,18 @@ export default function App() {
           🐌 {character.name || 'Little Wanderer'} {saving ? '(saving…)' : ''}
         </div>
         
+        {/* Day/Night Cycle Toggle */}
+        <button
+          style={{
+            ...styles.pill,
+            background: isNight ? '#7209b7' : '#ffb703',
+            color: isNight ? '#ffffff' : '#4a2c11',
+          }}
+          onClick={() => setIsNight((prev) => !prev)}
+        >
+          {isNight ? '🌙 Night Mode' : '☀️ Day Mode'}
+        </button>
+
         {/* Pet Selection Quick Toggle */}
         <button
           style={{
