@@ -81,6 +81,7 @@ export default function Composer({ user, defaultRecipient = '', onLetterSent }) 
     <div style={styles.composerContainer}>
       {isBouquetBuilderOpen ? (
         <BouquetBuilder
+          isNight={isNight}
           onDone={(bouquetData) => {
             setAttachedBouquet(bouquetData);
             setIsBouquetBuilderOpen(false);

@@ -252,6 +252,7 @@ export default function App() {
                 user={{ id: 'local_player', name: character?.name || 'Wanderer' }}
                 defaultRecipient={preselectedVillager?.name || ''}
                 onLetterSent={() => handleLetterSent(preselectedVillager?.name || 'Oliver')}
+                isNight={isNight}
               />
             </div>
           </div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CornerFlourishes, AmbientBackgroundFlourishes } from './LeafFlourish';
+import { generatePixelFlower } from '../village/pixelFlowers.js';
 
 /** -------------------------------------------------------------
  *  BOUQUET OPTIONS DATA (NO EMOJI - ALL CUSTOM SVG ILLUSTRATIONS)
@@ -294,33 +295,38 @@ function IllustratedCherryBlossom({ fx, fy, scale = 1, rotation = 0 }) {
   );
 }
 
-function RenderSingleFlowerSVG({ type, fx, fy, scale = 1, rotation = 0 }) {
-  switch (type) {
-    case 'daisy':
-      return <IllustratedDaisy fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'tulip':
-      return <IllustratedTulip fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'rose':
-      return <IllustratedRose fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'poppy':
-      return <IllustratedPoppy fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'lily':
-      return <IllustratedLily fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'sunflower':
-      return <IllustratedSunflower fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'lavender':
-      return <IllustratedLavender fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    case 'cherry_blossom':
-      return <IllustratedCherryBlossom fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-    default:
-      return <IllustratedDaisy fx={fx} fy={fy} scale={scale} rotation={rotation} />;
-  }
+export function RenderPixelFlowerSVG({ type = 'daisy', seed = 12345, fx = 0, fy = 0, scale = 1, rotation = 0 }) {
+  const pixelMap = useMemo(() => generatePixelFlower(type, seed), [type, seed]);
+  const pixels = pixelMap.pixels || {};
+
+  return (
+    <g transform={`translate(${fx}, ${fy}) rotate(${rotation}) scale(${scale * 2.3})`}>
+      {Object.entries(pixels).map(([coord, color]) => {
+        const [px, py] = coord.split(',').map(Number);
+        return (
+          <rect
+            key={coord}
+            x={px - 8}
+            y={py - 8}
+            width="1.05"
+            height="1.05"
+            fill={color}
+            shapeRendering="crispEdges"
+          />
+        );
+      })}
+    </g>
+  );
+}
+
+function RenderSingleFlowerSVG({ type, seed = 12345, fx, fy, scale = 1, rotation = 0 }) {
+  return <RenderPixelFlowerSVG type={type} seed={seed} fx={fx} fy={fy} scale={scale} rotation={rotation} />;
 }
 
 /** -------------------------------------------------------------
- *  SHARED BOUQUET ILLUSTRATION COMPONENT (2D LAYERED STICKER)
+ *  SHARED BOUQUET ILLUSTRATION COMPONENT (TRUE PIXEL-ART FLOWERS)
  * ------------------------------------------------------------- */
-export function RenderBouquetSVG({ bouquet, width = 280, height = 300 }) {
+export function RenderBouquetSVG({ bouquet, isNight: isNightProp = false, width = 280, height = 300 }) {
   const selectedFlowers = bouquet?.flowers || [];
   const selectedGreenery = bouquet?.greenery || [];
   const wrap = bouquet?.wrap || WRAP_STYLES[0];
@@ -328,100 +334,23 @@ export function RenderBouquetSVG({ bouquet, width = 280, height = 300 }) {
   const card = bouquet?.card || CARD_STYLES[0];
   const bg = bouquet?.background || BACKGROUND_STYLES[0];
 
-  const bgColor = bg.color || '#f4e9d8';
-  const wrapColor = wrap.color || '#d4a373';
-  const ribbonColor = ribbon.color || '#e63946';
+  const isNightMode = bouquet?.isNight ?? isNightProp;
+  const viewH = isNightMode ? 340 : 310;
+  const bgColor = isNightMode ? '#10061e' : bg.color || '#f4e9d8';
+  const wrapColor = isNightMode ? '#3a0ca3' : wrap.color || '#d4a373';
+  const ribbonColor = isNightMode ? '#7209b7' : ribbon.color || '#e63946';
 
-  // Anchor Bundle Point: (140, 205) inside the paper wrap
+  // Anchor Bundle Point: (140, 215)
   const BUNDLE_X = 140;
-  const BUNDLE_Y = 205;
+  const BUNDLE_Y = 215;
 
   return (
-    <svg width={width} height={height} viewBox="0 0 280 300" style={{ background: bgColor, borderRadius: 16 }}>
+    <svg width={width} height={height} viewBox={`0 0 280 ${viewH}`} style={{ background: bgColor, borderRadius: 16 }}>
       <defs>
         {/* Soft 2D Drop Shadow Filter for Paper-Doll Layering */}
         <filter id="dropShadow2D" x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="1.5" dy="2.5" stdDeviation="2.2" floodColor="#2b2013" floodOpacity="0.32" />
         </filter>
-
-        {/* Linear & Radial Gradients for 2D Illustrated Shading */}
-        <linearGradient id="illDaisyPetal" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#f4f1de" />
-        </linearGradient>
-
-        <radialGradient id="illDaisyCenter" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#ffee8c" />
-          <stop offset="70%" stopColor="#ffb703" />
-          <stop offset="100%" stopColor="#fb8500" />
-        </radialGradient>
-
-        <linearGradient id="illTulipOuter" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ff758f" />
-          <stop offset="70%" stopColor="#e63946" />
-          <stop offset="100%" stopColor="#800f2f" />
-        </linearGradient>
-
-        <linearGradient id="illTulipMid" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ff4d6d" />
-          <stop offset="100%" stopColor="#a4133c" />
-        </linearGradient>
-
-        <linearGradient id="illTulipInner" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ff8fa3" />
-          <stop offset="100%" stopColor="#c9184a" />
-        </linearGradient>
-
-        <radialGradient id="illRoseOuter" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#ff4d6d" />
-          <stop offset="70%" stopColor="#c9184a" />
-          <stop offset="100%" stopColor="#590d22" />
-        </radialGradient>
-
-        <radialGradient id="illRoseMid" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#ff758f" />
-          <stop offset="100%" stopColor="#a4133c" />
-        </radialGradient>
-
-        <linearGradient id="illPoppyPetal" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#ff7b00" />
-          <stop offset="70%" stopColor="#ff5400" />
-          <stop offset="100%" stopColor="#9e0059" />
-        </linearGradient>
-
-        <linearGradient id="illLilyA" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fff0f3" />
-          <stop offset="50%" stopColor="#ffb703" />
-          <stop offset="100%" stopColor="#fb8500" />
-        </linearGradient>
-
-        <linearGradient id="illLilyB" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffe5ec" />
-          <stop offset="100%" stopColor="#ffb703" />
-        </linearGradient>
-
-        <linearGradient id="illSunPetal" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#ffea00" />
-          <stop offset="70%" stopColor="#ffb703" />
-          <stop offset="100%" stopColor="#d4a373" />
-        </linearGradient>
-
-        <radialGradient id="illSunCenter" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#8c5a3c" />
-          <stop offset="60%" stopColor="#5c381e" />
-          <stop offset="100%" stopColor="#2b180d" />
-        </radialGradient>
-
-        <linearGradient id="illLavenderFloret" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c77dff" />
-          <stop offset="100%" stopColor="#7b2cbf" />
-        </linearGradient>
-
-        <linearGradient id="illCherryPetal" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="60%" stopColor="#ffb5a7" />
-          <stop offset="100%" stopColor="#f72585" />
-        </linearGradient>
 
         {/* Paper Wrap Cone Facet Gradients */}
         <linearGradient id="illWrapLeft" x1="0" y1="0" x2="1" y2="0">
@@ -436,8 +365,19 @@ export function RenderBouquetSVG({ bouquet, width = 280, height = 300 }) {
       </defs>
 
       {/* 1. Background Card Backdrop */}
-      <rect width="280" height="300" rx="16" fill={bgColor} />
-      <circle cx="140" cy="140" r="115" fill="#ffffff" opacity="0.18" />
+      <rect width="280" height={viewH} rx="16" fill={bgColor} />
+      <circle cx="140" cy="140" r="115" fill={isNightMode ? '#3a0ca3' : '#ffffff'} opacity="0.18" />
+
+      {/* Night Mode Subtle Pixel-Art Particles & Glow */}
+      {isNightMode && (
+        <g opacity="0.65">
+          <rect x="40" y="35" width="3" height="3" fill="#ffd166" shapeRendering="crispEdges" />
+          <rect x="230" y="50" width="4" height="4" fill="#c77dff" shapeRendering="crispEdges" />
+          <rect x="65" y="110" width="3" height="3" fill="#e0aaff" shapeRendering="crispEdges" />
+          <rect x="215" y="125" width="3" height="3" fill="#ffd166" shapeRendering="crispEdges" />
+          <circle cx="140" cy="120" r="75" fill="#7209b7" opacity="0.15" />
+        </g>
+      )}
 
       {/* 2. Paper Wrap Back Flap */}
       <path d="M 75 160 Q 140 145 205 160 L 152 272 L 128 272 Z" fill="#e9d8a6" opacity="0.5" />
@@ -538,7 +478,7 @@ export function RenderBouquetSVG({ bouquet, width = 280, height = 300 }) {
 /** -------------------------------------------------------------
  *  MAIN BOUQUET BUILDER COMPONENT
  * ------------------------------------------------------------- */
-export default function BouquetBuilder({ onDone, onCancel }) {
+export default function BouquetBuilder({ isNight = false, onDone, onCancel }) {
   const [activeStep, setActiveStep] = useState(0); // 0: Flowers, 1: Greenery, 2: Wrap, 3: Card, 4: Background, 5: Preview
 
   const [selectedFlowers, setSelectedFlowers] = useState([
@@ -592,6 +532,7 @@ export default function BouquetBuilder({ onDone, onCancel }) {
     ribbon: selectedRibbon,
     card: selectedCard,
     background: selectedBg,
+    isNight,
   };
 
   const isValidFlowers = selectedFlowers.length >= 3 && selectedFlowers.length <= 8;

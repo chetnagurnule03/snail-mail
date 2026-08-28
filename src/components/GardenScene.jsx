@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Sparkles, Outlines } from '@react-three/drei';
 import * as THREE from 'three';
 import { generateVillage } from '../village/generateVillage.js';
+import { generatePixelFlower, renderPixelFlowerToCanvas } from '../village/pixelFlowers.js';
 import Villagers, { VILLAGERS_DATA } from './Villagers';
 
 /** -------------------------------------------------------------
@@ -124,39 +125,29 @@ function LampPost({ position, isNight = false }) {
 }
 
 /** -------------------------------------------------------------
- *  PROPORTIONAL PETAL FLOWER COMPONENT 🌸🌼
+ *  TRUE PIXEL ART FLOWER COMPONENT (17x17 GRID BILLBOARD) 🌸🌼
  * ------------------------------------------------------------- */
-function AnatomicalPetalFlower({ position, color = '#ff4d6d', petalCount = 7 }) {
-  const petals = useMemo(() => {
-    const arr = [];
-    const radius = 0.22;
-    for (let i = 0; i < petalCount; i++) {
-      const angle = i * ((Math.PI * 2) / petalCount);
-      const px = Math.cos(angle) * radius;
-      const pz = Math.sin(angle) * radius;
-      arr.push({ px, pz, angle });
-    }
-    return arr;
-  }, [petalCount]);
+function PixelFlower3D({ position, type = 'daisy', seed = 12345, scaleRatio = 1.0, rotationY = 0 }) {
+  const texture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 68;
+    canvas.height = 68;
+    const pixelMap = generatePixelFlower(type, seed);
+    renderPixelFlowerToCanvas(canvas, pixelMap, 68);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.NearestFilter;
+    tex.needsUpdate = true;
+    return tex;
+  }, [type, seed]);
 
   return (
-    <group position={[position[0], 0, position[1]]} scale={0.75}>
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <cylinderGeometry args={[0.04, 0.05, 1.0, 8]} />
-        <meshToonMaterial color="#38b000" />
+    <group position={[position[0], 0, position[1]]} rotation={[0, rotationY, 0]} scale={scaleRatio * 0.95}>
+      <mesh position={[0, 0.45 * scaleRatio, 0]} castShadow>
+        <planeGeometry args={[0.95, 0.95]} />
+        <meshBasicMaterial map={texture} transparent alphaTest={0.1} side={THREE.DoubleSide} />
       </mesh>
-      <group position={[0, 1.0, 0]}>
-        <mesh castShadow>
-          <sphereGeometry args={[0.16, 12, 12]} />
-          <meshToonMaterial color="#ffb703" />
-        </mesh>
-        {petals.map((p, idx) => (
-          <mesh key={idx} position={[p.px, 0, p.pz]} rotation={[0, -p.angle, 0]} castShadow>
-            <sphereGeometry args={[0.13, 10, 10]} />
-            <meshToonMaterial color={color} />
-          </mesh>
-        ))}
-      </group>
     </group>
   );
 }
@@ -1433,7 +1424,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         />
       ))}
       {village.houseGardenFlowers.map((f) => (
-        <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+        <PixelFlower3D key={f.id} position={f.position} type={f.type} seed={f.seed} scaleRatio={f.scaleRatio} rotationY={f.rotationY} />
       ))}
 
       {/* Market Square */}
@@ -1450,7 +1441,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
         <group key={g.id}>
           <FenceOutline center={g.fence.center} width={g.fence.width} depth={g.fence.depth} />
           {g.flowers.map((f) => (
-            <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+            <PixelFlower3D key={f.id} position={f.position} type={f.type} seed={f.seed} scaleRatio={f.scaleRatio} rotationY={f.rotationY} />
           ))}
         </group>
       ))}
@@ -1458,7 +1449,7 @@ export default function GardenScene({ character, resetCameraSignal, isMounted, t
       {/* Loose Flower Clusters */}
       {village.looseFlowerClusters?.map((cluster) =>
         cluster.flowers.map((f) => (
-          <AnatomicalPetalFlower key={f.id} position={f.position} color={f.color} />
+          <PixelFlower3D key={f.id} position={f.position} type={f.type} seed={f.seed} scaleRatio={f.scaleRatio} rotationY={f.rotationY} />
         ))
       )}
 

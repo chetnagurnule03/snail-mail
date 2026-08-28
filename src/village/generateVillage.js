@@ -6,6 +6,7 @@ import {
   clampToBounds,
   fruitOnFoliageSphere,
 } from './placement.js';
+import { FLOWER_TYPES } from './pixelFlowers.js';
 import {
   BOUNDS,
   CENTER,
@@ -62,7 +63,10 @@ export function generateVillage() {
     return pts.map((p, j) => ({
       id: `house-garden-${i}-${j}`,
       position: p.position,
-      color: pick(FLOWER_PALETTE),
+      type: FLOWER_TYPES[Math.floor(rng() * FLOWER_TYPES.length)],
+      seed: Math.floor(rng() * 100000),
+      scaleRatio: 0.75 + rng() * 0.3,
+      rotationY: (rng() * 30 - 15) * (Math.PI / 180),
     }));
   });
 
@@ -93,26 +97,58 @@ export function generateVillage() {
     };
   });
 
-  // --- Flower gardens: fenced plots filled with a jittered grid ---
+  // --- Flower gardens: fenced plots filled with a jittered grid & compositions ---
+  const gardenCompositions = [
+    ['daisy', 'rose', 'lavender', 'poppy', 'lily'],       // Garden 0
+    ['tulip', 'daisy', 'lily', 'rose', 'sunflower'],      // Garden 1
+    ['sunflower', 'poppy', 'daisy', 'tulip', 'lavender'], // Garden 2
+    ['rose', 'tulip', 'daisy', 'lily', 'poppy'],          // Garden 3
+  ];
+
   const flowerGardens = FLOWER_GARDENS.map((garden, gi) => {
+    const comp = gardenCompositions[gi % gardenCompositions.length];
     const grid = jitteredGrid({
       center: garden.center,
-      width: garden.width,
-      depth: garden.depth,
-      spacingX: garden.width / Math.ceil(Math.sqrt(garden.count)),
-      spacingZ: garden.depth / Math.ceil(Math.sqrt(garden.count)),
-      jitter: 0.4,
+      width: garden.width - 0.6,
+      depth: garden.depth - 0.6,
+      spacingX: (garden.width - 0.6) / Math.ceil(Math.sqrt(garden.count)),
+      spacingZ: (garden.depth - 0.6) / Math.ceil(Math.sqrt(garden.count)),
+      jitter: 0.2,
       rng,
     }).slice(0, garden.count);
 
     return {
       id: `garden-${gi}`,
       fence: { center: garden.center, width: garden.width, depth: garden.depth },
-      flowers: grid.map((p, i) => ({
-        id: `garden-${gi}-flower-${i}`,
-        position: p.position,
-        color: pick(FLOWER_PALETTE),
-      })),
+      flowers: grid.map((p, i) => {
+        // Composition distribution: 40% primary, 25% secondary, 20% white/cream, 10% accent, 5% filler
+        const r = rng();
+        let flowerType = comp[0];
+        if (r > 0.40 && r <= 0.65) flowerType = comp[1];
+        else if (r > 0.65 && r <= 0.85) flowerType = comp[2];
+        else if (r > 0.85 && r <= 0.95) flowerType = comp[3];
+        else if (r > 0.95) flowerType = comp[4];
+
+        // Depth / Height Layering (Back = Large, Middle = Medium, Front = Small)
+        const relZ = (p.position[1] - garden.center[1]) / (garden.depth / 2);
+        let heightScale = 1.0;
+        if (relZ < -0.2) {
+          heightScale = 1.1 + rng() * 0.4; // Large 1.1 - 1.5
+        } else if (relZ >= -0.2 && relZ <= 0.2) {
+          heightScale = 0.8 + rng() * 0.3; // Medium 0.8 - 1.1
+        } else {
+          heightScale = 0.6 + rng() * 0.2; // Small 0.6 - 0.8
+        }
+
+        return {
+          id: `garden-${gi}-flower-${i}`,
+          position: p.position,
+          type: flowerType,
+          seed: Math.floor(rng() * 100000),
+          scaleRatio: heightScale,
+          rotationY: (rng() * 30 - 15) * (Math.PI / 180), // -15° to +15°
+        };
+      }),
     };
   });
 
@@ -247,6 +283,7 @@ export function generateVillage() {
     const size =
       LOOSE_FLOWER_CLUSTERS.minSize +
       Math.floor(rng() * (LOOSE_FLOWER_CLUSTERS.maxSize - LOOSE_FLOWER_CLUSTERS.minSize + 1));
+    const clusterType = FLOWER_TYPES[ci % FLOWER_TYPES.length];
     const flowers = scatterInCircle({
       center: spot.position,
       radius: 1.1,
@@ -256,7 +293,10 @@ export function generateVillage() {
     }).map((p, i) => ({
       id: `loose-${ci}-${i}`,
       position: p.position,
-      color: pick(FLOWER_PALETTE),
+      type: clusterType,
+      seed: Math.floor(rng() * 100000),
+      scaleRatio: 0.85 + rng() * 0.3,
+      rotationY: (rng() * 30 - 15) * (Math.PI / 180),
     }));
     return { id: `loose-cluster-${ci}`, flowers };
   });
